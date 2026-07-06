@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kartenbild-Finder · PokeZentrum</title>
+<style>
+  :root{
+    --bg:#101418; --panel:#1a2028; --line:#2a3340;
+    --ink:#e8edf2; --muted:#8b98a8;
+    --tera:#5eead4; --tera2:#a78bfa;
+    --err:#f87171; --ok:#4ade80;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height:100vh; padding:20px 16px 48px;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  header{margin-bottom:16px;}
+  .set-tag{
+    display:inline-block; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--tera);
+    border:1px solid var(--line); border-radius:999px;
+    padding:4px 10px; margin-bottom:10px;
+  }
+  h1{font-size:22px; font-weight:700; line-height:1.2;}
+  h1 span{
+    background:linear-gradient(90deg,var(--tera),var(--tera2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{color:var(--muted); font-size:13px; margin-top:6px; line-height:1.5;}
+  .banner{
+    background:#2a2333; border:1px solid #4c3d66; border-radius:12px;
+    padding:10px 14px; font-size:13px; line-height:1.5; color:#d8ccf0;
+    margin:14px 0;
+  }
+  select, input[type="text"]{
+    width:100%; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; color:var(--ink); font-size:16px;
+    padding:13px 14px; outline:none; appearance:none;
+  }
+  select:focus, input[type="text"]:focus{border-color:var(--tera);}
+  .row{display:flex; gap:8px; margin-bottom:8px;}
+  .row .grow{flex:1;}
+  button{
+    border:none; border-radius:12px; cursor:pointer;
+    font-size:14px; font-weight:700; padding:12px 16px;
+  }
+  button.go{
+    background:linear-gradient(135deg,var(--tera),var(--tera2)); color:#0b0f13;
+  }
+  button.chip{
+    background:var(--panel); color:var(--tera);
+    border:1px solid var(--line); font-weight:600;
+  }
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px;}
+  .toolbar{
+    display:none; align-items:center; justify-content:space-between;
+    gap:10px; margin-bottom:12px; flex-wrap:wrap;
+  }
+  .count{font-size:13px; color:var(--muted);}
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+    gap:14px;
+  }
+  .card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; overflow:hidden;
+  }
+  .card .imgbox{
+    background:#0b0f13; display:flex; align-items:center; justify-content:center;
+    min-height:140px; padding:10px;
+  }
+  .card img{max-width:100%; border-radius:6px; display:block;}
+  .card .meta{padding:10px 12px 12px; border-top:1px solid var(--line);}
+  .card .name{font-weight:700; font-size:14px;}
+  .card .num{color:var(--muted); font-size:12px; margin-top:2px;}
+  .card a.open{
+    display:inline-block; margin-top:8px; font-size:12px; font-weight:600;
+    color:var(--tera); text-decoration:none;
+    border:1px solid var(--line); border-radius:8px; padding:6px 10px;
+  }
+  .status{font-size:11px; color:var(--muted); margin-top:4px;}
+  .fail{color:var(--err);}
+  .notice{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; font-size:13px;
+    color:var(--muted); line-height:1.5;
+  }
+  .toast{
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    background:var(--ok); color:#06220f; font-weight:700; font-size:14px;
+    padding:10px 18px; border-radius:999px; display:none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="set-tag" id="setTag"></div>
+    <h1>Kartenbild-<span>Finder</span></h1>
+    <p class="sub">Set wählen, dann Nummer(n) <b>oder</b> Namen eingeben — oder direkt „Alle ex-Karten“ antippen. Bilder: lange antippen → speichern. Quelle: PokeZentrum (Nutzung mit Erlaubnis).</p>
+  </header>
+
+  <div class="banner">
+    ⚠️ Diese Datei <b>herunterladen und direkt im Browser öffnen</b> (Chrome/Safari) — in der Claude-Vorschau werden externe Bilder blockiert.
+  </div>
+
+  <div class="row"><select id="langSel"><option value="alle">🌐 Alle Sprachen</option></select></div>
+  <div class="row"><select id="setSel"></select></div>
+  <div class="row">
+    <div class="grow"><input type="text" id="q" placeholder="Nummer(n) oder Name … z. B. 46 oder Darkrai" /></div>
+    <button class="go" onclick="run()">Suchen</button>
+  </div>
+  <div class="chips">
+    <button class="chip" onclick="showAll()">Alle Karten</button>
+    <button class="chip" onclick="showCat('ex')">⭐ ex-Karten</button>
+    <button class="chip" onclick="showCat('AR')">🎨 Alt Arts (AR)</button>
+    <button class="chip" onclick="showCat('SAR')">✨ SAR</button>
+    <button class="chip" onclick="showCat('SR')">👑 SR/UR/Gold</button>
+  </div>
+
+  <div class="toolbar" id="toolbar">
+    <span class="count" id="count"></span>
+    <button class="chip" onclick="copyLinks()">🔗 Alle Bild-Links kopieren</button>
+  </div>
+
+  <div class="grid" id="out"></div>
+</div>
+<div class="toast" id="toast">Links kopiert ✓</div>
+
+<script>
+const BASE = "https://pokezentrum.de/wp-content/uploads/";
+
+/* ============ SET-DATEN ============
+   suffix: exaktes Dateinamens-Ende (kein Raten nötig).
+   Ohne suffix: SV8a-Rate-Modus (probiert Varianten durch).
+   cards: [[Nr, "Datei-Namensteil", [Alternativen]]]
+====================================== */
+const SETS = [
+{
+  code:"M5", name:"Abyss Eye", lang:"Japanisch", total:81,
+  page:"https://pokezentrum.de/pokemon-karten-news/pokemon-m5-abyss-eye-kartenliste-und-kartengalerie/",
+  suffix:"-081-M5-Abyss-Eye-Pokemon-Karte-Japan-2026.jpg",
+  cards:[
+  [1,"Tropius"],[2,"Mabula"],[3,"Imantis"],[4,"Mantidea-ex"],[5,"Poltchageist-Mortcha"],
+  [6,"Sinistcha-Fatalitcha"],[7,"Heatran"],[8,"Thermopod"],[9,"Infernopod"],[10,"Knarbon"],
+  [11,"Crimanzo"],[12,"Goldini"],[13,"Golking"],[14,"Wailmer"],[15,"Wailord-ex"],
+  [16,"Relicanth"],[17,"Robball"],[18,"Marikeck"],[19,"Primarene"],[20,"Normifin"],
+  [21,"Delfinator"],[22,"Frizelbliz"],[23,"Voltenso"],[24,"Akkup"],[25,"Vikavolt"],
+  [26,"Mega-Zeraora-ex"],[27,"Miraidon"],[28,"Flegmon"],[29,"Lahmus"],[30,"Rossana"],
+  [31,"Shuppet"],[32,"Banette"],[33,"Kryppuk"],[34,"Lichtel"],[35,"Laternecto"],
+  [36,"Mega-Chandelure-Skelabra-ex"],[37,"Moruda"],[38,"Marshadow"],[39,"Epitaff"],[40,"Menki"],
+  [41,"Rassaff"],[42,"Koknodon-Cranidos"],[43,"Rameidon-Rampardos-ex"],[44,"Rotomurf"],[45,"Koraidon"],
+  [46,"Mega-Darkrai-ex"],[47,"Skallyk"],[48,"Grypheldis"],[49,"Iscalar-Inkay"],[50,"Calamanero-Malamar"],
+  [51,"Kleptifux"],[52,"Gaunux"],[53,"Morpeko-ex"],[54,"Zarude"],[55,"Mobtiff"],
+  [56,"Mastifioso"],[57,"Yuyu-Chi-Yu"],[58,"Panzaeron"],[59,"Schilterus"],[60,"Bollterus-Bastiodon"],
+  [61,"Bronzel"],[62,"Bronzong"],[63,"Mega-Stalobor-Excadrill-ex"],[64,"Peppeck"],[65,"Trompeck"],
+  [66,"Tikanon"],[67,"Typ-Null"],[68,"Amigento"],[69,"Adebom"],[70,"Finstere-Glocke"],
+  [71,"Kopffossil"],[72,"Panzerfossil"],[73,"Explosive-Bombe"],[74,"Wiederholungsorden"],
+  [75,"Mistys-Energie-Energy"],[76,"Gladion"],[77,"Corrosio-Clan-Ruepel"],[78,"Gwynn"],
+  [79,"Fossillien-Steinbruch"],[80,"Blitzende-Elektro-Energie"],[81,"Schatten-Finsternis-Energie"]
+  ]
+},
+{
+  code:"M4", name:"Ninja Spinner", lang:"Japanisch", total:83,
+  page:"https://pokezentrum.de/pokemon-karten-news/pokemon-m4-ninja-spinner-kartenliste-und-kartengalerie/",
+  suffix:"-083-M4-Ninja-Spinner-Pokemon-Karte-Japan-TCG-2026.jpg",
+  known:{29:"Ampharos-29-083-M4-F-Ninja-Spinner-Pokemon-Karte-Hongkong-Taiwan-TCG-2026.jpg"},
+  cards:[
+  [1,"Hornliu"],[2,"Kokuna"],[3,"Bibor-Beedrill-ex"],[4,"Venuflibis"],[5,"Igamaro"],
+  [6,"Igarstarnish"],[7,"Brigaron"],[8,"Vulpix"],[9,"Vulnona"],[10,"Ho-Oh"],
+  [11,"Fynx"],[12,"Rutena"],[13,"Fennexis"],[14,"Leufeo"],[15,"Mega-Pyroleo-ex"],
+  [16,"Remoraid"],[17,"Octillery"],[18,"Botogell"],[19,"Keldeo"],[20,"Froxy"],
+  [21,"Amphizel"],[22,"Mega-Quajutsu-Greninja-ex"],[23,"Arktip"],[24,"Arktilasl"],
+  [25,"Reisslaus"],[26,"Tectass"],[27,"Voltilamm"],[28,"Waaty"],[29,"Ampharos"],
+  [30,"Emolga"],[31,"Deoxys"],[32,"Deoxys"],[33,"Deoxys"],[34,"Deoxys"],
+  [35,"Mega-Floette-ex"],[36,"Psiau"],[37,"Psiaugon"],[38,"Paragoni"],[39,"Trombork"],
+  [40,"Irrbis"],[41,"Pumpdjinn-ex"],[42,"Xerneas"],[43,"Mogelbaum"],[44,"Phanpy"],
+  [45,"Donphan"],[46,"Pupapance"],[47,"Lepumentasl"],[48,"Zubat"],[49,"Golbat"],
+  [50,"Iksbat"],[51,"Baldorfish"],[52,"Skunkapuh"],[53,"Skuntank"],[54,"Unratuetox"],
+  [55,"Deponitox"],[56,"Algitt"],[57,"Tanhel"],[58,"Metang"],[59,"Metagross"],
+  [60,"Kastadur"],[61,"Tentanel"],[62,"Kobalium-Cobalion-ex"],[63,"Mega-Tandrak-ex"],
+  [64,"Viscora"],[65,"Viscargot"],[66,"Viscogon"],[67,"Tauros"],[68,"Nagelotz"],
+  [69,"Kukmarda"],[70,"Picochilla"],[71,"Chillabell-ex"],[72,"Spezielle-Rote-Karte"],
+  [73,"Grosses-Fangnetz"],[74,"Buch-der-Veraenderung"],[75,"Azetts-Gelassenheit"],
+  [76,"Gipson"],[77,"Micas-Auftritt"],[78,"Matiere"],[79,"Ange-Floette"],
+  [80,"Prisma-Turm"],[81,"Nitro-Feuer-Energie"],[82,"Blasen-Wasser-Energie"],
+  [83,"Magnet-Metall-Energie"]
+  ]
+},
+{
+  code:"M3", name:"Munikis Zero", lang:"Japanisch", total:80,
+  page:"https://pokezentrum.de/pokemon-karten-news/pokemon-m3-munikis-zero-kartenliste-und-kartengalerie/",
+  suffix:"-080-M3-Munikis-Zero-Pokemon-Karte-Japan.jpg",
+  known:{
+    15:"Molunk-015-080-M3-Munikis-Zero-Pokemon-Karte-Japan-neu.jpg",
+    23:"Amagarga-003-080-M3-Munikis-Zero-Pokemon-Karte-Japan.jpg"
+  },
+  cards:[
+  [1,"Webarak"],[2,"Ariados"],[3,"Shaymin"],[4,"Serpifeu"],[5,"Efoserp"],
+  [6,"Serpiroyal"],[7,"Purmel"],[8,"Puponcho"],[9,"Vivillon"],[10,"Bauz"],
+  [11,"Arboretoss"],[12,"Silvarro-ex"],[13,"Dartignis"],[14,"Fiaro"],[15,"Molunk"],
+  [16,"Amfira-Salazzle-ex"],[17,"Tortunator"],[18,"Jurob"],[19,"Jugong"],[20,"Sterndu"],
+  [21,"Mega-Starmie-ex"],[22,"Amarino"],[23,"Amagarga"],[24,"Volcanion"],[25,"Sheinux"],
+  [26,"Luxio"],[27,"Luxtra"],[28,"Dedenne"],[29,"Piepi"],[30,"Mega-Pixi-ex"],
+  [31,"Flunkifer"],[32,"Psiau"],[33,"Psiaugon"],[34,"Parfi"],[35,"Parfinesse"],
+  [36,"Nasgnet"],[37,"Voluminas"],[38,"Hippopotas"],[39,"Hippoterus"],[40,"Demeteros"],
+  [41,"Bithora"],[42,"Thanathora"],[43,"Balgoras"],[44,"Monargoras"],[45,"Resladero"],
+  [46,"Mega-Zygarde-ex"],[47,"Nebulak"],[48,"Alpollo"],[49,"Gengar"],[50,"Pionskora"],
+  [51,"Piondragi"],[52,"Yveltal-ex"],[53,"Baojian"],[54,"Mega-Panzaeron-Skarmory-ex"],
+  [55,"Gramokles-Honedge"],[56,"Duokles-Duoblade"],[57,"Durengard-Aegislash"],[58,"Clavion"],
+  [59,"Rattfratz"],[60,"Rattikarl"],[61,"Mauzi-ex"],[62,"Relaxo"],[63,"Scoppel"],
+  [64,"Grebbit"],[65,"Dartiri"],[66,"Coiffwaff"],[67,"Energie-Staubwedel"],
+  [68,"Antikes-Kieferfossil"],[69,"Antikes-Flossenfossil"],[70,"Pokepad"],
+  [71,"Illumina-Galette"],[72,"Kernspeicher"],[73,"Tarragon"],[74,"Kayleen"],
+  [75,"Rosys-Ermutigung"],[76,"Violette"],[77,"Illumina-City"],
+  [78,"Wachstums-Pflanzen-Energie"],[79,"Telepathie-Psycho-Energie"],
+  [80,"Steinige-Kampf-Energie"]
+  ]
+},
+{
+  code:"SV8a", name:"Terastal Festival ex", lang:"Japanisch", total:187,
+  page:"https://pokezentrum.de/pokemon-karten-news/pokemon-terastal-festival-ex-kartenliste-und-kartengalerie/",
+  known:{93:"Nachtara-ex-093-187-SV8a-Terastal-Festival-ex-Terakistall-Pokemon-Karte-Japan-TCG.jpg"},
+  cards:[
+  [1,"Knospi"],[2,"Folipurba"],[3,"Folipurba-ex"],[4,"Waumboll"],[5,"Elfun"],
+  [6,"Chimpep"],[7,"Chimstix"],[8,"Knapfel"],[9,"Sirapfel"],[10,"Hydrapfel-ex"],
+  [11,"Weherba"],[12,"Horrerba"],[13,"Relluk"],[14,"Skarabaks"],[15,"Chonjian"],
+  [16,"Eisenblatt-ex"],[17,"Mortcha"],[18,"Fatalitcha"],[19,"Fatlitcha-ex",["Fatalitcha-ex"]],
+  [20,"Tuerkisgruene-Maske-Ogerpon-ex"],[21,"Flamara"],[22,"Flamara-ex-Flareon-ex",["Flamara-ex"]],
+  [23,"Knarbon"],[24,"Eisenfalter"],[25,"Yuyu"],[26,"Ofenmaske-Ogerpon-ex"],[27,"Keilflamme-ex"],
+  [28,"Goldini"],[29,"Golking"],[30,"Aquana"],[31,"Aquana-ex"],[32,"Karnimani"],
+  [33,"Tyracroc"],[34,"Impergator"],[35,"Barschwa"],[36,"Milotic"],[37,"Schneppke"],
+  [38,"Frosdedje"],[39,"Knakrack-ex"],[40,"Glaziola"],[41,"Glaziola-ex",["Glaziola-ex-ex"]],
+  [42,"Schligda"],[43,"Schligdri"],[44,"Normifin"],[45,"Delfinator",["Delfinator-ex"]],
+  [46,"Delfinator-ex"],[47,"Eisenbuendel"],[48,"Baojian"],[49,"Windewoge-ex"],
+  [50,"Brunnenmaske-Ogerpon-ex"],[51,"Blitza"],[52,"Blitza-ex"],[53,"Zeraora"],
+  [54,"Eisenhand-ex"],[55,"Eisendorn"],[56,"Eisendorn-ex"],[57,"Abra"],[58,"Kadabra"],
+  [59,"Simsala"],[60,"Natu"],[61,"Xatu"],[62,"Psiana"],[63,"Psiana-ex"],
+  [64,"Zwirrlicht"],[65,"Zwirklop"],[66,"Zwirrfinst"],[67,"Flauschling"],[68,"Feelinara"],
+  [69,"Feelinara-ex"],[70,"Azugladis"],[71,"Bruellschweif"],[72,"Flatterhaar"],
+  [73,"Gierspenst"],[74,"Eisenkrieger-ex"],[75,"Benesaru"],[76,"Beatori"],[77,"Eisenfels"],
+  [78,"Eisenhaupt-ex"],[79,"Relicanth"],[80,"Groudon"],[81,"Kaumalat"],[82,"Knarksel"],
+  [83,"Rotomurf"],[84,"Resladero"],[85,"Blutmond-Ursaluna"],[86,"Riesenzahn"],
+  [87,"Kriechfluegel"],[88,"Sandfell-ex"],[89,"Dinglu"],[90,"Boninu"],
+  [91,"Fundamentmaske-Ogeron-ex",["Fundamentmaske-Ogerpon-ex"]],[92,"Nachtara"],[93,"Nachtara-ex"],
+  [94,"Unratuetox"],[95,"Deponitox"],[96,"Zorua"],[97,"Zoroark"],[98,"Morpeko"],
+  [99,"Wutpilz"],[100,"Donnersichel"],[101,"Donnersichel-ex"],[102,"Boninu-ex"],
+  [103,"Benesaru-ex"],[104,"Beatori-ex"],[105,"Infamomo-ex"],[106,"Tanhel"],[107,"Metang"],
+  [108,"Jirachi"],[109,"Gramokles"],[110,"Duokles"],[111,"Durengard"],[112,"Duraludon"],
+  [113,"Briduradon"],[114,"Knattox"],[115,"Knattatox"],[116,"Eisenrad"],[117,"Monetigo-ex"],
+  [118,"Grolldra"],[119,"Phandra"],[120,"Katapuldra-ex"],[121,"Nigiragi"],[122,"Koraidon"],
+  [123,"Miraidon"],[124,"Furienblitz-ex"],[125,"Evoli"],[126,"Eevee-ex-Evoli-ex",["Evoli-ex"]],
+  [127,"Hoothoot"],[128,"Noctuh"],[129,"Dummisel"],[130,"Dummimisel"],[131,"Wirbel-Rotom"],
+  [132,"Regigigas"],[133,"Bisofank"],[134,"Blutmond-Ursaluna-ex"],[135,"Eisenhals"],
+  [136,"Terapagos-ex"],[137,"Maske-des-Oni"],[138,"Spezial-Hammer"],[139,"Konterfaenger"],
+  [140,"Glastrompete"],[141,"Hochwertiger-Energie-Zugewinn"],[142,"MAX-Angel-Rod"],
+  [143,"Irdengefaess"],[144,"Techradar"],[145,"Tera-Orb"],[146,"Schatzsucher-Apparat"],
+  [147,"Dicke-Freunde-Knursp"],[148,"Erstklassiger-Faenger"],[149,"Aufwischwirbel"],
+  [150,"Kaefersammlerset"],[151,"Nachttrage"],[152,"Funkelnder-Kristall"],
+  [153,"Rettungsboard"],[154,"Ketten-Mochi"],[155,"Luxurioeser-Umhanf",["Luxurioeser-Umhang"]],
+  [156,"Terirobeere"],[157,"Energiekapsel-aus-der-Vergangenheit"],
+  [158,"Energiekapsel-aus-der-Zukunft"],[159,"Maximalguertel"]
+  ]
+}
+];
+
+let CUR = SETS[0];
+const foundUrls = new Map();
+
+function init(){
+  const langSel = document.getElementById("langSel");
+  [...new Set(SETS.map(s=>s.lang))].forEach(l=>{
+    const o = document.createElement("option");
+    o.value = l; o.textContent = l;
+    langSel.appendChild(o);
+  });
+  langSel.onchange = fillSets;
+  fillSets();
+  document.getElementById("setTag").textContent =
+    SETS.length + (SETS.length===1?" Set geladen":" Sets geladen");
+}
+
+function fillSets(){
+  const lang = document.getElementById("langSel").value;
+  const sel = document.getElementById("setSel");
+  sel.innerHTML = "";
+  SETS.forEach((s,i)=>{
+    if (lang!=="alle" && s.lang!==lang) return;
+    const o = document.createElement("option");
+    o.value = i; o.textContent = `${s.code} · ${s.name} (${s.lang})`;
+    sel.appendChild(o);
+  });
+  sel.onchange = () => { CUR = SETS[sel.value]; clearOut(); };
+  CUR = SETS[sel.value]; clearOut();
+}
+
+function pad(n){ return String(n).padStart(3,"0"); }
+function entry(n){ return CUR.cards.find(c=>c[0]===n); }
+
+function candidates(n){
+  if (CUR.known && CUR.known[n]) return [BASE + CUR.known[n]];
+  const e = entry(n);
+  if (!e) return [];
+  const files = [e[1], ...(e[2]||[])];
+  // Exakter Modus: Set hat festes Dateinamens-Ende
+  if (CUR.suffix){
+    return files.map(f => `${BASE}${f}-${pad(n)}${CUR.suffix}`);
+  }
+  // Rate-Modus (SV8a): Varianten durchprobieren
+  const isEx = /-ex/i.test(e[1]);
+  const isTrainer = n >= 137 && CUR.code==="SV8a";
+  let mids, posts;
+  if (isEx){ mids=["-Terakristall","-Terakistall","-Holo","","-Holo-Terakristall"]; posts=["-RR",""]; }
+  else if (isTrainer){ mids=["-Holo","","-ASS-KLASSE","-Holo-ASS-KLASSE"]; posts=["","-ACE"]; }
+  else { mids=["-Holo",""]; posts=[""]; }
+  const tails=["-TCG",""];
+  const urls=[];
+  for (const f of files) for (const p of posts) for (const m of mids) for (const t of tails)
+    urls.push(`${BASE}${f}-${pad(n)}-${CUR.total}${p}-SV8a-Terastal-Festival-ex${m}-Pokemon-Karte-Japan${t}.jpg`);
+  return urls;
+}
+
+function clearOut(){
+  document.getElementById("out").innerHTML="";
+  document.getElementById("toolbar").style.display="none";
+  foundUrls.clear();
+}
+
+function run(){
+  const raw = document.getElementById("q").value.trim();
+  if (!raw) return;
+  const nums = [...new Set(raw.split(/[\s,;]+/).map(s=>parseInt(s,10)).filter(n=>!isNaN(n)))];
+  if (nums.length){ render(nums); return; }
+  const q = raw.toLowerCase().replace(/[\s-]/g,"");
+  const hits = CUR.cards.filter(c => c[1].toLowerCase().replace(/-/g,"").includes(q)).map(c=>c[0]);
+  if (hits.length) render(hits);
+  else document.getElementById("out").innerHTML =
+    '<div class="notice">Nichts gefunden. Tipp: deutschen Kartennamen oder die Nummer eingeben.</div>';
+}
+
+function showCat(cat){
+  let hits;
+  if (cat==="ex") hits = CUR.cards.filter(c=>/-ex/i.test(c[1]) || c[3]==="ex");
+  else if (cat==="SR") hits = CUR.cards.filter(c=>["SR","UR","MUR","ACE","Gold"].includes(c[3]));
+  else hits = CUR.cards.filter(c=>c[3]===cat);
+  if (!hits.length){
+    clearOut();
+    document.getElementById("out").innerHTML =
+      '<div class="notice">Für dieses Set sind solche Karten noch nicht hinterlegt. Die Secret Rares (AR/SAR/UR) stehen bei PokeZentrum in separaten Artikeln — sag Claude, für welches Set sie ergänzt werden sollen.</div>';
+    return;
+  }
+  render(hits.map(c=>c[0]));
+}
+function showAll(){ render(CUR.cards.map(c=>c[0])); }
+
+function render(nums){
+  clearOut();
+  const out = document.getElementById("out");
+  nums.forEach(n=>out.appendChild(cardEl(n)));
+  document.getElementById("toolbar").style.display="flex";
+  document.getElementById("count").textContent = nums.length + " Karte(n)";
+}
+
+function cardEl(n){
+  const el=document.createElement("div"); el.className="card";
+  const e=entry(n); const urls=candidates(n);
+  if (!urls.length){
+    el.innerHTML=`<div class="meta"><div class="name">Nr. ${pad(n)}</div>
+      <div class="status fail">Noch nicht hinterlegt — sag Claude Bescheid, dann wird sie ergänzt.</div>
+      <a class="open" href="${CUR.page}" target="_blank" rel="noopener">Galerie öffnen</a></div>`;
+    return el;
+  }
+  const disp=(CUR.known&&CUR.known[n]?CUR.known[n].split("-"+pad(n))[0]:e[1]).replace(/-/g," ");
+  el.innerHTML=`
+    <div class="imgbox"><img alt="${disp}" loading="lazy"/></div>
+    <div class="meta">
+      <div class="name">${disp}</div>
+      <div class="num">Nr. ${pad(n)}/${CUR.total} · ${CUR.code}</div>
+      <div class="status">Lade…</div>
+      <a class="open" href="#" target="_blank" rel="noopener" style="display:none">In neuem Tab öffnen</a>
+    </div>`;
+  const img=el.querySelector("img"), status=el.querySelector(".status"), open=el.querySelector("a.open");
+  let i=0;
+  img.onload=()=>{
+    status.textContent="✓ lange antippen zum Speichern";
+    open.href=img.src; open.style.display="inline-block";
+    foundUrls.set(CUR.code+"-"+n, img.src);
+  };
+  img.onerror=()=>{
+    i++;
+    if(i<urls.length){ img.src=urls[i]; }
+    else{
+      status.innerHTML='<span class="fail">Bild nicht gefunden/blockiert.</span>';
+      open.href=CUR.page; open.textContent="Galerie öffnen"; open.style.display="inline-block";
+      el.querySelector(".imgbox").style.display="none";
+    }
+  };
+  img.src=urls[0];
+  return el;
+}
+
+function copyLinks(){
+  const links=[...foundUrls.values()].join("\n");
+  if(!links){ alert("Noch keine geladenen Bilder — warte kurz, bis die Bilder erscheinen."); return; }
+  navigator.clipboard.writeText(links).then(()=>{
+    const t=document.getElementById("toast");
+    t.style.display="block"; setTimeout(()=>t.style.display="none",1800);
+  }).catch(()=>{ prompt("Links manuell kopieren:", links); });
+}
+
+document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
+init();
+</script>
+</body>
+</html>
