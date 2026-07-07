@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PokeZentrum · Karten-Tools</title>
+<style>
+  :root{
+    --bg:#101418; --panel:#1a2028; --line:#2a3340;
+    --ink:#e8edf2; --muted:#8b98a8;
+    --tera:#5eead4; --tera2:#a78bfa;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #17202b, var(--bg));
+    color:var(--ink);
+    font-family:-apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height:100vh; padding:48px 16px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .wrap{max-width:760px; width:100%;}
+  header{text-align:center; margin-bottom:32px;}
+  h1{font-size:28px; font-weight:800; line-height:1.15;}
+  h1 span{
+    background:linear-gradient(90deg,var(--tera),var(--tera2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{color:var(--muted); font-size:14px; margin-top:10px; line-height:1.5;}
+
+  .tiles{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:560px){ .tiles{grid-template-columns:1fr;} }
+
+  a.tile{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--panel); border:1px solid var(--line); border-radius:20px;
+    padding:26px 22px; min-height:190px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    transition:border-color .15s, transform .12s, box-shadow .15s;
+  }
+  a.tile:hover{
+    border-color:var(--tera); transform:translateY(-3px);
+    box-shadow:0 12px 30px rgba(0,0,0,.35);
+  }
+  a.tile:active{transform:translateY(0);}
+  .tile .icon{font-size:40px; line-height:1;}
+  .tile .t-title{font-size:20px; font-weight:800; margin-top:16px;}
+  .tile .t-desc{font-size:13px; color:var(--muted); margin-top:8px; line-height:1.5;}
+  .tile .go{
+    margin-top:18px; align-self:flex-start; font-size:13px; font-weight:700;
+    color:var(--tera); border:1px solid var(--line); border-radius:999px; padding:8px 14px;
+  }
+
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:32px; line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>PokeZentrum · <span>Karten-Tools</span></h1>
+    <p class="sub">Zwei Offline-Werkzeuge f&uuml;r deine Pok&eacute;mon-Sammlung.<br>Auf dem Handy oder am PC — direkt im Browser.</p>
+  </header>
+
+  <div class="tiles">
+    <a class="tile" href="kartenbild-finder-v6.html">
+      <div class="icon">&#128269;</div>
+      <div>
+        <div class="t-title">Kartenbild-Finder</div>
+        <div class="t-desc">Set w&auml;hlen, Nummer oder Namen eingeben und das passende Kartenbild anzeigen &amp; speichern.</div>
+      </div>
+      <span class="go">&Ouml;ffnen &rarr;</span>
+    </a>
+
+    <a class="tile" href="erfassung.html">
+      <div class="icon">&#128203;</div>
+      <div>
+        <div class="t-title">Karten-Erfassung</div>
+        <div class="t-desc">Bestandsliste f&uuml;hren: Karten schnell erfassen, Menge &amp; Status pflegen, als CSV oder Backup exportieren.</div>
+      </div>
+      <span class="go">&Ouml;ffnen &rarr;</span>
+    </a>
+  </div>
+
+  <footer>
+    Bilder: PokeZentrum (Nutzung mit Erlaubnis) · L&auml;uft komplett offline im Browser.
+  </footer>
+</div>
+</body>
+</html>

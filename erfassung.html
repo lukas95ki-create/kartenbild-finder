@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Karten-Erfassung · Bestandsliste</title>
+<style>
+  :root{
+    --bg:#101418; --panel:#1a2028; --panel2:#141a21; --line:#2a3340;
+    --ink:#e8edf2; --muted:#8b98a8;
+    --tera:#5eead4; --tera2:#a78bfa;
+    --err:#f87171; --ok:#4ade80; --warn:#fbbf24;
+    --st-bestand:#38bdf8; --st-gelistet:#fbbf24; --st-verkauft:#4ade80;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height:100vh; padding:16px 12px calc(96px + env(safe-area-inset-bottom));
+    line-height:1.4;
+  }
+  .wrap{max-width:820px; margin:0 auto;}
+  header{margin-bottom:12px;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  h1{font-size:20px; font-weight:700;}
+  h1 span{
+    background:linear-gradient(90deg,var(--tera),var(--tera2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .home{
+    font-size:12px; font-weight:600; color:var(--tera); text-decoration:none;
+    border:1px solid var(--line); border-radius:999px; padding:7px 12px;
+  }
+  .sub{color:var(--muted); font-size:12px; margin-top:4px;}
+
+  /* Tabs */
+  .tabs{display:flex; gap:8px; margin:14px 0;}
+  .tab{
+    flex:1; text-align:center; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; color:var(--muted); font-weight:700; font-size:15px;
+    padding:14px 10px; cursor:pointer;
+  }
+  .tab.active{
+    color:#0b0f13; border-color:transparent;
+    background:linear-gradient(135deg,var(--tera),var(--tera2));
+  }
+  .tab .badge{
+    display:inline-block; min-width:20px; margin-left:4px; font-size:12px;
+  }
+
+  section{display:none;}
+  section.active{display:block;}
+
+  label{display:block; font-size:12px; color:var(--muted); margin:0 0 4px 2px;}
+  select, input[type="text"], input[type="number"], input[type="search"], textarea{
+    width:100%; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; color:var(--ink); font-size:16px;
+    padding:14px 14px; outline:none; appearance:none; font-family:inherit;
+  }
+  select:focus, input:focus, textarea:focus{border-color:var(--tera);}
+  .field{margin-bottom:12px;}
+  .row{display:flex; gap:10px;}
+  .row > *{flex:1;}
+  .row .num-col{flex:2;}
+  .row .qty-col{flex:1;}
+
+  button{
+    border:none; border-radius:12px; cursor:pointer;
+    font-size:15px; font-weight:700; padding:14px 16px; font-family:inherit;
+  }
+  button:active{transform:translateY(1px);}
+  button.go{
+    width:100%; background:linear-gradient(135deg,var(--tera),var(--tera2)); color:#0b0f13;
+    font-size:17px; padding:17px 16px;
+  }
+  button.chip{
+    background:var(--panel); color:var(--tera);
+    border:1px solid var(--line); font-weight:600; font-size:13px; padding:11px 13px;
+  }
+  button.ghost{background:transparent; color:var(--muted); border:1px solid var(--line);}
+  button.danger{background:var(--err); color:#2a0b0b;}
+  button.warnbtn{background:var(--warn); color:#3a2a00;}
+  button:disabled{opacity:.4; cursor:not-allowed;}
+
+  .langbadge{
+    display:inline-block; font-size:12px; font-weight:700; color:var(--tera);
+    border:1px solid var(--line); border-radius:999px; padding:5px 12px; margin-top:6px;
+  }
+
+  .undo-row{display:flex; gap:10px; margin-top:12px;}
+  .undo-row button{flex:1;}
+
+  /* Feedback area */
+  #feedback{margin-top:16px;}
+  .fbcard{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:14px; display:flex; gap:14px; align-items:flex-start;
+  }
+  .fbcard.ok{border-color:#2f6b4a;}
+  .fbcard.warn{border-color:#7a5b16;}
+  .fb-imgbox{
+    width:96px; min-width:96px; height:132px; background:#0b0f13;
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .fb-imgbox img{max-width:100%; max-height:100%; border-radius:6px;}
+  .fb-ph{color:var(--muted); font-size:11px; text-align:center; padding:6px;}
+  .fb-body{flex:1; min-width:0;}
+  .fb-title{font-weight:700; font-size:16px;}
+  .fb-line{font-size:13px; color:var(--muted); margin-top:3px;}
+  .fb-tag{
+    display:inline-block; font-size:11px; font-weight:700; margin-top:6px;
+    color:var(--tera2); border:1px solid var(--line); border-radius:6px; padding:3px 8px;
+  }
+  .fb-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .fb-actions button{flex:1; min-width:120px;}
+  .manual-form{margin-top:10px;}
+
+  /* Bestand */
+  .stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px;
+  }
+  .stat{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:12px 10px; text-align:center;
+  }
+  .stat .n{font-size:22px; font-weight:800; color:var(--tera);}
+  .stat .l{font-size:11px; color:var(--muted); margin-top:2px;}
+  .langsplit{
+    background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    padding:10px 12px; font-size:12px; color:var(--muted); margin-bottom:12px;
+    display:flex; gap:14px; flex-wrap:wrap;
+  }
+  .langsplit b{color:var(--ink);}
+
+  .filters{display:flex; flex-direction:column; gap:8px; margin-bottom:12px;}
+  .filters .row3{display:flex; gap:8px;}
+  .filters .row3 > *{flex:1;}
+  .filters select{padding:11px 10px; font-size:14px;}
+
+  .toolbtns{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .toolbtns button{flex:1; min-width:130px;}
+
+  .list{display:flex; flex-direction:column; gap:10px;}
+  .item{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:10px; display:flex; gap:12px;
+  }
+  .item-img{
+    width:52px; min-width:52px; height:72px; background:#0b0f13; border-radius:8px;
+    overflow:hidden; display:flex; align-items:center; justify-content:center;
+  }
+  .item-img img{max-width:100%; max-height:100%;}
+  .item-img .ph{font-size:10px; color:var(--muted);}
+  .item-body{flex:1; min-width:0;}
+  .item-name{font-weight:700; font-size:15px; word-break:break-word;}
+  .item-meta{font-size:12px; color:var(--muted); margin-top:2px;}
+  .item-meta .sep{opacity:.5;}
+  .item-extra{font-size:12px; color:var(--muted); margin-top:3px;}
+  .qtybadge{
+    display:inline-block; background:#0b0f13; border:1px solid var(--line);
+    border-radius:8px; padding:2px 8px; font-weight:800; color:var(--ink); font-size:13px;
+  }
+  .statuspill{
+    display:inline-block; font-size:11px; font-weight:800; border-radius:999px;
+    padding:4px 10px; cursor:pointer; border:1px solid transparent; margin-top:6px;
+  }
+  .st-Im.Bestand{}
+  .pill-bestand{background:rgba(56,189,248,.15); color:var(--st-bestand); border-color:var(--st-bestand);}
+  .pill-gelistet{background:rgba(251,191,36,.15); color:var(--st-gelistet); border-color:var(--st-gelistet);}
+  .pill-verkauft{background:rgba(74,222,128,.15); color:var(--st-verkauft); border-color:var(--st-verkauft);}
+  .item-actions{display:flex; flex-direction:column; gap:6px; justify-content:flex-start;}
+  .item-actions button{padding:9px 10px; font-size:12px; min-width:44px;}
+
+  .empty{
+    background:var(--panel); border:1px dashed var(--line); border-radius:14px;
+    padding:26px 16px; text-align:center; color:var(--muted); font-size:14px;
+  }
+
+  /* Modal */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,.6); display:none;
+    align-items:flex-end; justify-content:center; z-index:50; padding:0;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:18px 18px 0 0; width:100%; max-width:820px;
+    padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height:90vh; overflow:auto;
+  }
+  .modal h3{font-size:17px; margin-bottom:14px;}
+  .modal .field{margin-bottom:12px;}
+  .modal-actions{display:flex; gap:10px; margin-top:8px;}
+  .modal-actions button{flex:1;}
+  @media(min-width:560px){
+    .modal-bg{align-items:center;}
+    .modal{border-radius:18px;}
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ok); color:#06220f; font-weight:800; font-size:15px;
+    padding:12px 22px; border-radius:999px; opacity:0; pointer-events:none;
+    transition:opacity .18s, transform .18s; z-index:60; box-shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--err); color:#2a0b0b;}
+
+  .hint{font-size:12px; color:var(--muted); margin-top:10px; text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="topbar">
+      <div>
+        <h1>Karten-<span>Erfassung</span></h1>
+        <div class="sub">Bestandsliste · offline · Speicherung im Browser</div>
+      </div>
+      <a class="home" href="index.html">&larr; Start</a>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" id="tabErfassen" onclick="switchTab('erfassen')">Erfassen</div>
+    <div class="tab" id="tabBestand" onclick="switchTab('bestand')">
+      Bestand<span class="badge" id="tabCount"></span>
+    </div>
+  </div>
+
+  <!-- ============ ERFASSEN ============ -->
+  <section id="secErfassen" class="active">
+    <div class="field">
+      <label for="setSel">Set</label>
+      <select id="setSel"></select>
+      <span class="langbadge" id="langBadge"></span>
+    </div>
+
+    <div class="row">
+      <div class="field num-col">
+        <label for="numInput">Kartennummer</label>
+        <input type="text" id="numInput" inputmode="numeric" pattern="[0-9]*"
+               autocomplete="off" placeholder="z. B. 46" enterkeyhint="done">
+      </div>
+      <div class="field qty-col">
+        <label for="qtyInput">Menge</label>
+        <input type="number" id="qtyInput" inputmode="numeric" min="1" step="1" value="1">
+      </div>
+    </div>
+
+    <button class="go" onclick="onAdd()">Hinzuf&uuml;gen</button>
+
+    <div class="undo-row">
+      <button class="ghost" id="undoBtn" onclick="undo()" disabled>&#8630; Letzte Eingabe r&uuml;ckg&auml;ngig</button>
+    </div>
+
+    <div id="feedback"></div>
+
+    <p class="hint">Nummer eingeben &rarr; Enter oder „Hinzuf&uuml;gen“. Feld wird geleert f&uuml;rs schnelle Weitertippen.</p>
+  </section>
+
+  <!-- ============ BESTAND ============ -->
+  <section id="secBestand">
+    <div class="stats">
+      <div class="stat"><div class="n" id="statTotal">0</div><div class="l">Karten gesamt</div></div>
+      <div class="stat"><div class="n" id="statDistinct">0</div><div class="l">verschiedene</div></div>
+      <div class="stat"><div class="n" id="statStatus">0</div><div class="l">im Bestand</div></div>
+    </div>
+    <div class="langsplit" id="langSplit"></div>
+
+    <div class="filters">
+      <input type="search" id="fSearch" placeholder="Suche: Name oder Nummer …" oninput="renderList()">
+      <div class="row3">
+        <select id="fSet" onchange="renderList()"><option value="">Alle Sets</option></select>
+        <select id="fLang" onchange="renderList()"><option value="">Alle Sprachen</option></select>
+        <select id="fStatus" onchange="renderList()"><option value="">Alle Status</option></select>
+      </div>
+    </div>
+
+    <div class="toolbtns">
+      <button class="chip" onclick="exportCSV()">&#128190; CSV exportieren</button>
+      <button class="chip" onclick="exportJSON()">&#128230; Backup (JSON)</button>
+      <button class="chip" onclick="document.getElementById('importFile').click()">&#128229; Backup importieren</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importJSON(event)">
+    </div>
+
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<!-- Edit-Modal -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3>Eintrag bearbeiten</h3>
+    <div class="field"><label>Name</label><input type="text" id="eName"></div>
+    <div class="row">
+      <div class="field"><label>Menge</label><input type="number" id="eQty" inputmode="numeric" min="0" step="1"></div>
+      <div class="field"><label>Einkaufspreis (€, optional)</label><input type="text" id="ePrice" inputmode="decimal" placeholder="z. B. 2,50"></div>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="eStatus">
+        <option>Im Bestand</option><option>Gelistet</option><option>Verkauft</option>
+      </select>
+    </div>
+    <div class="field"><label>Notiz (optional)</label><textarea id="eNote" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeEdit()">Abbrechen</button>
+      <button class="go" style="width:auto" onclick="saveEdit()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="sets-data.js"></script>
+<script>
+"use strict";
+
+/* ============ Konstanten & Zustand ============ */
+const STORE_KEY   = "kartenErfassung.v1";
+const SETTINGS_KEY= "kartenErfassung.settings";
+const STATUSES    = ["Im Bestand", "Gelistet", "Verkauft"];
+
+let inventory = [];      // Array der Einträge
+let undoStack = [];      // Schnappschüsse (JSON-Strings) für Rückgängig
+let editingId = null;
+
+/* ============ Bild-Auflösung (portiert aus v6) ============ */
+function pad(n){ return String(n).padStart(3,"0"); }
+function findCard(set, n){ return set.cards.find(c=>c[0]===n); }
+
+function imgCandidates(set, n){
+  if (set.known && set.known[n]) return [BASE + set.known[n]];
+  const e = findCard(set, n);
+  if (!e) return [];
+  const files = [e[1], ...(e[2]||[])];
+  if (set.suffix){
+    return files.map(f => `${BASE}${f}-${pad(n)}${set.suffix}`);
+  }
+  const isEx = /-ex/i.test(e[1]);
+  const isTrainer = n >= 137 && set.code==="SV8a";
+  let mids, posts;
+  if (isEx){ mids=["-Terakristall","-Terakistall","-Holo","","-Holo-Terakristall"]; posts=["-RR",""]; }
+  else if (isTrainer){ mids=["-Holo","","-ASS-KLASSE","-Holo-ASS-KLASSE"]; posts=["","-ACE"]; }
+  else { mids=["-Holo",""]; posts=[""]; }
+  const tails=["-TCG",""];
+  const urls=[];
+  for (const f of files) for (const p of posts) for (const m of mids) for (const t of tails)
+    urls.push(`${BASE}${f}-${pad(n)}-${set.total}${p}-SV8a-Terastal-Festival-ex${m}-Pokemon-Karte-Japan${t}.jpg`);
+  return urls;
+}
+
+// Karten-Info für die Kontrollanzeige
+function cardInfo(set, n){
+  const e = findCard(set, n);
+  if (!e) return null;
+  const name = (e[1]||("Nr. "+pad(n))).replace(/-/g," ");
+  let rarity = e[3] || "";
+  if (!rarity && /-ex/i.test(e[1])) rarity = "ex";
+  return { name, rarity, urls: imgCandidates(set, n) };
+}
+
+function setByCodeLang(code, lang){
+  return SETS.find(s=>s.code===code && s.lang===lang);
+}
+
+// <img> mit Fallback über mehrere Kandidaten-URLs
+function fallbackImg(urls, alt, onDone){
+  const box = document.createElement("div");
+  const img = document.createElement("img");
+  img.alt = alt || ""; img.loading = "lazy";
+  let i = 0;
+  img.onload = () => { if(onDone) onDone(img.src); };
+  img.onerror = () => {
+    i++;
+    if (i < urls.length) img.src = urls[i];
+    else {
+      const ph = document.createElement("div");
+      ph.className = "fb-ph"; ph.textContent = "kein Bild";
+      box.replaceChildren(ph);
+    }
+  };
+  if (urls && urls.length) img.src = urls[0];
+  else { const ph=document.createElement("div"); ph.className="fb-ph"; ph.textContent="kein Bild"; box.appendChild(ph); return box; }
+  box.appendChild(img);
+  return box;
+}
+
+/* ============ Speicherung ============ */
+function load(){
+  try { inventory = JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+  catch(e){ inventory = []; }
+  if (!Array.isArray(inventory)) inventory = [];
+}
+function save(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(inventory)); }
+  catch(e){ toast("Speichern fehlgeschlagen (Speicher voll?)", true); }
+}
+function loadSettings(){
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveSettings(obj){
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(obj)); } catch(e){}
+}
+
+/* ============ Undo ============ */
+function pushUndo(){
+  undoStack.push(JSON.stringify(inventory));
+  if (undoStack.length > 30) undoStack.shift();
+  document.getElementById("undoBtn").disabled = false;
+}
+function undo(){
+  if (!undoStack.length) return;
+  inventory = JSON.parse(undoStack.pop());
+  save();
+  document.getElementById("undoBtn").disabled = undoStack.length === 0;
+  document.getElementById("feedback").innerHTML = "";
+  refreshAll();
+  toast("Rückgängig gemacht");
+}
+
+/* ============ Set-Auswahl ============ */
+function fillSetSelect(){
+  const sel = document.getElementById("setSel");
+  sel.innerHTML = "";
+  const byLang = {};
+  SETS.forEach((s, i) => {
+    (byLang[s.lang] = byLang[s.lang] || []).push({ s, i });
+  });
+  Object.keys(byLang).forEach(lang => {
+    const og = document.createElement("optgroup");
+    og.label = lang;
+    byLang[lang].forEach(({ s, i }) => {
+      const o = document.createElement("option");
+      o.value = i;
+      o.textContent = `${s.code} · ${s.name}`;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  const st = loadSettings();
+  if (st.lastSet != null && SETS[st.lastSet]) sel.value = st.lastSet;
+  sel.onchange = onSetChange;
+  onSetChange();
+}
+function currentSet(){ return SETS[+document.getElementById("setSel").value]; }
+function onSetChange(){
+  const s = currentSet();
+  document.getElementById("langBadge").textContent = "Sprache: " + s.lang;
+  const st = loadSettings(); st.lastSet = +document.getElementById("setSel").value; saveSettings(st);
+  document.getElementById("feedback").innerHTML = "";
+}
+
+/* ============ Tabs ============ */
+function switchTab(which){
+  const erf = which === "erfassen";
+  document.getElementById("tabErfassen").classList.toggle("active", erf);
+  document.getElementById("tabBestand").classList.toggle("active", !erf);
+  document.getElementById("secErfassen").classList.toggle("active", erf);
+  document.getElementById("secBestand").classList.toggle("active", !erf);
+  if (!erf) renderList();
+  else document.getElementById("numInput").focus();
+}
+
+/* ============ Erfassen ============ */
+function keyOf(setCode, num, lang){ return setCode + "|" + num + "|" + lang; }
+function findEntry(setCode, num, lang){
+  return inventory.find(e => e.setCode===setCode && e.num===num && e.lang===lang);
+}
+
+function onAdd(){
+  const set = currentSet();
+  const numRaw = document.getElementById("numInput").value.trim();
+  const num = parseInt(numRaw, 10);
+  let qty = parseInt(document.getElementById("qtyInput").value, 10);
+  if (!qty || qty < 1) qty = 1;
+
+  if (!numRaw || isNaN(num) || num < 1){
+    toast("Bitte eine gültige Kartennummer eingeben", true);
+    return;
+  }
+
+  const info = cardInfo(set, num);
+  if (!info){ showNotFound(set, num, qty); return; }
+
+  const existing = findEntry(set.code, num, set.lang);
+  if (existing){ showDuplicate(existing, set, num, info, qty); return; }
+
+  const entry = makeEntry(set, num, info.name, info.rarity, qty, false);
+  pushUndo();
+  inventory.push(entry);
+  save();
+  showSuccess(set, num, info, qty, entry);
+  refreshCounts();
+  resetInput();
+}
+
+function makeEntry(set, num, name, rarity, qty, manual){
+  return {
+    id: (Date.now().toString(36) + Math.random().toString(36).slice(2,7)),
+    setCode: set.code, setName: set.name, lang: set.lang,
+    num: num, name: name, rarity: rarity || "",
+    qty: qty, status: STATUSES[0],
+    price: null, note: "", manual: !!manual,
+    date: new Date().toISOString()
+  };
+}
+
+function resetInput(){
+  const ni = document.getElementById("numInput");
+  ni.value = "";
+  document.getElementById("qtyInput").value = "1";
+  ni.focus();
+}
+
+function showSuccess(set, num, info, qty, entry){
+  const fb = document.getElementById("feedback");
+  fb.innerHTML = "";
+  const card = document.createElement("div");
+  card.className = "fbcard ok";
+  const imgbox = document.createElement("div"); imgbox.className = "fb-imgbox";
+  imgbox.appendChild(fallbackImg(info.urls, info.name, (src)=>{ entry.imgCache = src; }));
+  const body = document.createElement("div"); body.className = "fb-body";
+  body.innerHTML = `
+    <div class="fb-title">&#10003; ${esc(info.name)}</div>
+    <div class="fb-line">Nr. ${pad(num)}/${set.total} · ${esc(set.code)} · ${esc(set.lang)}</div>
+    ${info.rarity ? `<span class="fb-tag">${esc(info.rarity)}</span>` : ""}
+    <div class="fb-line">Menge hinzugefügt: <b>${qty}</b></div>`;
+  card.appendChild(imgbox); card.appendChild(body);
+  fb.appendChild(card);
+  toast(qty + "× " + info.name + " erfasst");
+}
+
+function showDuplicate(existing, set, num, info, qty){
+  const fb = document.getElementById("feedback");
+  fb.innerHTML = "";
+  const card = document.createElement("div");
+  card.className = "fbcard warn";
+  const imgbox = document.createElement("div"); imgbox.className = "fb-imgbox";
+  imgbox.appendChild(fallbackImg(info.urls, info.name));
+  const body = document.createElement("div"); body.className = "fb-body";
+  body.innerHTML = `
+    <div class="fb-title">Schon im Bestand</div>
+    <div class="fb-line">${esc(info.name)} — Nr. ${pad(num)}/${set.total} · ${esc(set.code)}</div>
+    <div class="fb-line">Aktuelle Menge: <b>${existing.qty}</b></div>
+    <div class="fb-actions">
+      <button class="warnbtn" id="dupYes">Menge um ${qty} erhöhen</button>
+      <button class="ghost" id="dupNo">Abbrechen</button>
+    </div>`;
+  card.appendChild(imgbox); card.appendChild(body);
+  fb.appendChild(card);
+  document.getElementById("dupYes").onclick = () => {
+    pushUndo();
+    existing.qty += qty;
+    save();
+    showSuccess(set, num, info, qty, existing);
+    refreshCounts();
+    resetInput();
+  };
+  document.getElementById("dupNo").onclick = () => { fb.innerHTML = ""; resetInput(); };
+}
+
+function showNotFound(set, num, qty){
+  const fb = document.getElementById("feedback");
+  fb.innerHTML = "";
+  const card = document.createElement("div");
+  card.className = "fbcard warn";
+  const imgbox = document.createElement("div"); imgbox.className = "fb-imgbox";
+  const ph = document.createElement("div"); ph.className = "fb-ph"; ph.textContent = "?";
+  imgbox.appendChild(ph);
+  const body = document.createElement("div"); body.className = "fb-body";
+  body.innerHTML = `
+    <div class="fb-title" style="color:var(--warn)">&#9888; Nummer nicht gefunden</div>
+    <div class="fb-line">Nr. ${pad(num)} ist in „${esc(set.code)} · ${esc(set.name)}“ nicht hinterlegt.</div>
+    <div class="manual-form">
+      <label for="manualName">Name von Hand eintragen (optional)</label>
+      <input type="text" id="manualName" placeholder="Kartenname …" autocomplete="off">
+      <div class="fb-actions">
+        <button class="warnbtn" id="manualAdd">Manuell erfassen</button>
+        <button class="ghost" id="manualCancel">Abbrechen</button>
+      </div>
+    </div>`;
+  card.appendChild(imgbox); card.appendChild(body);
+  fb.appendChild(card);
+
+  const doAdd = () => {
+    const nm = document.getElementById("manualName").value.trim() || ("Nr. " + pad(num));
+    const existing = findEntry(set.code, num, set.lang);
+    if (existing){
+      pushUndo(); existing.qty += qty; save();
+      toast("Menge erhöht"); fb.innerHTML = ""; refreshCounts(); resetInput(); return;
+    }
+    const entry = makeEntry(set, num, nm, "", qty, true);
+    pushUndo(); inventory.push(entry); save();
+    fb.innerHTML = "";
+    const info = { name: nm, rarity: "", urls: [] };
+    showSuccess(set, num, info, qty, entry);
+    refreshCounts(); resetInput();
+  };
+  document.getElementById("manualAdd").onclick = doAdd;
+  document.getElementById("manualName").addEventListener("keydown", e => { if(e.key==="Enter") doAdd(); });
+  document.getElementById("manualCancel").onclick = () => { fb.innerHTML = ""; resetInput(); };
+  document.getElementById("manualName").focus();
+}
+
+/* ============ Bestand: Statistik & Filter ============ */
+function totalCards(list){ return list.reduce((a,e)=>a + (e.qty||0), 0); }
+
+function refreshCounts(){
+  document.getElementById("tabCount").textContent = inventory.length ? " (" + inventory.length + ")" : "";
+  document.getElementById("statTotal").textContent = totalCards(inventory);
+  document.getElementById("statDistinct").textContent = inventory.length;
+  document.getElementById("statStatus").textContent =
+    totalCards(inventory.filter(e=>e.status==="Im Bestand"));
+  const byLang = {};
+  inventory.forEach(e => { byLang[e.lang] = (byLang[e.lang]||0) + (e.qty||0); });
+  const ls = document.getElementById("langSplit");
+  const langs = Object.keys(byLang);
+  ls.innerHTML = langs.length
+    ? langs.map(l => `${esc(l)}: <b>${byLang[l]}</b>`).join('<span class="sep"></span>')
+    : '<span>Noch keine Karten erfasst.</span>';
+}
+
+function fillFilters(){
+  const fSet = document.getElementById("fSet");
+  const fLang = document.getElementById("fLang");
+  const fStatus = document.getElementById("fStatus");
+  const curSet = fSet.value, curLang = fLang.value, curStatus = fStatus.value;
+
+  const sets = [...new Set(inventory.map(e=>e.setCode))].sort();
+  fSet.innerHTML = '<option value="">Alle Sets</option>' +
+    sets.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  const langs = [...new Set(inventory.map(e=>e.lang))];
+  fLang.innerHTML = '<option value="">Alle Sprachen</option>' +
+    langs.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join("");
+  fStatus.innerHTML = '<option value="">Alle Status</option>' +
+    STATUSES.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("");
+
+  fSet.value = curSet; fLang.value = curLang; fStatus.value = curStatus;
+}
+
+function pillClass(status){
+  if (status==="Gelistet") return "pill-gelistet";
+  if (status==="Verkauft") return "pill-verkauft";
+  return "pill-bestand";
+}
+
+function renderList(){
+  refreshCounts();
+  fillFilters();
+  const q = document.getElementById("fSearch").value.trim().toLowerCase();
+  const fSet = document.getElementById("fSet").value;
+  const fLang = document.getElementById("fLang").value;
+  const fStatus = document.getElementById("fStatus").value;
+
+  let list = inventory.slice();
+  if (fSet) list = list.filter(e=>e.setCode===fSet);
+  if (fLang) list = list.filter(e=>e.lang===fLang);
+  if (fStatus) list = list.filter(e=>e.status===fStatus);
+  if (q) list = list.filter(e =>
+    (e.name||"").toLowerCase().includes(q) || pad(e.num).includes(q) || String(e.num).includes(q));
+
+  // Neueste zuerst
+  list.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+
+  const cont = document.getElementById("list");
+  if (!list.length){
+    cont.innerHTML = '<div class="empty">' +
+      (inventory.length ? "Keine Treffer für die aktuellen Filter." : "Noch keine Karten erfasst. Wechsle zu „Erfassen“.") +
+      '</div>';
+    return;
+  }
+  cont.innerHTML = "";
+  list.forEach(e => cont.appendChild(itemEl(e)));
+}
+
+function itemEl(e){
+  const el = document.createElement("div");
+  el.className = "item";
+
+  // Bild
+  const imgbox = document.createElement("div"); imgbox.className = "item-img";
+  const set = setByCodeLang(e.setCode, e.lang);
+  const urls = e.imgCache ? [e.imgCache] : (set ? imgCandidates(set, e.num) : []);
+  if (urls.length) imgbox.appendChild(fallbackImg(urls, e.name, (src)=>{ e.imgCache = src; }));
+  else { const ph=document.createElement("div"); ph.className="ph"; ph.textContent="—"; imgbox.appendChild(ph); }
+
+  const body = document.createElement("div"); body.className = "item-body";
+  const priceTxt = (e.price!=null && e.price!=="") ? " · EK " + fmtPrice(e.price) + " €" : "";
+  const noteTxt  = e.note ? " · " + esc(e.note) : "";
+  body.innerHTML = `
+    <div class="item-name">${esc(e.name)}${e.manual ? ' <span style="color:var(--muted);font-size:12px">(manuell)</span>':''}</div>
+    <div class="item-meta">${esc(e.setCode)} · Nr. ${pad(e.num)} <span class="sep">·</span> ${esc(e.lang)}${e.rarity ? ' <span class="sep">·</span> '+esc(e.rarity):''}</div>
+    <div class="item-extra"><span class="qtybadge">${e.qty}×</span>${priceTxt}${noteTxt}</div>
+    <span class="statuspill ${pillClass(e.status)}" title="Tippen: Status wechseln">${esc(e.status)}</span>`;
+  body.querySelector(".statuspill").onclick = () => cycleStatus(e.id);
+
+  const actions = document.createElement("div"); actions.className = "item-actions";
+  const bEdit = document.createElement("button"); bEdit.className="chip"; bEdit.textContent="Bearb.";
+  bEdit.onclick = () => openEdit(e.id);
+  const bDel = document.createElement("button"); bDel.className="danger"; bDel.textContent="Löschen";
+  bDel.onclick = () => delEntry(e.id);
+  actions.appendChild(bEdit); actions.appendChild(bDel);
+
+  el.appendChild(imgbox); el.appendChild(body); el.appendChild(actions);
+  return el;
+}
+
+function cycleStatus(id){
+  const e = inventory.find(x=>x.id===id);
+  if (!e) return;
+  pushUndo();
+  const i = STATUSES.indexOf(e.status);
+  e.status = STATUSES[(i+1) % STATUSES.length];
+  save(); renderList();
+  toast("Status: " + e.status);
+}
+
+function delEntry(id){
+  const e = inventory.find(x=>x.id===id);
+  if (!e) return;
+  if (!confirm(`„${e.name}“ (Nr. ${pad(e.num)}, ${e.setCode}) wirklich löschen?`)) return;
+  pushUndo();
+  inventory = inventory.filter(x=>x.id!==id);
+  save(); renderList();
+  toast("Eintrag gelöscht");
+}
+
+/* ============ Edit-Modal ============ */
+function openEdit(id){
+  const e = inventory.find(x=>x.id===id);
+  if (!e) return;
+  editingId = id;
+  document.getElementById("eName").value = e.name || "";
+  document.getElementById("eQty").value = e.qty;
+  document.getElementById("ePrice").value = (e.price!=null && e.price!=="") ? fmtPrice(e.price) : "";
+  document.getElementById("eStatus").value = e.status;
+  document.getElementById("eNote").value = e.note || "";
+  document.getElementById("editModal").classList.add("open");
+}
+function closeEdit(){
+  editingId = null;
+  document.getElementById("editModal").classList.remove("open");
+}
+function saveEdit(){
+  const e = inventory.find(x=>x.id===editingId);
+  if (!e){ closeEdit(); return; }
+  pushUndo();
+  e.name = document.getElementById("eName").value.trim() || e.name;
+  let q = parseInt(document.getElementById("eQty").value, 10);
+  e.qty = (!q || q < 0) ? 0 : q;
+  const p = parsePrice(document.getElementById("ePrice").value);
+  e.price = p;
+  e.status = document.getElementById("eStatus").value;
+  e.note = document.getElementById("eNote").value.trim();
+  save(); closeEdit(); renderList();
+  toast("Gespeichert");
+}
+
+/* ============ Export / Import ============ */
+function fmtPrice(v){
+  const n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
+  if (isNaN(n)) return "";
+  return n.toFixed(2).replace(".", ",");
+}
+function parsePrice(s){
+  s = (s||"").trim();
+  if (!s) return null;
+  const n = parseFloat(s.replace(/[^\d,.-]/g,"").replace(",", "."));
+  return isNaN(n) ? null : n;
+}
+function fmtDate(iso){
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  const p = x => String(x).padStart(2,"0");
+  return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`;
+}
+
+function download(filename, content, mime){
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+
+function csvEsc(v){
+  v = (v==null) ? "" : String(v);
+  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+function exportCSV(){
+  if (!inventory.length){ toast("Nichts zu exportieren", true); return; }
+  const head = ["Set","Nummer","Name","Sprache","Seltenheit","Menge","Status","Einkaufspreis","Notiz","Datum"];
+  const rows = inventory.map(e => [
+    e.setCode, pad(e.num), e.name, e.lang, e.rarity||"", e.qty, e.status,
+    (e.price!=null && e.price!=="") ? fmtPrice(e.price) : "", e.note||"", fmtDate(e.date)
+  ]);
+  const body = [head, ...rows].map(r => r.map(csvEsc).join(";")).join("\r\n");
+  const content = "﻿" + body;   // UTF-8 BOM für deutsches Excel
+  download("kartenbestand_" + dateStamp() + ".csv", content, "text/csv;charset=utf-8");
+  toast("CSV exportiert");
+}
+function exportJSON(){
+  const data = { app:"kartenbild-finder/erfassung", version:1, exportedAt:new Date().toISOString(), entries:inventory };
+  download("kartenbestand_backup_" + dateStamp() + ".json", JSON.stringify(data, null, 2), "application/json");
+  toast("Backup gespeichert");
+}
+function dateStamp(){
+  const d = new Date(), p = x=>String(x).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+
+function importJSON(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(reader.result); }
+    catch(e){ toast("Datei ist kein gültiges JSON", true); ev.target.value=""; return; }
+    const entries = Array.isArray(data) ? data : (data && Array.isArray(data.entries) ? data.entries : null);
+    if (!entries){ toast("Keine Einträge in der Datei gefunden", true); ev.target.value=""; return; }
+    const clean = entries.filter(e => e && e.setCode!=null && e.num!=null).map(normalizeEntry);
+    if (!clean.length){ toast("Keine gültigen Einträge", true); ev.target.value=""; return; }
+
+    const mode = inventory.length
+      ? (confirm(`${clean.length} Einträge importieren.\n\nOK = mit aktuellem Bestand ZUSAMMENFÜHREN\nAbbrechen = aktuellen Bestand ERSETZEN`) ? "merge" : "replace")
+      : "replace";
+
+    pushUndo();
+    if (mode === "replace"){
+      inventory = clean;
+    } else {
+      clean.forEach(imp => {
+        const ex = findEntry(imp.setCode, imp.num, imp.lang);
+        if (ex) ex.qty += imp.qty;
+        else inventory.push(imp);
+      });
+    }
+    save(); refreshAll();
+    toast(mode==="merge" ? "Zusammengeführt" : "Bestand ersetzt");
+    ev.target.value = "";
+  };
+  reader.readAsText(file, "utf-8");
+}
+
+function normalizeEntry(e){
+  return {
+    id: e.id || (Date.now().toString(36)+Math.random().toString(36).slice(2,7)),
+    setCode: String(e.setCode),
+    setName: e.setName || "",
+    lang: e.lang || "",
+    num: parseInt(e.num,10) || 0,
+    name: e.name || ("Nr. " + pad(parseInt(e.num,10)||0)),
+    rarity: e.rarity || "",
+    qty: parseInt(e.qty,10) || 1,
+    status: STATUSES.includes(e.status) ? e.status : STATUSES[0],
+    price: (e.price!=null && e.price!=="") ? (parseFloat(String(e.price).replace(",",".")) || null) : null,
+    note: e.note || "",
+    manual: !!e.manual,
+    date: e.date || new Date().toISOString()
+  };
+}
+
+/* ============ Helpers ============ */
+function esc(s){
+  return String(s==null?"":s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+let toastTimer = null;
+function toast(msg, isErr){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.toggle("err", !!isErr);
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 1900);
+}
+
+function refreshAll(){ refreshCounts(); renderList(); }
+
+/* ============ Init ============ */
+function init(){
+  load();
+  fillSetSelect();
+  refreshCounts();
+  document.getElementById("numInput").addEventListener("keydown", e => {
+    if (e.key === "Enter"){ e.preventDefault(); onAdd(); }
+  });
+  document.getElementById("qtyInput").addEventListener("keydown", e => {
+    if (e.key === "Enter"){ e.preventDefault(); onAdd(); }
+  });
+  // Modal per Hintergrund-Tap schließen
+  document.getElementById("editModal").addEventListener("click", e => {
+    if (e.target.id === "editModal") closeEdit();
+  });
+  document.getElementById("numInput").focus();
+}
+init();
+</script>
+</body>
+</html>
