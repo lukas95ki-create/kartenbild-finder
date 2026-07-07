@@ -27,7 +27,9 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 - [ ] Buttons „Alle Karten“, „ex-Karten“ usw. zeigen passende Karten.
 
 ## 3. Erfassen (`erfassung.html`, Tab „Erfassen“)
-- [ ] Set-Dropdown ist **nach Sprache gruppiert** (Optgroups Japanisch/Deutsch/Chinesisch).
+- [ ] Set-Dropdown ist **befüllt** und **nach Sprache gruppiert** (Optgroups Japanisch/Deutsch/Chinesisch).
+      Ist es leer, erscheint eine deutliche Meldung „Kartendaten konnten nicht geladen werden“
+      (dann `sets-data.js` neben `erfassung.html` prüfen bzw. hart neu laden).
 - [ ] Sprach-Anzeige („Sprache: …“) passt zum gewählten Set.
 - [ ] Nummernfeld öffnet am Handy die **Zahlentastatur** (`inputmode=numeric`).
 - [ ] Nummer eingeben + Enter (oder „Hinzufügen“):

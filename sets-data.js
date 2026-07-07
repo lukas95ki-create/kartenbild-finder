@@ -10,9 +10,9 @@
    Ohne suffix: SV8a-Rate-Modus (probiert Varianten durch).
    cards: [[Nr, "Datei-Namensteil", [Alternativen], "Seltenheit"]]
    ============================================================ */
-const BASE = "https://pokezentrum.de/wp-content/uploads/";
+var BASE = "https://pokezentrum.de/wp-content/uploads/";
 
-const SETS = [
+var SETS = [
 {
   code:"M5", name:"Abyss Eye", lang:"Japanisch", total:81,
   page:"https://pokezentrum.de/pokemon-karten-news/pokemon-m5-abyss-eye-kartenliste-und-kartengalerie/",

@@ -905,7 +905,37 @@ function init(){
   });
   document.getElementById("numInput").focus();
 }
-init();
+
+/* ============ Daten-Bootstrap (robust) ============
+   sets-data.js wird oben per <script src> geladen und definiert SETS + BASE.
+   Falls das fehlschlägt (z. B. Host liefert .js mit falschem MIME-Typ, oder
+   veralteter Cache), laden wir die Datei als Text nach und werten sie aus.
+   Klappt auch das nicht, erscheint eine deutliche Fehlermeldung statt einer
+   stumm leeren Set-Auswahl. */
+function dataReady(){
+  return typeof SETS !== "undefined" && Array.isArray(SETS) && SETS.length > 0;
+}
+function showDataError(){
+  const sel = document.getElementById("setSel");
+  if (sel) sel.innerHTML = '<option value="">⚠ Kartendaten nicht geladen</option>';
+  const fb = document.getElementById("feedback");
+  if (fb) fb.innerHTML =
+    '<div class="fbcard warn"><div class="fb-body">' +
+    '<div class="fb-title" style="color:var(--warn)">&#9888; Kartendaten konnten nicht geladen werden</div>' +
+    '<div class="fb-line">Die Datei <b>sets-data.js</b> muss im selben Ordner wie <b>erfassung.html</b> liegen. ' +
+    'Auf dem Handy oder gehostet hilft meist ein <b>hartes Neuladen</b> (Cache leeren) oder erneutes Hochladen von sets-data.js.</div>' +
+    '</div></div>';
+}
+function boot(){
+  if (dataReady()){ init(); return; }
+  try {
+    fetch("sets-data.js", { cache: "no-store" })
+      .then(r => r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status)))
+      .then(txt => { (0, eval)(txt); if (dataReady()) init(); else showDataError(); })
+      .catch(() => showDataError());
+  } catch(e){ showDataError(); }
+}
+boot();
 </script>
 </body>
 </html>
