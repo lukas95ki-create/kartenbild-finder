@@ -1,0 +1,184 @@
+[
+ {
+  "code": "KP01",
+  "name": "Karmesin & Purpur",
+  "lang": "Deutsch",
+  "gallery": "aktuelle-karmesin-purpur-kartenliste",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-karmesin-purpur"
+  ],
+  "scheme": "lead",
+  "marker": "Karmesin-Purpur"
+ },
+ {
+  "code": "KP02",
+  "name": "Entwicklungen in Paldea",
+  "lang": "Deutsch",
+  "gallery": "aktuelle-pokemon-entwicklungen-in-paldea-kartenliste",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-entwicklungen-in-paldea"
+  ]
+ },
+ {
+  "code": "KP03",
+  "name": "Obsidianflammen",
+  "lang": "Deutsch",
+  "gallery": "pokemon-obsidianflammen-obsidian-flames-aktuelle-kartenliste",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-obsidianflammen"
+  ]
+ },
+ {
+  "code": "KP03.5",
+  "name": "Karmesin & Purpur 151",
+  "lang": "Deutsch",
+  "gallery": "aktuelle-pokemon-karmesin-purpur-151-kartenliste",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-151"
+  ]
+ },
+ {
+  "code": "KP04",
+  "name": "Paradoxrift",
+  "lang": "Deutsch",
+  "gallery": "pokemon-paradoxrift-paradox-rift-aktuelle-kartenliste",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-paradoxrift"
+  ]
+ },
+ {
+  "code": "KP04.5",
+  "name": "Paldeas Schicksale",
+  "lang": "Deutsch",
+  "gallery": "pokemon-paldeas-schicksale-paldean-fates-kartenliste",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-paldeas-schicksale"
+  ]
+ },
+ {
+  "code": "KP05",
+  "name": "Gewalten der Zeit",
+  "lang": "Deutsch",
+  "gallery": "pokemon-gewalten-der-zeit-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-gewalten-der-zeit"
+  ]
+ },
+ {
+  "code": "KP06",
+  "name": "Maskerade im Zwielicht",
+  "lang": "Deutsch",
+  "gallery": "pokemon-maskerade-im-zwielicht-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-maskerade-im-zwielicht"
+  ]
+ },
+ {
+  "code": "KP06.5",
+  "name": "Wachsendes Chaos",
+  "lang": "Deutsch",
+  "gallery": "pokemon-wachsendes-chaos-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-wachsendes-chaos"
+  ]
+ },
+ {
+  "code": "KP07",
+  "name": "Stellarkrone",
+  "lang": "Deutsch",
+  "gallery": "pokemon-stellarkrone-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-stellarkrone"
+  ]
+ },
+ {
+  "code": "KP08",
+  "name": "Sturmische Funken",
+  "lang": "Deutsch",
+  "gallery": "pokemon-sturmische-funken-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-sturmische-funken"
+  ]
+ },
+ {
+  "code": "KP08.5",
+  "name": "Fatale Flammen",
+  "lang": "Deutsch",
+  "gallery": "pokemon-fatale-flammen-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-fatale-flammen"
+  ]
+ },
+ {
+  "code": "KP09",
+  "name": "Reisegefaehrten",
+  "lang": "Deutsch",
+  "gallery": "pokemon-reisegefaehrten-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-reisegefaehrten"
+  ]
+ },
+ {
+  "code": "KP09.5",
+  "name": "Prismatische Entwicklungen",
+  "lang": "Deutsch",
+  "gallery": "pokemon-prismatische-entwicklungen-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-prismatische-entwicklungen"
+  ]
+ },
+ {
+  "code": "KP10",
+  "name": "Erhabene Helden",
+  "lang": "Deutsch",
+  "gallery": "pokemon-erhabene-helden-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-erhabene-helden"
+  ]
+ },
+ {
+  "code": "KP11W",
+  "name": "Schwarze Blitze",
+  "lang": "Deutsch",
+  "gallery": "pokemon-schwarze-blitze-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-schwarze-blitze"
+  ]
+ },
+ {
+  "code": "KP11S",
+  "name": "Weisse Flammen",
+  "lang": "Deutsch",
+  "gallery": "pokemon-weisse-flammen-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-weisse-flammen"
+  ]
+ },
+ {
+  "code": "MEG",
+  "name": "Mega-Entwicklung",
+  "lang": "Deutsch",
+  "gallery": "pokemon-mega-entwicklung-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-mega-entwicklung"
+  ]
+ },
+ {
+  "code": "NDS",
+  "name": "Nebel der Sagen",
+  "lang": "Deutsch",
+  "gallery": "pokemon-nebel-der-sagen-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-nebel-der-sagen"
+  ]
+ },
+ {
+  "code": "ER",
+  "name": "Ewige Rivalen",
+  "lang": "Deutsch",
+  "gallery": "pokemon-ewige-rivalen-kartenliste-und-kartengalerie",
+  "sr": [
+   "alle-secret-rare-karten-aus-pokemon-ewige-rivalen"
+  ]
+ }
+]
