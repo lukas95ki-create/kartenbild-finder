@@ -94,6 +94,59 @@
     background:var(--ok); color:#06220f; font-weight:700; font-size:14px;
     padding:10px 18px; border-radius:999px; display:none;
   }
+
+  /* eBay-Text-Button auf der Karte */
+  button.ebay{
+    display:block; width:100%; margin-top:8px; font-size:12px; font-weight:700;
+    padding:9px 10px; border-radius:8px; cursor:pointer;
+    background:linear-gradient(135deg,var(--tera),var(--tera2)); color:#0b0f13;
+  }
+  .imgbox.clickable{cursor:pointer;}
+
+  /* eBay-Modal */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:100;
+    display:none; align-items:flex-end; justify-content:center;
+    padding:0;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:16px 16px 0 0; width:100%; max-width:640px;
+    max-height:92vh; overflow:auto;
+    padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+  @media(min-width:560px){
+    .modal-bg{align-items:center;}
+    .modal{border-radius:16px;}
+  }
+  .modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;}
+  .modal-head h2{font-size:18px; font-weight:700;}
+  .modal-head .x{
+    background:var(--bg); color:var(--ink); border:1px solid var(--line);
+    border-radius:10px; font-size:18px; font-weight:700; line-height:1;
+    width:40px; height:40px; cursor:pointer;
+  }
+  .modal .msub{color:var(--muted); font-size:12px; margin-bottom:14px;}
+  .modal .fld{margin-bottom:16px;}
+  .modal .fld-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .modal label{font-size:13px; font-weight:700; color:var(--tera);}
+  .modal .len{font-size:11px; color:var(--muted);}
+  .modal .len.over{color:var(--err); font-weight:700;}
+  .modal textarea{
+    width:100%; background:var(--bg); border:1px solid var(--line);
+    border-radius:12px; color:var(--ink); font-size:15px; line-height:1.5;
+    padding:12px 13px; outline:none; resize:vertical; font-family:inherit;
+  }
+  .modal textarea:focus{border-color:var(--tera);}
+  .modal textarea.title-ta{min-height:60px;}
+  .modal textarea.desc-ta{min-height:220px;}
+  .modal .copybtn{
+    width:100%; margin-top:8px; font-size:14px; font-weight:700; padding:13px 14px;
+    border-radius:12px; cursor:pointer;
+    background:linear-gradient(135deg,var(--tera),var(--tera2)); color:#0b0f13;
+  }
+  .modal .copybtn.done{background:var(--ok);}
 </style>
 </head>
 <body>
@@ -130,6 +183,34 @@
   <div class="grid" id="out"></div>
 </div>
 <div class="toast" id="toast">Links kopiert ✓</div>
+
+<!-- eBay-Listing-Modal -->
+<div class="modal-bg" id="ebayModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="eBay-Listing">
+    <div class="modal-head">
+      <h2>eBay-Listing</h2>
+      <button class="x" type="button" onclick="closeEbay()" aria-label="Schließen">✕</button>
+    </div>
+    <div class="msub">Titel und Beschreibung sind editierbar. Mit „Kopieren“ ins eBay-Formular einfügen.</div>
+
+    <div class="fld">
+      <div class="fld-top">
+        <label for="ebayTitle">Titel</label>
+        <span class="len" id="ebayTitleLen"></span>
+      </div>
+      <textarea class="title-ta" id="ebayTitle" rows="2"></textarea>
+      <button class="copybtn" type="button" onclick="copyField('ebayTitle', this)">📋 Titel kopieren</button>
+    </div>
+
+    <div class="fld">
+      <div class="fld-top">
+        <label for="ebayDesc">Beschreibung</label>
+      </div>
+      <textarea class="desc-ta" id="ebayDesc" rows="12"></textarea>
+      <button class="copybtn" type="button" onclick="copyField('ebayDesc', this)">📋 Beschreibung kopieren</button>
+    </div>
+  </div>
+</div>
 
 <script src="sets-data.js"></script>
 <script>
@@ -241,15 +322,19 @@ function cardEl(n){
     return el;
   }
   const disp=((e&&e[1])?e[1]:(CUR.known&&CUR.known[n]?CUR.known[n].split("-"+pad(n))[0]:("Nr."+pad(n)))).replace(/-/g," ");
+  const setRef=CUR;
   el.innerHTML=`
-    <div class="imgbox"><img alt="${disp}" loading="lazy"/></div>
+    <div class="imgbox clickable" title="Für eBay-Text tippen"><img alt="${disp}" loading="lazy"/></div>
     <div class="meta">
       <div class="name">${disp}</div>
       <div class="num">Nr. ${pad(n)}/${CUR.total} · ${CUR.code}</div>
       <div class="status">Lade…</div>
       <a class="open" href="#" target="_blank" rel="noopener" style="display:none">In neuem Tab öffnen</a>
+      <button class="ebay" type="button">🏷️ eBay-Text erstellen</button>
     </div>`;
   const img=el.querySelector("img"), status=el.querySelector(".status"), open=el.querySelector("a.open");
+  el.querySelector(".imgbox").addEventListener("click", ()=>openEbay(setRef, n));
+  el.querySelector("button.ebay").addEventListener("click", ()=>openEbay(setRef, n));
   let i=0;
   img.onload=()=>{
     status.textContent="✓ lange antippen zum Speichern";
@@ -277,6 +362,116 @@ function copyLinks(){
     t.style.display="block"; setTimeout(()=>t.style.display="none",1800);
   }).catch(()=>{ prompt("Links manuell kopieren:", links); });
 }
+
+/* ============ eBay-Listing-Generator ============ */
+function ebayCardName(setObj, n){
+  const e = setObj.cards.find(c=>c[0]===n);
+  const raw = (e&&e[1]) ? e[1]
+    : (setObj.known && setObj.known[n] ? setObj.known[n].split("-"+pad(n))[0] : ("Nr."+pad(n)));
+  return raw.replace(/-/g," ").trim();
+}
+function ebayRarity(setObj, n){
+  const e = setObj.cards.find(c=>c[0]===n);
+  return (e && e[3]) ? e[3] : "";
+}
+
+// Titel <= 80 Zeichen, "Pokémon" bleibt immer erhalten.
+function ebayTitle(setObj, n){
+  const MAX = 80;
+  const name = ebayCardName(setObj, n);
+  const setName = setObj.name;
+  const num = n + "/" + setObj.total;
+  const rarity = ebayRarity(setObj, n);
+  const lang = setObj.lang;
+  const join = parts => parts.filter(Boolean).join(" ");
+
+  // Vollform
+  let t = join(["Pokémon","Karte",name,setName,num,rarity,lang]);
+  if (t.length <= MAX) return t;
+  // 1) "Karte" weglassen
+  t = join(["Pokémon",name,setName,num,rarity,lang]);
+  if (t.length <= MAX) return t;
+  // 2) Seltenheit weglassen
+  t = join(["Pokémon",name,setName,num,lang]);
+  if (t.length <= MAX) return t;
+  // 3) Setnamen abkürzen (so viel wie möglich behalten)
+  for (let cut = setName.length; cut >= 1; cut--){
+    const short = setName.slice(0, cut).replace(/[\s-]+$/,"");
+    const c = join(["Pokémon",name,short,num,lang]);
+    if (c.length <= MAX) return c;
+  }
+  // 3b) Set-Code statt Name
+  t = join(["Pokémon",name,setObj.code,num,lang]);
+  if (t.length <= MAX) return t;
+  // Notfall: hart kürzen (Pokémon bleibt am Anfang erhalten)
+  return t.slice(0, MAX).replace(/[\s-]+$/,"");
+}
+
+function ebayDesc(setObj, n){
+  const name = ebayCardName(setObj, n);
+  const rarity = ebayRarity(setObj, n);
+  const lines = [
+    name,
+    "Set: " + setObj.name,
+    "Kartennummer: " + n + "/" + setObj.total
+  ];
+  if (rarity) lines.push("Seltenheit: " + rarity);
+  lines.push("Sprache: " + setObj.lang);
+  lines.push("");
+  lines.push("Hinweis: Bei den Bildern handelt es sich um Stockbilder. Wer ein Foto der tatsächlichen Karte möchte, kann mich gerne anschreiben.");
+  lines.push("");
+  lines.push("Versand erfolgt gut geschützt im Luftpolsterumschlag.");
+  lines.push("");
+  lines.push("Beim Kauf mehrerer Karten ist ein Rabatt möglich – schreibt mich dazu einfach an.");
+  return lines.join("\n");
+}
+
+function updateTitleLen(){
+  const ta = document.getElementById("ebayTitle");
+  const el = document.getElementById("ebayTitleLen");
+  const len = ta.value.length;
+  el.textContent = len + "/80";
+  el.classList.toggle("over", len > 80);
+}
+
+function openEbay(setObj, n){
+  document.getElementById("ebayTitle").value = ebayTitle(setObj, n);
+  document.getElementById("ebayDesc").value = ebayDesc(setObj, n);
+  updateTitleLen();
+  // Kopier-Buttons in den Ausgangszustand zurücksetzen
+  document.querySelectorAll("#ebayModal .copybtn").forEach(b=>{
+    if (b.dataset.orig){ b.textContent = b.dataset.orig; }
+    b.classList.remove("done");
+  });
+  document.getElementById("ebayModal").classList.add("open");
+}
+function closeEbay(){
+  document.getElementById("ebayModal").classList.remove("open");
+}
+
+function copyField(id, btn){
+  const ta = document.getElementById(id);
+  const txt = ta.value;
+  const done = () => {
+    const orig = btn.dataset.orig || btn.textContent;
+    btn.dataset.orig = orig;
+    btn.classList.add("done");
+    btn.textContent = "✓ Kopiert";
+    setTimeout(()=>{ btn.classList.remove("done"); btn.textContent = orig; }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>{ ta.select(); try{document.execCommand("copy"); done();}catch(e){ prompt("Manuell kopieren:", txt);} });
+  } else {
+    ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ prompt("Manuell kopieren:", txt); }
+  }
+}
+
+// Modal schließen: Klick außerhalb + Escape + Live-Zählung
+document.getElementById("ebayModal").addEventListener("click", e=>{
+  if (e.target.id === "ebayModal") closeEbay();
+});
+document.getElementById("ebayTitle").addEventListener("input", updateTitleLen);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeEbay(); });
 
 document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
 init();
