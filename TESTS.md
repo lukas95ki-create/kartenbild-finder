@@ -1,5 +1,13 @@
 # Test-Checkliste (manuell)
 
+> **Automatisierte Tests:** Für den eBay-Entwurfs-Export (Export A) gibt es
+> automatisierte Tests in `tests/ebay-draft-csv.test.mjs`. Ausführen im
+> Repo-Hauptverzeichnis mit `node --test` (Node ≥ 18, keine Abhängigkeiten).
+> Geprüft werden: die vier `#INFO`-Zeilen der offiziellen Vorlage
+> „eBay-draft-listings-template_DE“, die exakte Kopfzeile, UTF-8-BOM,
+> CRLF-Zeilenenden, Semikolon-/Anführungszeichen-Escaping, `Action=Draft`,
+> Punkt-Dezimaltrenner und Category ID pro Zeile.
+
 Diese Punkte sollten nach Änderungen kurz von Hand geprüft werden.
 Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet**
 (z. B. Netlify), sowie einmal am **Handy**.
@@ -124,12 +132,21 @@ und einer unbekannten Kartennummer.
       4,00 €); pro Zeile umschaltbar; Massenaktionen „Alle → …“ funktionieren.
 - [ ] **Einstellungen** (Standort, Bearbeitungszeit, Versand, Rücknahme) werden
       gemerkt (nach Neuladen noch da).
-- [ ] **Export A** (`ebay-entwuerfe.csv`): nur Einzel-Zeilen, Action `Draft`,
+- [ ] **Export A** (`ebay-entwuerfe.csv`): beginnt mit den **vier `#INFO`-Zeilen**
+      der offiziellen Vorlage „eBay-draft-listings-template_DE“ (Zeile 1:
+      `#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;`),
+      Zeile 5 ist die Kopfzeile; danach nur Einzel-Zeilen, Action `Draft`,
       SKU `SETCODE-NNN`, Category `183454`, Price mit **Punkt**, Format
       `FixedPrice`.
+- [ ] **Export A hochladen**: Verkäufercockpit Pro → Berichte → Hochladen
+      akzeptiert die Datei (keine Meldung „Wir konnten Ihre Vorlage nicht
+      identifizieren“); Entwürfe erscheinen unter ebay.de/sh/lst/drafts.
 - [ ] **Export B** (`ebay-varianten.csv`): pro Set eine Elternzeile (`Add`,
       `RelationshipDetails=Kartenname=Wert1;Wert2;…`) + Kindzeilen
-      (`Relationship=Variation`, eigener Preis/Menge).
+      (`Relationship=Variation`, eigener Preis/Menge). **Achtung:** nutzt
+      bewusst NICHT die Entwurfs-Vorlage (die kann keine Varianten), sondern
+      das File-Exchange-Format – Upload erzeugt aktive Angebote. Der Hinweis
+      dazu ist in der UI (CSV-Export-Karte) sichtbar.
 - [ ] Ist eine der beiden Gruppen leer, wird die jeweilige Datei **nicht**
       erzeugt.
 - [ ] **CSV in Texteditor öffnen**: beginnt mit BOM, Felder mit `;` getrennt,

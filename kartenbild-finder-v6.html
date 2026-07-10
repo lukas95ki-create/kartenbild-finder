@@ -417,6 +417,13 @@
         <button class="go" id="exportB">⬇️ Export B · Varianten-Angebote (ebay-varianten.csv)</button>
       </div>
       <div class="exporthint" id="exportHint"></div>
+      <p class="hintline"><b>Export A</b> entspricht exakt der offiziellen eBay-Vorlage
+        „eBay-draft-listings-template_DE“ (beginnt mit den vier <code>#INFO</code>-Zeilen) und wird im
+        Verkäufercockpit Pro unter <i>Berichte → Hochladen</i> als <b>Entwurf</b> eingelesen.</p>
+      <p class="hintline" style="color:var(--warn)"><b>⚠️ Export B (Varianten):</b> Die Entwurfs-Vorlage
+        unterstützt <b>keine Varianten</b>. Export B nutzt deshalb weiterhin das klassische
+        File-Exchange-Format mit eigener Kopfzeile und <code>Action=Add</code> – beim Hochladen entstehen
+        direkt <b>aktive Angebote</b>, keine Entwürfe.</p>
       <p class="hintline">Semikolon-getrennt · UTF-8 mit BOM · Zeilenenden CRLF. Leere Gruppen erzeugen keine Datei.</p>
     </div>
 
@@ -620,9 +627,50 @@ const SHEETJS_CDN     = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.f
 const FILE_A          = "ebay-entwuerfe.csv";
 const FILE_B          = "ebay-varianten.csv";
 
-/* Export A – exakter Header (Einzel-Entwürfe / Draft) */
-const HEADER_A =
+/* =====================================================================
+   Export A – Entwurfs-CSV exakt nach der offiziellen eBay-Vorlage
+   "eBay-draft-listings-template_DE" (Verkäufercockpit Pro → Berichte).
+   eBay identifiziert den Upload an der ERSTEN Zeile – die vier
+   #INFO-Zeilen und die Kopfzeile dürfen daher NICHT verändert werden.
+   Der Block ist bewusst DOM-frei; tests/ebay-draft-csv.test.mjs
+   extrahiert ihn über die Marker und testet ihn automatisiert.
+   ===================================================================== */
+/* @EBAY_DRAFT_CSV_START */
+const EBAY_DRAFT_INFO_LINES = [
+  "#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;",
+  "#INFO Action und Category ID sind erforderliche Felder. 1) Stellen Sie Action auf Draft ein. 2) Die Kategorie-ID für Ihre Angebote finden Sie hier: https://pages.ebay.com/sellerinformation/news/categorychanges.html;;;;;;;;;",
+  "#INFO Nachdem Sie Ihren Entwurf erfolgreich im Berichte-Tab Ihres Verkäufer-Cockpit Pro heruntergeladen haben; können Sie die Entwürfe hier zu aktiven Angeboten vervollständigen: https://www.ebay.de/sh/lst/drafts;;;;;;;;;",
+  "#INFO;;;;;;;;;;"
+];
+const EBAY_DRAFT_HEADER =
   "Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);Custom label (SKU);Category ID;Title;UPC;Price;Quantity;Item photo URL;Condition ID;Description;Format";
+function priceDot(n){ return n==null?"":(+n).toFixed(2); }                     // CSV: Punkt-Dezimaltrenner
+function csvEsc(v){
+  v = (v==null)?"":String(v);
+  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+/* records: [{sku, categoryId, title, price, qty, photoUrl, conditionId, description}] */
+function buildDraftCsv(records){
+  const lines = EBAY_DRAFT_INFO_LINES.concat([EBAY_DRAFT_HEADER]);
+  records.forEach(r=>{
+    lines.push([
+      "Draft",                 // Action – Pflichtfeld der Vorlage
+      r.sku,
+      r.categoryId,            // Category ID – Pflichtfeld, pro Zeile befüllt
+      r.title,
+      "",                      // UPC leer
+      priceDot(r.price),
+      String(r.qty),
+      r.photoUrl,
+      r.conditionId || "",
+      r.description,
+      "FixedPrice"
+    ].map(csvEsc).join(";"));
+  });
+  return "\uFEFF" + lines.join("\r\n") + "\r\n";   // UTF-8 BOM + CRLF
+}
+/* @EBAY_DRAFT_CSV_END */
 
 /* Export B – exakter Header (Varianten-Angebote, eBay File Exchange). */
 const HEADER_B =
@@ -654,12 +702,7 @@ function parsePrice(v){
   return isNaN(n)?null:n;
 }
 function priceComma(n){ return n==null?"":(+n).toFixed(2).replace(".",","); }  // Anzeige
-function priceDot(n){ return n==null?"":(+n).toFixed(2); }                     // CSV
-function csvEsc(v){
-  v = (v==null)?"":String(v);
-  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
-  return v;
-}
+/* priceDot + csvEsc: siehe @EBAY_DRAFT_CSV-Block oben (auch von Export B genutzt). */
 function downloadFile(filename, content, mime){
   const blob = new Blob([content],{type:mime});
   const url = URL.createObjectURL(blob);
@@ -1263,32 +1306,36 @@ function description(headline, isVariant){
 }
 
 /* =====================================================================
-   EXPORT A – Einzel-Entwürfe (Draft-CSV)
+   EXPORT A – Einzel-Entwürfe (Draft-CSV, Vorlage
+   "eBay-draft-listings-template_DE" – siehe @EBAY_DRAFT_CSV-Block).
    Zeilen ohne Preis werden ausgeschlossen (orange markiert).
    ===================================================================== */
 function buildCsvA(){
   const singles = exRows.filter(o=>o.mode==="single" && o.price!=null);
   if (!singles.length) return null;
-  const lines=[HEADER_A];
-  singles.forEach(o=>{
+  return buildDraftCsv(singles.map(o=>{
     const title = draftTitle(o);
-    const rec=[
-      "Draft", sku(o), CATEGORY_ID, title,
-      "",                      // UPC leer
-      priceDot(o.price),       // Punkt-Dezimaltrenner
-      String(o.qty),
-      exportUrl(o),
-      "",                      // Condition ID leer (bewusst, s. Beschreibung ohne Zustand)
-      description(title,false),
-      "FixedPrice"
-    ];
-    lines.push(rec.map(csvEsc).join(";"));
-  });
-  return "﻿" + lines.join("\r\n");   // UTF-8 BOM + CRLF
+    return {
+      sku: sku(o),
+      categoryId: CATEGORY_ID,
+      title,
+      price: o.price,
+      qty: o.qty,
+      photoUrl: exportUrl(o),
+      conditionId: "",         // bewusst leer (Beschreibung ohne Zustandsangabe)
+      description: description(title,false)
+    };
+  }));
 }
 
 /* =====================================================================
    EXPORT B – Varianten-Angebote (Kategorie-CSV)
+   -------------------------------------------------------------------
+   ACHTUNG: nutzt NICHT die Entwurfs-Vorlage von Export A – die
+   "eBay-draft-listings-template_DE" unterstützt keine Varianten.
+   Export B behält daher den File-Exchange-Header (HEADER_B) und
+   Action=Add (erzeugt aktive Angebote). Hinweis dazu steht sichtbar
+   in der UI (CSV-Export-Karte).
    -------------------------------------------------------------------
    eBay-File-Exchange-Variantensyntax (verifiziert gg. eBay-Doku):
    • Elternzeile: Relationship leer,
