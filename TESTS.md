@@ -11,13 +11,14 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 
 ## 0. Dateien / Struktur
 - [ ] Im Hauptverzeichnis liegen: `index.html`, `erfassung.html`,
-      `kartenbild-finder-v6.html`, `sets-data.js`.
+      `kartenbild-finder-v6.html`, `ebay-export.html`, `sets-data.js`.
 - [ ] Alles öffnet sich per Doppelklick (Protokoll `file://`) ohne Fehler.
 
 ## 1. Startseite `index.html`
-- [ ] Zwei Kacheln sichtbar: „Kartenbild-Finder“ und „Karten-Erfassung“.
+- [ ] Drei Kacheln sichtbar: „Kartenbild-Finder“, „Karten-Erfassung“ und „eBay-Export“.
 - [ ] Klick auf Kachel 1 öffnet `kartenbild-finder-v6.html`.
 - [ ] Klick auf Kachel 2 öffnet `erfassung.html`.
+- [ ] Klick auf Kachel 3 öffnet `ebay-export.html`.
 
 ## 2. Kartenbild-Finder `kartenbild-finder-v6.html` (unverändertes Verhalten)
 - [ ] Oben steht „48 Sets geladen“ (Set-Daten kommen jetzt aus `sets-data.js`).
@@ -67,3 +68,45 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 ## 6. Mobil / Einhand
 - [ ] Tippflächen (Buttons, Tabs, Status-Pille) sind groß genug für den Daumen.
 - [ ] Erfassen ist ohne Zoomen/Scrollen in einem Rutsch möglich.
+
+## 7. eBay-Export `ebay-export.html`
+Testdatei: eine kleine `Karten-Archiv.xlsx` nachbauen — Sheet **„Erfassung“**,
+Kopfzeile in **Zeile 3** (`Nr. | Set-Code | Kartennummer | Sprache | Anzahl |
+Name | Notiz | Preis`) mit u. a.: einem Set-Block (Set-Code nur in der ersten
+Zeile), einer Zeile mit `sv9 ` (Leerzeichen), zwei gleichen Karten (Set+Nummer),
+einer Zeile mit Notiz `masterball`, einer Zeile ohne Preis, einem unbekannten
+Set-Code und einer unbekannten Kartennummer.
+
+- [ ] **Import**: Datei-Auswahl lädt die xlsx; beim ersten Mal wird SheetJS aus
+      dem Netz nachgeladen (Internet nötig, danach im Cache).
+- [ ] **Set-Vererbung**: Zeilen ohne Set-Code übernehmen den letzten Set-Code.
+- [ ] **Trimmen/Normalisieren**: `sv9 ` → `SV9`, Nummer `5` → `005`.
+- [ ] **Sprache**: globales Dropdown ist aus der Spalte „Sprache“ vorbelegt und
+      gilt für den ganzen Import.
+- [ ] **Duplikate**: gleiche Karte doppelt → **beide Zeilen gelb**,
+      Hinweis „doppelt“ (nicht zusammengefasst).
+- [ ] **Ball-Variante**: `masterball`/`pokeball` → **Zeile blau**, Titel-Zusatz
+      „Master Ball“ / „Poke Ball“.
+- [ ] **Preis fehlt**: Zeile ohne Preis wird im Preis-Feld als „Preis fehlt“
+      (gelb) markiert.
+- [ ] **Fehlerliste**: unbekannter Set-Code / unbekannte Nummer erscheinen
+      **rot** in der Fehlerliste und sind **nicht** im Export.
+- [ ] **Umschalter**: Vorbelegung Einzel/Variante nach Preisgrenze (Default
+      4,00 €); pro Zeile umschaltbar; Massenaktionen „Alle → …“ funktionieren.
+- [ ] **Einstellungen** (Standort, Bearbeitungszeit, Versand, Rücknahme) werden
+      gemerkt (nach Neuladen noch da).
+- [ ] **Export A** (`ebay-entwuerfe.csv`): nur Einzel-Zeilen, Action `Draft`,
+      SKU `SETCODE-NNN`, Category `183454`, Price mit **Punkt**, Format
+      `FixedPrice`.
+- [ ] **Export B** (`ebay-varianten.csv`): pro Set eine Elternzeile (`Add`,
+      `RelationshipDetails=Kartenname=Wert1;Wert2;…`) + Kindzeilen
+      (`Relationship=Variation`, eigener Preis/Menge).
+- [ ] Ist eine der beiden Gruppen leer, wird die jeweilige Datei **nicht**
+      erzeugt.
+- [ ] **CSV in Texteditor öffnen**: beginnt mit BOM, Felder mit `;` getrennt,
+      Zeilenenden CRLF, Umlaute korrekt.
+- [ ] **CSV in deutschem Excel öffnen**: Spalten korrekt getrennt, Umlaute ok.
+- [ ] **Titelbild-Generator**: pro Varianten-Set ein 1600×1600-PNG mit Banner,
+      Sprach-Flagge und Kartenraster; Auswahl der Rasterbilder per Klick
+      änderbar; PNG-Download (bei blockierten Bildern erscheint der
+      CORS-Hinweis).
