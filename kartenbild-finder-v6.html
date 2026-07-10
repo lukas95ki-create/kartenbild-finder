@@ -94,6 +94,170 @@
     background:var(--ok); color:#06220f; font-weight:700; font-size:14px;
     padding:10px 18px; border-radius:999px; display:none;
   }
+
+  /* ================= eBay-Export-Tab (alle Styles namespaced) ================= */
+  :root{
+    --warn:#fbbf24; --orange:#fb923c;
+    --dup:#3b3416; --dup-line:#8a7514;
+    --ball:#132a3a; --ball-line:#2f6f9e;
+    --panel2:#141a21;
+  }
+  .wrap.wide{max-width:1100px;}
+  .tabs{display:flex; gap:8px; margin:0 0 14px;}
+  .tab{
+    flex:1; text-align:center; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; color:var(--muted); font-weight:700; font-size:15px;
+    padding:13px 10px; cursor:pointer; user-select:none;
+  }
+  .tab.active{
+    color:#0b0f13; border-color:transparent;
+    background:linear-gradient(135deg,var(--tera),var(--tera2));
+  }
+  .tabsec{display:none;}
+  .tabsec.active{display:block;}
+
+  .xcard{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:14px; margin-bottom:14px;
+  }
+  .xcard > h2{font-size:15px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .xcard > h2 .step{
+    font-size:11px; font-weight:800; color:#0b0f13; background:var(--tera);
+    border-radius:999px; padding:2px 8px;
+  }
+  details.xcard > summary{
+    font-size:15px; font-weight:700; cursor:pointer; list-style:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  details.xcard > summary::-webkit-details-marker{display:none;}
+  details.xcard > summary::after{content:"\25B8"; margin-left:auto; color:var(--muted);}
+  details.xcard[open] > summary::after{content:"\25BE";}
+
+  #secExport label{display:block; font-size:12px; color:var(--muted); margin:0 0 4px 2px;}
+  #secExport input[type="number"], #secExport input[type="text"], #secExport select{
+    width:100%; background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; color:var(--ink); font-size:15px;
+    padding:11px 12px; outline:none; appearance:none; font-family:inherit;
+  }
+  #secExport input:focus, #secExport select:focus{border-color:var(--tera);}
+  .grid2x{display:grid; grid-template-columns:1fr 1fr; gap:10px 12px;}
+  .grid3x{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px 12px;}
+  @media(max-width:640px){ .grid2x,.grid3x{grid-template-columns:1fr;} }
+
+  .filebtn{
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel2); border:1px dashed var(--line); border-radius:12px;
+    padding:16px 18px; cursor:pointer; font-weight:700; color:var(--ink); width:100%;
+    justify-content:center; font-size:15px;
+  }
+  .filebtn:hover{border-color:var(--tera);}
+  .hintline{font-size:12px; color:var(--muted); margin-top:6px;}
+  .hintline code{background:#0b0f13; padding:1px 5px; border-radius:5px;}
+
+  /* Import-Status */
+  .impstatus{border-radius:12px; padding:11px 14px; font-size:13px; line-height:1.5; margin-top:12px; display:none;}
+  .impstatus.show{display:block;}
+  .impstatus.busy{background:rgba(94,234,212,.08); border:1px solid var(--line); color:var(--muted);}
+  .impstatus.ok{background:rgba(74,222,128,.10); border:1px solid #2f6b4a; color:#bbf7d0;}
+  .impstatus.err{background:rgba(248,113,113,.12); border:1px solid var(--err); color:#fecaca; font-weight:600;}
+  .impstatus details{margin-top:8px; font-weight:400; color:var(--muted);}
+  .impstatus details summary{cursor:pointer; font-size:12px; color:var(--tera);}
+  .impstatus details div{margin-top:6px; font-size:12px; white-space:pre-wrap;}
+
+  .errlist{list-style:none; display:flex; flex-direction:column; gap:6px; padding:0;}
+  .errlist li{
+    background:rgba(248,113,113,.10); border:1px solid var(--err); border-radius:10px;
+    padding:9px 12px; font-size:13px; color:#fecaca;
+  }
+
+  /* Preisregeln */
+  .rulebox{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px;}
+  .rulebox.default-rule{border-color:var(--tera); border-style:dashed;}
+  .rulegrid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px;}
+  .rulegrid2{display:grid; grid-template-columns:1fr 1fr auto auto auto; gap:8px; align-items:end;}
+  @media(max-width:720px){ .rulegrid{grid-template-columns:1fr 1fr;} }
+  .rulebox .rl{font-size:11px; color:var(--muted); margin-bottom:2px; display:block;}
+  .rulebox input, .rulebox select{padding:8px 10px !important; font-size:13px !important;}
+  .rulebox .rbtn{padding:8px 11px; font-size:13px; background:var(--panel); color:var(--muted); border:1px solid var(--line); border-radius:8px;}
+  .rulebox .rbtn:hover{color:var(--tera);}
+  .rule-def-label{font-size:13px; font-weight:700; color:var(--tera); padding:6px 0;}
+
+  /* Vorschau-Tabelle */
+  .xtoolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px;}
+  .xtoolbar .xcount{font-size:13px; color:var(--muted); margin-right:auto;}
+  .tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px;}
+  #secExport table{border-collapse:collapse; width:100%; font-size:13px; min-width:860px;}
+  #secExport th, #secExport td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle;}
+  #secExport th{background:var(--panel2); color:var(--muted); font-weight:700; position:sticky; top:0; font-size:12px;}
+  #secExport tr.row-dup{background:var(--dup); border-left:3px solid var(--dup-line);}
+  #secExport tr.row-ball{background:var(--ball); border-left:3px solid var(--ball-line);}
+  #secExport tr.row-orange{border-left:3px solid var(--orange);}
+  #secExport tr.row-orange td.c-price .badge-src{color:var(--orange); border-color:var(--orange);}
+  td.c-thumb{width:52px;}
+  td.c-thumb .tbx{
+    width:44px; height:60px; background:#0b0f13; border-radius:6px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  td.c-thumb img{max-width:100%; max-height:100%;}
+  td.c-thumb .ph{font-size:9px; color:var(--muted);}
+  .title-cell{max-width:380px;}
+  .title-cell .t{font-weight:600; word-break:break-word;}
+  .title-cell .m{font-size:11px; color:var(--muted); margin-top:2px;}
+  .tag{display:inline-block; font-size:10px; font-weight:800; border-radius:5px; padding:2px 6px; margin-left:6px;}
+  .tag-dup{background:rgba(251,191,36,.18); color:var(--warn); border:1px solid var(--dup-line);}
+  .tag-ball{background:rgba(94,234,212,.14); color:var(--tera); border:1px solid var(--ball-line);}
+  #secExport input.price-in{width:84px; padding:7px 8px; font-size:13px;}
+  #secExport input.sales-in{width:74px; padding:7px 8px; font-size:12px;}
+  .badge-src{
+    display:inline-block; font-size:10px; font-weight:800; margin-top:4px;
+    color:var(--muted); border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+  }
+  .badge-src.src-rule{color:var(--tera);}
+  .badge-src.src-sales{color:var(--tera2);}
+  .badge-src.src-manual{color:var(--warn);}
+  a.soldlink{
+    display:inline-block; font-size:11px; font-weight:700; color:var(--tera);
+    text-decoration:none; border:1px solid var(--line); border-radius:7px;
+    padding:6px 8px; margin-bottom:4px; white-space:nowrap;
+  }
+  a.soldlink:hover{border-color:var(--tera);}
+  .toggle{
+    display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; cursor:pointer;
+    font-size:11px; font-weight:800; user-select:none;
+  }
+  .toggle span{padding:6px 10px; color:var(--muted); background:var(--panel2);}
+  .toggle.mode-single span.s-single{background:var(--tera); color:#0b0f13;}
+  .toggle.mode-variant span.s-variant{background:var(--tera2); color:#0b0f13;}
+
+  .stats{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+  .stat{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12px; color:var(--muted);}
+  .stat b{color:var(--ink); font-size:15px;}
+  .exporthint{font-size:12px; color:var(--orange); font-weight:700; margin-top:8px; display:none;}
+  .exporthint.show{display:block;}
+
+  /* Titelbild */
+  .tb-controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px;}
+  .tb-controls select{max-width:320px;}
+  #tbCanvasWrap{overflow-x:auto; text-align:center;}
+  #tbCanvas{width:100%; max-width:420px; height:auto; border:1px solid var(--line); border-radius:12px; background:#fff;}
+  .tb-pick{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:6px; margin-top:10px;}
+  .tb-pick .pk{
+    position:relative; border:2px solid transparent; border-radius:8px; overflow:hidden; cursor:pointer;
+    background:#0b0f13; aspect-ratio:5/7;
+  }
+  .tb-pick .pk.sel{border-color:var(--tera);}
+  .tb-pick .pk img{width:100%; height:100%; object-fit:cover; display:block;}
+  .tb-pick .pk .no{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted);}
+
+  .toast2{
+    position:fixed; left:50%; bottom:20px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ok); color:#06220f; font-weight:800; font-size:15px;
+    padding:12px 22px; border-radius:999px; opacity:0; pointer-events:none;
+    transition:opacity .18s, transform .18s; z-index:60; box-shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+  .toast2.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast2.err{background:var(--err); color:#2a0b0b;}
 </style>
 </head>
 <body>
@@ -103,6 +267,14 @@
     <h1>Kartenbild-<span>Finder</span></h1>
     <p class="sub">Set wählen, dann Nummer(n) <b>oder</b> Namen eingeben — oder direkt „Alle ex-Karten“ antippen. Bilder: lange antippen → speichern. Quelle: PokeZentrum (Nutzung mit Erlaubnis).</p>
   </header>
+
+  <div class="tabs">
+    <div class="tab active" id="tabSuche" onclick="switchMainTab('suche')">Kartensuche</div>
+    <div class="tab" id="tabExport" onclick="switchMainTab('export')">eBay-Export</div>
+  </div>
+
+  <!-- ================= TAB 1: KARTENSUCHE (unveraendert) ================= -->
+  <section id="secSuche" class="tabsec active">
 
   <div class="banner">
     ⚠️ Diese Datei <b>herunterladen und direkt im Browser öffnen</b> (Chrome/Safari) — in der Claude-Vorschau werden externe Bilder blockiert.
@@ -128,10 +300,148 @@
   </div>
 
   <div class="grid" id="out"></div>
+
+  </section><!-- /secSuche -->
+
+  <!-- ================= TAB 2: EBAY-EXPORT ================= -->
+  <section id="secExport" class="tabsec">
+
+    <!-- Einstellungen -->
+    <details class="xcard" id="settingsCard">
+      <summary>⚙️ Angebots-Einstellungen (einmalig, werden gemerkt)</summary>
+      <div style="margin-top:12px">
+        <div class="grid3x">
+          <div><label>Standort (Location)</label>
+            <input type="text" id="setLocation" placeholder="z. B. 12345 Musterstadt"></div>
+          <div><label>Bearbeitungszeit (DispatchTimeMax, Werktage)</label>
+            <input type="number" id="setDispatch" min="0" step="1" placeholder="z. B. 2"></div>
+          <div><label>Versandart (ShippingService-1:Option)</label>
+            <input type="text" id="setShipService" placeholder="z. B. DE_DeutschePostBriefNational"></div>
+          <div><label>Versandkosten (ShippingService-1:Cost, €)</label>
+            <input type="text" id="setShipCost" inputmode="decimal" placeholder="z. B. 1,80"></div>
+          <div><label>Rücknahme</label>
+            <select id="setReturns">
+              <option value="no">Keine Rücknahme</option>
+              <option value="yes">Rücknahme akzeptiert (30 Tage)</option>
+            </select></div>
+        </div>
+        <p class="hintline">Diese Werte gelten für die <b>Varianten-Angebote</b> (Export B). Einzel-Entwürfe (Export A)
+          sind reine Drafts – dort ergänzt du Versand/Standort später direkt in eBay.</p>
+      </div>
+    </details>
+
+    <!-- Preisregeln -->
+    <details class="xcard" id="rulesCard">
+      <summary>💶 Preisregeln (automatische Preis-Vorbelegung)</summary>
+      <div style="margin-top:12px">
+        <p class="hintline" style="margin:0 0 10px">Regeln werden <b>von oben nach unten</b> geprüft – die erste passende
+          Regel bestimmt Basispreis und Mindestpreis. Die letzte Regel ist immer die Standard-Regel für alle übrigen Karten.
+          Leere Bedingungsfelder gelten als „egal“.</p>
+        <div id="rulesList"></div>
+        <div class="xtoolbar" style="margin-top:10px">
+          <button class="chip" id="addRule">+ Regel hinzufügen</button>
+          <button class="chip" id="resetRules">Auf Standard zurücksetzen</button>
+        </div>
+        <div class="grid3x" style="margin-top:12px">
+          <div><label>Aufschlag auf Ø-Verkaufspreis (%)</label>
+            <input type="number" id="markupPct" min="0" step="1"></div>
+          <div><label>Rundung (bei Preisen aus Verkaufsdaten)</label>
+            <select id="roundingSel">
+              <option value="off">aus</option>
+              <option value="49">aufrunden auf ,49</option>
+              <option value="99">aufrunden auf ,99</option>
+            </select></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Import -->
+    <div class="xcard">
+      <h2><span class="step">1</span> Excel importieren</h2>
+      <label class="filebtn" for="xlsxFile">📥 Excel-Datei auswählen …
+        <input type="file" id="xlsxFile" accept=".xlsx,.xls" style="display:none"></label>
+      <div class="grid3x" style="margin-top:12px">
+        <div><label>Sprache (gilt für den ganzen Import)</label>
+          <select id="globalLang">
+            <option>Deutsch</option><option>Englisch</option><option>Japanisch</option>
+            <option>Koreanisch</option><option>Chinesisch</option>
+          </select></div>
+        <div><label>Preisgrenze Einzelangebot ab (€)</label>
+          <input type="text" id="priceThreshold" inputmode="decimal" value="4,00"></div>
+        <div style="align-self:end">
+          <button class="chip" id="applyThreshold" style="width:100%">Einzel/Variante nach Preisgrenze vorbelegen</button>
+        </div>
+      </div>
+      <p class="hintline">Pflichtspalten: <code>Set-Code</code> · <code>Kartennummer</code> · <code>Anzahl</code> —
+        die Kopfzeile wird automatisch in den ersten 10 Zeilen aller Tabellenblätter gesucht.
+        Optional: <code>Sprache</code>, <code>Name</code>, <code>Notiz</code> (masterball/pokeball),
+        <code>Preis</code> (überschreibt als manueller Preis die Regel-Preise).</p>
+      <div class="impstatus" id="importStatus"></div>
+    </div>
+
+    <!-- Fehlerliste -->
+    <div class="xcard" id="errorCard" style="display:none">
+      <h2>🔴 Nicht auflösbare Zeilen</h2>
+      <p class="hintline" style="margin:0 0 8px">Diese Zeilen konnten <b>nicht</b> gegen die Kartendaten aufgelöst werden
+        und sind <b>nicht</b> in den Exporten enthalten. Bitte Set-Code/Nummer prüfen.</p>
+      <ul class="errlist" id="errorList"></ul>
+    </div>
+
+    <!-- Vorschau -->
+    <div class="xcard" id="previewCard" style="display:none">
+      <h2><span class="step">2</span> Vorschau &amp; Preise</h2>
+      <div class="stats" id="stats"></div>
+      <div class="xtoolbar">
+        <span class="xcount" id="rowCount"></span>
+        <button class="chip" id="allSingle">Alle → Einzelangebot</button>
+        <button class="chip" id="allVariant">Alle → Variante</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr>
+            <th></th><th>Titel</th><th>Anzahl</th><th>Preis (€)</th><th>Verkäufe prüfen</th><th>Angebotsart</th>
+          </tr></thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+      <p class="hintline">„Verkäufe prüfen“ öffnet die eBay-Suche (Verkaufte&nbsp;+&nbsp;Beendete Angebote) in einem neuen Tab.
+        Den dort abgelesenen Durchschnitt ins Feld „Ø €“ eintragen – der Preis wird dann automatisch als
+        max(Mindestpreis, Ø × Aufschlag) berechnet. Preisfeld ist direkt editierbar (→ „Manuell“).</p>
+    </div>
+
+    <!-- Export -->
+    <div class="xcard" id="exportCard" style="display:none">
+      <h2><span class="step">3</span> CSV-Export</h2>
+      <div class="xtoolbar">
+        <button class="go" id="exportA">⬇️ Export A · Einzel-Entwürfe (ebay-entwuerfe.csv)</button>
+        <button class="go" id="exportB">⬇️ Export B · Varianten-Angebote (ebay-varianten.csv)</button>
+      </div>
+      <div class="exporthint" id="exportHint"></div>
+      <p class="hintline">Semikolon-getrennt · UTF-8 mit BOM · Zeilenenden CRLF. Leere Gruppen erzeugen keine Datei.</p>
+    </div>
+
+    <!-- Titelbild -->
+    <div class="xcard" id="titleImgCard" style="display:none">
+      <h2><span class="step">4</span> Titelbild-Generator (für Varianten-Angebote)</h2>
+      <p class="hintline" style="margin:0 0 10px">Pro Set ein einheitliches Titelbild (1600×1600 PNG).
+        <b>Nach dem CSV-Upload manuell als erstes Foto ins Angebot laden.</b></p>
+      <div class="tb-controls">
+        <select id="tbSetSel"></select>
+        <button class="chip" id="tbDownload">⬇️ Titelbild als PNG</button>
+      </div>
+      <div id="tbCanvasWrap"><canvas id="tbCanvas" width="1600" height="1600"></canvas></div>
+      <p class="hintline" id="tbTaintNote" style="color:var(--warn)"></p>
+      <div class="hintline">Bilder für das Raster auswählen (8–12, höchstpreisige sind vorausgewählt):</div>
+      <div class="tb-pick" id="tbPick"></div>
+    </div>
+
+  </section><!-- /secExport -->
 </div>
 <div class="toast" id="toast">Links kopiert ✓</div>
+<div class="toast2" id="exToast"></div>
 
 <script src="sets-data.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
 <script>
 
 let CUR = SETS[0];
@@ -280,6 +590,1044 @@ function copyLinks(){
 
 document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
 init();
+
+/* =====================================================================
+   ============ TAB "EBAY-EXPORT" ======================================
+   Integriert aus ebay-export.html. Liest ein Excel-Inventar
+   (Set-Code | Kartennummer | Anzahl, optional Sprache/Name/Notiz/Preis),
+   gleicht es gegen sets-data.js ab, belegt Preise über ein Regel-System
+   vor und erzeugt zwei eBay-File-Exchange-CSVs.
+   Kein Server, kein Build – SheetJS liegt lokal in vendor/.
+   Alle Funktionen/Variablen sind so benannt, dass sie den bestehenden
+   Kartensuche-Code nicht berühren.
+   ===================================================================== */
+
+/* ---------- Tab-Umschaltung ---------- */
+function switchMainTab(which){
+  const s = which==="suche";
+  document.getElementById("tabSuche").classList.toggle("active", s);
+  document.getElementById("tabExport").classList.toggle("active", !s);
+  document.getElementById("secSuche").classList.toggle("active", s);
+  document.getElementById("secExport").classList.toggle("active", !s);
+  document.querySelector(".wrap").classList.toggle("wide", !s);
+}
+
+/* ---------- Konstanten ---------- */
+const EX_SETTINGS_KEY = "ebayExport.settings.v1";
+const EX_RULES_KEY    = "ebayExport.priceRules.v1";
+const CATEGORY_ID     = "183454";      // eBay-Kategorie „Sammelkartenspiele – Einzelkarten“
+const SHEETJS_CDN     = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
+const FILE_A          = "ebay-entwuerfe.csv";
+const FILE_B          = "ebay-varianten.csv";
+
+/* Export A – exakter Header (Einzel-Entwürfe / Draft) */
+const HEADER_A =
+  "Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);Custom label (SKU);Category ID;Title;UPC;Price;Quantity;Item photo URL;Condition ID;Description;Format";
+
+/* Export B – exakter Header (Varianten-Angebote, eBay File Exchange). */
+const HEADER_B =
+  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
+const COLS_B = HEADER_B.split(";");
+
+/* ---------- Zustand ---------- */
+let exRows = [];       // aufgelöste Zeilen (Vorschau/Export)
+let exErrs = [];       // nicht auflösbare Zeilen
+let lastDet = null;    // letztes Header-Erkennungsergebnis (für Re-Match bei Sprachwechsel)
+
+/* ---------- Hilfsfunktionen ---------- */
+function byId(id){ return document.getElementById(id); }
+let exToastTimer = null;
+function toastX(msg, isErr){
+  const t = byId("exToast");
+  t.textContent = msg; t.classList.toggle("err", !!isErr);
+  t.classList.add("show"); clearTimeout(exToastTimer);
+  exToastTimer = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+function esc(s){
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function parsePrice(v){
+  if (v==null || v==="") return null;
+  if (typeof v==="number") return isFinite(v)?v:null;
+  const n = parseFloat(String(v).replace(/[^\d,.-]/g,"").replace(",","."));
+  return isNaN(n)?null:n;
+}
+function priceComma(n){ return n==null?"":(+n).toFixed(2).replace(".",","); }  // Anzeige
+function priceDot(n){ return n==null?"":(+n).toFixed(2); }                     // CSV
+function csvEsc(v){
+  v = (v==null)?"":String(v);
+  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content],{type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function capTitle(t){ t=t.replace(/\s+/g," ").trim(); return t.length>80 ? t.slice(0,80).trim() : t; }
+function ballOf(note){
+  const s = String(note||"").toLowerCase();
+  if (s.includes("masterball") || s.includes("master ball") || s.includes("master-ball")) return "Master Ball";
+  if (s.includes("pokeball") || s.includes("poke ball") || s.includes("poké ball") || s.includes("poke-ball")) return "Poke Ball";
+  return "";
+}
+
+/* ---------- Bild-Auflösung (set-bezogen; Suchtab nutzt weiter CUR) ---------- */
+function findCardIn(set, n){ return set.cards.find(c=>c[0]===n); }
+function imgCandidatesFor(set, n){
+  if (set.known && set.known[n]) return [BASE + set.known[n]];
+  const e = findCardIn(set, n);
+  if (!e) return [];
+  const files = [e[1], ...(e[2]||[])];
+  if (set.suffix){
+    return files.map(f => `${BASE}${f}-${pad(n)}${set.suffix}`);
+  }
+  const isEx = /-ex/i.test(e[1]);
+  const isTrainer = n >= 137 && set.code==="SV8a";
+  let mids, posts;
+  if (isEx){ mids=["-Terakristall","-Terakistall","-Holo","","-Holo-Terakristall"]; posts=["-RR",""]; }
+  else if (isTrainer){ mids=["-Holo","","-ASS-KLASSE","-Holo-ASS-KLASSE"]; posts=["","-ACE"]; }
+  else { mids=["-Holo",""]; posts=[""]; }
+  const tails=["-TCG",""];
+  const urls=[];
+  for (const f of files) for (const p of posts) for (const m of mids) for (const t of tails)
+    urls.push(`${BASE}${f}-${pad(n)}-${set.total}${p}-SV8a-Terastal-Festival-ex${m}-Pokemon-Karte-Japan${t}.jpg`);
+  return urls;
+}
+/* Set-Suche: case-insensitiv, bevorzugt gewählte Sprache; sonst erste Fundstelle. */
+function findSetByCode(code, lang){
+  const c = code.trim().toLowerCase();
+  let s = SETS.find(x => x.code.toLowerCase()===c && x.lang===lang);
+  if (s) return { set:s, langMismatch:false };
+  s = SETS.find(x => x.code.toLowerCase()===c);
+  return s ? { set:s, langMismatch:true } : null;
+}
+function loadThumb(box, urls, row){
+  if (!urls || !urls.length){ box.innerHTML='<span class="ph">kein Bild</span>'; return; }
+  const img = document.createElement("img");
+  img.alt=""; img.loading="lazy";
+  let i=0;
+  img.onload = ()=>{ row.resolvedUrl = img.src; };
+  img.onerror = ()=>{ i++; if(i<urls.length) img.src=urls[i]; else box.innerHTML='<span class="ph">kein Bild</span>'; };
+  img.src=urls[0];
+  box.appendChild(img);
+}
+function exportUrl(o){ return o.resolvedUrl || (o.urls && o.urls[0]) || ""; }
+
+/* ---------- Einstellungen (localStorage) ---------- */
+function loadExSettings(){
+  let s={}; try{ s=JSON.parse(localStorage.getItem(EX_SETTINGS_KEY))||{}; }catch(e){}
+  byId("setLocation").value    = s.location    || "";
+  byId("setDispatch").value    = s.dispatch    || "";
+  byId("setShipService").value = s.shipService || "";
+  byId("setShipCost").value    = s.shipCost    || "";
+  byId("setReturns").value     = s.returns     || "no";
+  if (s.threshold) byId("priceThreshold").value = s.threshold;
+}
+function saveExSettings(){
+  const s = {
+    location:    byId("setLocation").value.trim(),
+    dispatch:    byId("setDispatch").value.trim(),
+    shipService: byId("setShipService").value.trim(),
+    shipCost:    byId("setShipCost").value.trim(),
+    returns:     byId("setReturns").value,
+    threshold:   byId("priceThreshold").value.trim()
+  };
+  try{ localStorage.setItem(EX_SETTINGS_KEY, JSON.stringify(s)); }catch(e){}
+}
+
+/* =====================================================================
+   PREISREGEL-SYSTEM
+   Regeln werden von oben nach unten geprüft; die erste passende Regel
+   gewinnt. Die letzte Regel ist immer die Standard-Regel (isDefault)
+   ohne Bedingungen. Leere Bedingungsfelder gelten als „egal“.
+   ===================================================================== */
+function defaultRuleset(){
+  return {
+    version: 1,
+    markupPct: 10,          // Aufschlag auf eingegebenen Ø-Verkaufspreis
+    rounding: "off",        // "off" | "49" | "99" (nur für Verkaufsdaten-Preise)
+    rules: [
+      { condLang:"Japanisch", condSet:"", condName:"ex", condNote:"", basis:1.50, min:1.50, isDefault:false },
+      { condLang:"", condSet:"", condName:"", condNote:"", basis:1.00, min:1.00, isDefault:true }
+    ]
+  };
+}
+let RULESET = loadRules();
+function loadRules(){
+  try{
+    const r = JSON.parse(localStorage.getItem(EX_RULES_KEY));
+    if (r && Array.isArray(r.rules) && r.rules.length && r.rules[r.rules.length-1].isDefault) return r;
+  }catch(e){}
+  return defaultRuleset();
+}
+function saveRules(){ try{ localStorage.setItem(EX_RULES_KEY, JSON.stringify(RULESET)); }catch(e){} }
+
+function matchRule(o){
+  for (const r of RULESET.rules){
+    if (r.isDefault) return r;
+    if (r.condLang && r.condLang !== o.lang) continue;
+    if (r.condSet){
+      const toks = r.condSet.toLowerCase().split(/[\s,;]+/).filter(Boolean);
+      if (!toks.includes(o.setCode.toLowerCase())) continue;
+    }
+    if (r.condName){
+      const hay = (o.cardName + " " + (o.rarity||"")).toLowerCase();
+      if (!hay.includes(r.condName.toLowerCase())) continue;
+    }
+    if (r.condNote && !String(o.note||"").toLowerCase().includes(r.condNote.toLowerCase())) continue;
+    return r;
+  }
+  return RULESET.rules[RULESET.rules.length-1];   // Sicherheitsnetz
+}
+/* Aufrunden auf ,49 bzw. ,99 (nächster Preis >= p mit dieser Endung). */
+function roundPrice(p){
+  const mode = RULESET.rounding;
+  if (mode!=="49" && mode!=="99") return p;
+  const cents = Math.round(p*100), e = (mode==="49") ? 49 : 99;
+  let cand = Math.floor(cents/100)*100 + e;
+  if (cand < cents) cand += 100;
+  return cand/100;
+}
+/* Effektiven Preis einer Zeile berechnen.
+   Prioritäten: manuell (Excel-Preisspalte oder editiertes Preisfeld)
+   > Verkaufsdaten (Ø × Aufschlag, Untergrenze Mindestpreis, opt. Rundung)
+   > Regel-Basispreis. */
+function computePrice(o){
+  const r = matchRule(o);
+  o.rule = r;
+  if (o.priceMode==="manual" && o.priceManual!=null){
+    o.price = Math.round(o.priceManual*100)/100;
+    o.priceSource = "manual";
+    return;
+  }
+  if (o.priceMode==="sales" && o.salesAvg!=null){
+    const raw = o.salesAvg * (1 + (+RULESET.markupPct||0)/100);
+    const min = (r.min!=null) ? r.min : 0;
+    o.price = Math.round(roundPrice(Math.max(min, raw))*100)/100;
+    o.priceSource = "sales";
+    return;
+  }
+  o.price = (r.basis!=null) ? Math.round(r.basis*100)/100 : null;
+  o.priceSource = "rule";
+}
+function applyPrices(){ exRows.forEach(computePrice); }
+
+/* ---------- Regel-Editor ---------- */
+const EX_LANGS = ["Deutsch","Englisch","Japanisch","Koreanisch","Chinesisch"];
+function renderRules(){
+  const list = byId("rulesList"); list.innerHTML="";
+  RULESET.rules.forEach((r,i)=>{
+    const box = document.createElement("div");
+    box.className = "rulebox" + (r.isDefault?" default-rule":"");
+    if (r.isDefault){
+      box.innerHTML = `<div class="rule-def-label">Standard-Regel — alle übrigen Karten</div>
+        <div class="rulegrid2">
+          <div><span class="rl">Basispreis (€)</span><input data-f="basis" type="text" inputmode="decimal" value="${priceComma(r.basis)}"></div>
+          <div><span class="rl">Mindestpreis (€)</span><input data-f="min" type="text" inputmode="decimal" value="${priceComma(r.min)}"></div>
+        </div>`;
+    } else {
+      box.innerHTML = `
+        <div class="rulegrid">
+          <div><span class="rl">Sprache</span><select data-f="condLang">
+            <option value="">– egal –</option>
+            ${EX_LANGS.map(l=>`<option${r.condLang===l?" selected":""}>${l}</option>`).join("")}
+          </select></div>
+          <div><span class="rl">Set-Code (Komma-Liste)</span><input data-f="condSet" type="text" value="${esc(r.condSet)}" placeholder="z. B. SV8a, SV9"></div>
+          <div><span class="rl">Kartenname/Seltenheit enthält</span><input data-f="condName" type="text" value="${esc(r.condName)}" placeholder="z. B. ex"></div>
+          <div><span class="rl">Notiz enthält</span><input data-f="condNote" type="text" value="${esc(r.condNote)}" placeholder="z. B. masterball"></div>
+        </div>
+        <div class="rulegrid2">
+          <div><span class="rl">Basispreis (€)</span><input data-f="basis" type="text" inputmode="decimal" value="${priceComma(r.basis)}"></div>
+          <div><span class="rl">Mindestpreis (€)</span><input data-f="min" type="text" inputmode="decimal" value="${priceComma(r.min)}"></div>
+          <button class="rbtn" data-act="up" title="nach oben">&uarr;</button>
+          <button class="rbtn" data-act="down" title="nach unten">&darr;</button>
+          <button class="rbtn" data-act="del" title="Regel löschen">&#10005;</button>
+        </div>`;
+    }
+    box.querySelectorAll("[data-f]").forEach(inp=>{
+      inp.addEventListener("change", ()=>{
+        const f = inp.dataset.f;
+        if (f==="basis"||f==="min") r[f] = parsePrice(inp.value);
+        else r[f] = inp.value.trim();
+        rulesChanged();
+      });
+    });
+    box.querySelectorAll("[data-act]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const act = btn.dataset.act;
+        if (act==="del") RULESET.rules.splice(i,1);
+        else if (act==="up" && i>0){ [RULESET.rules[i-1],RULESET.rules[i]]=[RULESET.rules[i],RULESET.rules[i-1]]; }
+        else if (act==="down" && i<RULESET.rules.length-2){ [RULESET.rules[i+1],RULESET.rules[i]]=[RULESET.rules[i],RULESET.rules[i+1]]; }
+        renderRules(); rulesChanged();
+      });
+    });
+    list.appendChild(box);
+  });
+}
+function rulesChanged(){
+  saveRules();
+  applyPrices();
+  renderPreview();
+}
+
+/* eBay.de-Suche „Verkaufte + Beendete Angebote“ – reiner Link, KEIN fetch
+   (eBay per fetch abzufragen scheitert an CORS und ist unerwünscht). */
+function ebaySoldLink(o){
+  const q = `Pokemon ${o.cardName} ${o.num3} ${o.setCode} ${o.lang}`;
+  return "https://www.ebay.de/sch/i.html?_nkw=" + encodeURIComponent(q) + "&LH_Sold=1&LH_Complete=1";
+}
+
+/* =====================================================================
+   EXCEL-IMPORT
+   ===================================================================== */
+function ensureSheetJs(){
+  return new Promise((resolve,reject)=>{
+    if (window.XLSX) return resolve("lokal (vendor/xlsx.full.min.js)");
+    const sc = document.createElement("script");
+    sc.src = SHEETJS_CDN;
+    sc.onload  = ()=> window.XLSX ? resolve("CDN-Fallback") : reject(new Error("Excel-Bibliothek geladen, aber unbrauchbar."));
+    sc.onerror = ()=> reject(new Error("Excel-Bibliothek fehlt: vendor/xlsx.full.min.js liegt nicht neben dieser Datei und das CDN ist nicht erreichbar. Bitte den Ordner vendor/ mit hochladen bzw. Internetverbindung prüfen."));
+    document.head.appendChild(sc);
+  });
+}
+function normHeader(s){ return String(s==null?"":s).toLowerCase().replace(/[.\s()\-_]/g,"").trim(); }
+function normLang(v){
+  const s = String(v==null?"":v).toLowerCase().trim();
+  if (!s) return "";
+  if (/^de|deutsch|ger/.test(s)) return "Deutsch";
+  if (/^en|engl|gb|us/.test(s))  return "Englisch";
+  if (/^jp|ja|japan/.test(s))    return "Japanisch";
+  if (/^ko|korea/.test(s))       return "Koreanisch";
+  if (/^cn|zh|chin/.test(s))     return "Chinesisch";
+  return "";
+}
+/* Kopfzeile in den ersten 10 Zeilen ALLER Tabellenblätter suchen
+   (Erkennung über „Set-Code“ + „Kartennummer“, Groß-/Kleinschreibung egal). */
+function detectHeader(wb){
+  const tried = [];
+  for (const name of wb.SheetNames){
+    const sheet = wb.Sheets[name];
+    if (!sheet){ tried.push(name); continue; }
+    const aoa = XLSX.utils.sheet_to_json(sheet,{header:1,raw:false,defval:""});
+    for (let r=0; r<Math.min(aoa.length,10); r++){
+      const norm = (aoa[r]||[]).map(normHeader);
+      const hasSet = norm.some(h=>h.includes("setcode"));
+      const hasNum = norm.some(h=>h.includes("kartennummer")||h==="nummer");
+      if (hasSet && hasNum){
+        const find = (...keys)=>{ for(let i=0;i<norm.length;i++) if(keys.some(k=>norm[i].includes(k))) return i; return -1; };
+        return {
+          sheetName:name, aoa, headerRow:r,
+          cols:{
+            cSet:  find("setcode"),
+            cNum:  find("kartennummer","nummer"),
+            cQty:  find("anzahl","menge","stück","stueck"),
+            cLang: find("sprache"),
+            cName: find("name"),
+            cNote: find("notiz"),
+            cPrice:find("preis")
+          }
+        };
+      }
+    }
+    tried.push(name);
+  }
+  return { error:true, tried };
+}
+function showImportStatus(type, html, diag){
+  const el = byId("importStatus");
+  el.className = "impstatus show " + type;
+  el.innerHTML = html + (diag
+    ? '<details><summary>Diagnose anzeigen</summary><div>'+esc(diag)+'</div></details>' : "");
+}
+function colLetter(i){ return i<0 ? "—" : String.fromCharCode(65 + (i%26)); }
+
+async function handleFile(file){
+  showImportStatus("busy", "⏳ Datei wird gelesen: <b>"+esc(file.name)+"</b> …");
+  let libSrc;
+  try{ libSrc = await ensureSheetJs(); }
+  catch(err){ showImportStatus("err", "❌ "+esc(err.message)); return; }
+
+  let wb;
+  try{
+    const buf = await file.arrayBuffer();
+    wb = XLSX.read(new Uint8Array(buf), {type:"array"});
+  }catch(e){
+    showImportStatus("err",
+      "❌ Die Datei konnte nicht als Excel gelesen werden. Ist es wirklich eine .xlsx/.xls-Datei?",
+      "Technische Meldung: " + (e && e.message ? e.message : e));
+    return;
+  }
+
+  const det = detectHeader(wb);
+  if (det.error){
+    showImportStatus("err",
+      "❌ Keine Kopfzeile mit „Set-Code“ und „Kartennummer“ gefunden (gesucht in den ersten 10 Zeilen aller Blätter).",
+      "Durchsuchte Tabellenblätter: " + det.tried.join(", ") +
+      "\nErwartet werden Spaltenüberschriften, die „Set-Code“ und „Kartennummer“ enthalten (Groß-/Kleinschreibung egal).");
+    return;
+  }
+  if (det.cols.cQty < 0){
+    showImportStatus("err",
+      "❌ Pflichtspalte „Anzahl“ fehlt in der Kopfzeile (Blatt „"+esc(det.sheetName)+"“, Zeile "+(det.headerRow+1)+").",
+      "Gefundene Zuordnung: Set-Code=Spalte "+colLetter(det.cols.cSet)+", Kartennummer=Spalte "+colLetter(det.cols.cNum));
+    return;
+  }
+
+  // Sprache aus erster gefüllter Zelle vorbelegen (optionale Spalte)
+  if (det.cols.cLang >= 0){
+    for (let r=det.headerRow+1; r<det.aoa.length; r++){
+      const l = normLang((det.aoa[r]||[])[det.cols.cLang]);
+      if (l){ byId("globalLang").value = l; break; }
+    }
+  }
+  det.libSrc = libSrc; det.fileName = file.name;
+  parseExcelRows(det);
+}
+
+function parseExcelRows(det){
+  lastDet = det;
+  const { aoa, cols } = det;
+  const lang = byId("globalLang").value;
+  const out=[], errs=[];
+  let lastSet="", read=0, skippedEmpty=0, skippedIncomplete=0;
+
+  for (let i=det.headerRow+1; i<aoa.length; i++){
+    const raw = aoa[i]||[];
+    const nonEmpty = raw.some(c=>String(c==null?"":c).trim()!=="");
+    if (!nonEmpty){ skippedEmpty++; continue; }      // komplett leere Zeilen überspringen
+    read++;
+
+    let setCode = cols.cSet>=0 ? String(raw[cols.cSet]==null?"":raw[cols.cSet]).trim() : "";
+    if (!setCode) setCode = lastSet;                 // Set-Vererbung (Erfassung in Blöcken)
+    else lastSet = setCode;
+
+    const numRaw  = String(raw[cols.cNum]==null?"":raw[cols.cNum]).trim();
+    const qtyRaw  = String(raw[cols.cQty]==null?"":raw[cols.cQty]).trim();
+    const noteRaw = cols.cNote>=0 ? String(raw[cols.cNote]==null?"":raw[cols.cNote]).trim() : "";
+    const nameXls = cols.cName>=0 ? String(raw[cols.cName]==null?"":raw[cols.cName]).trim() : "";
+    const priceXls= cols.cPrice>=0 ? parsePrice(raw[cols.cPrice]) : null;
+
+    const numInt = parseInt(numRaw.replace(/\D+/g,""),10);
+    const qty    = parseInt(qtyRaw.replace(/\D+/g,""),10);
+    if (!numRaw || isNaN(numInt) || !qtyRaw || isNaN(qty) || qty<1){ skippedIncomplete++; continue; }
+
+    const num3 = pad(numInt);
+    const rowObj = {
+      xlsRow:i+1, setCodeRaw:setCode, num:numInt, num3, qty, lang,
+      note:noteRaw, nameXls, ball:ballOf(noteRaw),
+      priceManual:priceXls, priceMode: priceXls!=null ? "manual" : "auto",
+      salesAvg:null, price:null, priceSource:"rule",
+      mode:"variant", resolvedUrl:null
+    };
+
+    const hit = findSetByCode(setCode, lang);
+    if (!hit){ errs.push({ ...rowObj, reason:`Set-Code „${setCode}“ unbekannt` }); continue; }
+    const set = hit.set;
+    const cardEntry = findCardIn(set, numInt);
+    if (!cardEntry){ errs.push({ ...rowObj, reason:`Nr. ${num3} in Set „${set.code}“ nicht hinterlegt` }); continue; }
+
+    rowObj.set = set;
+    rowObj.setCode = set.code;                       // kanonische Schreibweise
+    rowObj.setName = set.name;
+    rowObj.langMismatch = hit.langMismatch;
+    rowObj.cardName = (nameXls || cardEntry[1] || ("Nr. "+num3)).replace(/-/g," ");
+    rowObj.rarity = cardEntry[3] || "";
+    rowObj.urls = imgCandidatesFor(set, numInt);
+    out.push(rowObj);
+  }
+
+  // Duplikate markieren (gleicher kanonischer Set-Code + Nummer) – NICHT zusammenfassen
+  const seen={};
+  out.forEach(o=>{ const k=o.setCode+"|"+o.num; (seen[k]=seen[k]||[]).push(o); });
+  Object.values(seen).forEach(g=>{ if(g.length>1) g.forEach(o=>o.dup=true); });
+
+  exRows = out;
+  exErrs = errs;
+  applyPrices();
+  applyThresholdPrefill();
+  renderErrors();
+  renderPreview();
+  buildTitleImageSets();
+
+  const totalQty = out.reduce((a,o)=>a+o.qty,0);
+  const manualCount = out.filter(o=>o.priceMode==="manual").length;
+  const diag =
+    "Datei: " + (det.fileName||"—") +
+    "\nTabellenblatt: „" + det.sheetName + "“, Kopfzeile in Zeile " + (det.headerRow+1) +
+    "\nSpalten: Set-Code=" + colLetter(det.cols.cSet) + " · Kartennummer=" + colLetter(det.cols.cNum) +
+      " · Anzahl=" + colLetter(det.cols.cQty) + " · Sprache=" + colLetter(det.cols.cLang) +
+      " · Name=" + colLetter(det.cols.cName) + " · Notiz=" + colLetter(det.cols.cNote) +
+      " · Preis=" + colLetter(det.cols.cPrice) +
+    "\nExcel-Bibliothek: " + (det.libSrc||"—") +
+    "\nZeilen: " + read + " mit Inhalt · " + skippedEmpty + " leer übersprungen · " +
+      skippedIncomplete + " ohne Nummer/Anzahl übersprungen" +
+    (manualCount ? "\nManuelle Preise aus Preisspalte: " + manualCount : "");
+
+  if (!out.length){
+    showImportStatus("err",
+      "❌ Keine einzige Zeile konnte übernommen werden (" + read + " Zeilen gelesen, " +
+      errs.length + " nicht auflösbar, " + skippedIncomplete + " unvollständig).", diag);
+    return;
+  }
+  showImportStatus("ok",
+    "✅ Import erfolgreich: <b>" + read + "</b> Zeilen gelesen · <b>" + out.length +
+    "</b> Karten erkannt (" + totalQty + " Stück)" +
+    (errs.length ? " · <b style='color:var(--err)'>" + errs.length + " nicht auflösbar</b> (siehe rote Liste)" : "") +
+    (skippedIncomplete ? " · " + skippedIncomplete + " unvollständige Zeile(n) übersprungen" : ""), diag);
+  toastX(out.length + " Karte(n) eingelesen");
+}
+
+/* Vorbelegung Einzel/Variante nach Preisgrenze (auf Basis der aktuellen Preise) */
+function applyThresholdPrefill(){
+  const th = parsePrice(byId("priceThreshold").value);
+  const t = th==null ? 4 : th;
+  exRows.forEach(o=>{ o.mode = (o.price!=null && o.price>=t) ? "single" : "variant"; });
+}
+
+/* =====================================================================
+   RENDERN
+   ===================================================================== */
+function renderErrors(){
+  const card=byId("errorCard"), ul=byId("errorList");
+  if (!exErrs.length){ card.style.display="none"; return; }
+  card.style.display="block";
+  ul.innerHTML="";
+  exErrs.forEach(e=>{
+    const li=document.createElement("li");
+    li.innerHTML = `<b>Excel-Zeile ${e.xlsRow}:</b> Set „${esc(e.setCodeRaw)}“, Nr. ${esc(e.num3)}, `+
+                   `Anzahl ${esc(e.qty)} — ${esc(e.reason)}`;
+    ul.appendChild(li);
+  });
+}
+function renderPreview(){
+  const card=byId("previewCard");
+  if (!exRows.length){ card.style.display="none"; byId("exportCard").style.display="none"; return; }
+  card.style.display="block";
+  byId("exportCard").style.display="block";
+  const tb=byId("previewBody"); tb.innerHTML="";
+  exRows.forEach(o=>tb.appendChild(exRowEl(o)));
+  renderStats();
+  updateExportHint();
+  byId("rowCount").textContent = exRows.length + " Karte(n)";
+}
+function renderStats(){
+  const single=exRows.filter(o=>o.mode==="single").length;
+  const variant=exRows.length-single;
+  const dup=exRows.filter(o=>o.dup).length;
+  const ball=exRows.filter(o=>o.ball).length;
+  const sets=new Set(exRows.filter(o=>o.mode==="variant").map(o=>o.setCode)).size;
+  const src={rule:0,sales:0,manual:0,none:0};
+  exRows.forEach(o=>{ if(o.price==null) src.none++; else src[o.priceSource]++; });
+  byId("stats").innerHTML =
+    `<div class="stat">Einzel: <b>${single}</b></div>`+
+    `<div class="stat">Variante: <b>${variant}</b> (${sets} Set-Angebote)</div>`+
+    `<div class="stat">Preise: <b>${src.rule}</b> per Regel · <b>${src.sales}</b> per Verkaufsdaten · <b>${src.manual}</b> manuell</div>`+
+    (src.none?`<div class="stat" style="border-color:var(--orange);color:var(--orange)">Ohne Preis: <b style="color:var(--orange)">${src.none}</b></div>`:"")+
+    (dup?`<div class="stat">Doppelt: <b>${dup}</b></div>`:"")+
+    (ball?`<div class="stat">Ball-Variante: <b>${ball}</b></div>`:"");
+}
+function updateExportHint(){
+  const n = exRows.filter(o=>o.price==null).length;
+  const el = byId("exportHint");
+  el.classList.toggle("show", n>0);
+  el.textContent = n>0 ? `⚠ ${n} Zeile(n) ohne Preis — orange markiert, werden vom Export ausgeschlossen.` : "";
+}
+function setBadge(el, o){
+  if (o.price==null){
+    el.textContent="Preis fehlt"; el.className="badge-src"; el.style.color="var(--orange)";
+    el.style.borderColor="var(--orange)"; el.title="Kein Preis ermittelbar – Basispreis der passenden Regel ist leer.";
+    return;
+  }
+  el.style.color=""; el.style.borderColor="";
+  if (o.priceSource==="manual"){ el.textContent="Manuell"; el.className="badge-src src-manual"; el.title="Manueller Preis (Excel-Preisspalte oder editiert)"; }
+  else if (o.priceSource==="sales"){
+    el.textContent="Verkäufe +"+(+RULESET.markupPct||0)+" %"; el.className="badge-src src-sales";
+    el.title="max(Mindestpreis "+priceComma(o.rule&&o.rule.min)+" €, Ø "+priceComma(o.salesAvg)+" € × Aufschlag)";
+  }
+  else { el.textContent="Regel"; el.className="badge-src src-rule"; el.title="Basispreis der ersten passenden Preisregel"; }
+}
+function exRowEl(o){
+  const tr=document.createElement("tr");
+  if (o.dup) tr.classList.add("row-dup");
+  if (o.ball) tr.classList.add("row-ball");
+  if (o.price==null) tr.classList.add("row-orange");
+
+  // Thumbnail
+  const tdT=document.createElement("td"); tdT.className="c-thumb";
+  const box=document.createElement("div"); box.className="tbx";
+  loadThumb(box, o.urls, o);
+  tdT.appendChild(box);
+
+  // Titel
+  const tdTitle=document.createElement("td"); tdTitle.className="title-cell";
+  let tags="";
+  if (o.dup)  tags+=`<span class="tag tag-dup" title="Doppelt erfasst – bitte prüfen (möglicher Zählfehler)">doppelt</span>`;
+  if (o.ball) tags+=`<span class="tag tag-ball">${esc(o.ball)}</span>`;
+  if (o.langMismatch) tags+=`<span class="tag tag-dup" title="Kein Set in dieser Sprache hinterlegt – Bild evtl. andere Sprache">Bildsprache?</span>`;
+  tdTitle.innerHTML =
+    `<div class="t">${esc(draftTitle(o))}${tags}</div>`+
+    `<div class="m">${esc(o.setCode)} · Nr. ${esc(o.num3)} · ${esc(o.lang)}</div>`;
+
+  // Anzahl
+  const tdQ=document.createElement("td"); tdQ.textContent=o.qty;
+
+  // Preis (editierbar) + Quellen-Badge
+  const tdP=document.createElement("td"); tdP.className="c-price";
+  const pin=document.createElement("input");
+  pin.className="price-in"; pin.type="text"; pin.inputMode="decimal"; pin.placeholder="–";
+  pin.value = o.price!=null ? priceComma(o.price) : "";
+  const badge=document.createElement("div"); setBadge(badge,o);
+  pin.addEventListener("change", ()=>{
+    const v=parsePrice(pin.value);
+    if (v==null){ pin.value = o.price!=null?priceComma(o.price):""; return; }
+    o.priceManual=v; o.priceMode="manual";
+    computePrice(o);
+    pin.value=priceComma(o.price); setBadge(badge,o);
+    tr.classList.toggle("row-orange", o.price==null);
+    renderStats(); updateExportHint(); buildTitleImageSets();
+  });
+  tdP.appendChild(pin); tdP.appendChild(badge);
+
+  // Verkäufe prüfen (Link, kein fetch) + Ø-Eingabe
+  const tdS=document.createElement("td");
+  const a=document.createElement("a");
+  a.className="soldlink"; a.target="_blank"; a.rel="noopener";
+  a.href=ebaySoldLink(o); a.textContent="Verkäufe prüfen ↗";
+  a.title="Öffnet eBay.de: Verkaufte + Beendete Angebote für diese Karte";
+  const sin=document.createElement("input");
+  sin.className="sales-in"; sin.type="text"; sin.inputMode="decimal"; sin.placeholder="Ø €";
+  sin.title="Durchschnitt der letzten Verkäufe eintragen → Preis = max(Mindestpreis, Ø × Aufschlag)";
+  if (o.salesAvg!=null) sin.value=priceComma(o.salesAvg);
+  sin.addEventListener("change", ()=>{
+    const v=parsePrice(sin.value);
+    if (v==null){
+      o.salesAvg=null;
+      o.priceMode = (o.priceManual!=null) ? "manual" : "auto";
+      sin.value="";
+    } else {
+      o.salesAvg=v; o.priceMode="sales";
+    }
+    computePrice(o);
+    pin.value = o.price!=null?priceComma(o.price):"";
+    setBadge(badge,o);
+    tr.classList.toggle("row-orange", o.price==null);
+    renderStats(); updateExportHint(); buildTitleImageSets();
+  });
+  tdS.appendChild(a);
+  const sWrap=document.createElement("div"); sWrap.appendChild(sin);
+  tdS.appendChild(sWrap);
+
+  // Angebotsart-Umschalter
+  const tdMode=document.createElement("td");
+  const tg=document.createElement("div");
+  tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant");
+  tg.innerHTML=`<span class="s-single">Einzel</span><span class="s-variant">Variante</span>`;
+  tg.onclick=()=>{
+    o.mode = o.mode==="single" ? "variant" : "single";
+    tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant");
+    renderStats(); buildTitleImageSets();
+  };
+  tdMode.appendChild(tg);
+
+  tr.append(tdT,tdTitle,tdQ,tdP,tdS,tdMode);
+  return tr;
+}
+
+/* =====================================================================
+   TITEL / BESCHREIBUNG / SKU
+   ===================================================================== */
+function draftTitle(o){
+  // Pokemon [Kartenname] [Nummer] [Set-Code] [Sprache] [+ Master Ball/Poke Ball]
+  let t=`Pokemon ${o.cardName} ${o.num3} ${o.setCode} ${o.lang}`;
+  if (o.ball) t+=` ${o.ball}`;
+  return capTitle(t);
+}
+function parentTitle(set, lang){
+  return capTitle(`Pokemon ${set.name} ${set.code} ${lang} - Einzelkarten zum Aussuchen`);
+}
+function sku(o){ return `${o.setCode.toUpperCase()}-${o.num3}`; }
+/* Feste HTML-Beschreibung (kein Freitext, OHNE Zustandsangabe). */
+function description(headline, isVariant){
+  const stock = "Hinweis: Beim Produktbild handelt es sich um ein Beispielbild (Stockfoto). "+
+    "Sie erhalten die im Titel genannte Karte in der gewählten Variante. "+
+    "Gerne sende ich auf Anfrage Fotos der tatsächlichen Karte – schreiben Sie mich einfach an.";
+  const bundle = isVariant
+    ? "<p style='font-weight:bold'>Mehrere Karten kaufen und Versand sparen – nur 1x Versandkosten.</p>" : "";
+  return "<div style='font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#222'>"+
+         "<h2 style='font-size:18px;margin:0 0 10px'>"+esc(headline)+"</h2>"+
+         bundle+"<p>"+stock+"</p></div>";
+}
+
+/* =====================================================================
+   EXPORT A – Einzel-Entwürfe (Draft-CSV)
+   Zeilen ohne Preis werden ausgeschlossen (orange markiert).
+   ===================================================================== */
+function buildCsvA(){
+  const singles = exRows.filter(o=>o.mode==="single" && o.price!=null);
+  if (!singles.length) return null;
+  const lines=[HEADER_A];
+  singles.forEach(o=>{
+    const title = draftTitle(o);
+    const rec=[
+      "Draft", sku(o), CATEGORY_ID, title,
+      "",                      // UPC leer
+      priceDot(o.price),       // Punkt-Dezimaltrenner
+      String(o.qty),
+      exportUrl(o),
+      "",                      // Condition ID leer (bewusst, s. Beschreibung ohne Zustand)
+      description(title,false),
+      "FixedPrice"
+    ];
+    lines.push(rec.map(csvEsc).join(";"));
+  });
+  return "﻿" + lines.join("\r\n");   // UTF-8 BOM + CRLF
+}
+
+/* =====================================================================
+   EXPORT B – Varianten-Angebote (Kategorie-CSV)
+   -------------------------------------------------------------------
+   eBay-File-Exchange-Variantensyntax (verifiziert gg. eBay-Doku):
+   • Elternzeile: Relationship leer,
+     RelationshipDetails = "Kartenname=Wert1;Wert2;…" (Merkmal + ALLE
+     Werte, ';'-getrennt; mehrere Merkmale würden mit '|' verkettet).
+     StartPrice/Quantity leer – bei Varianten definieren die KINDZEILEN
+     Preis und Menge (eBay-Vorgabe).
+   • Kindzeile: Relationship="Variation",
+     RelationshipDetails="Kartenname=Wert" (genau ein Wert),
+     eigener StartPrice/Quantity/PicURL/C:Kartennummer.
+   • ANNAHME (in der eBay-Doku nicht eindeutig): Action der Kindzeilen
+     = "Add" wie die Elternzeile, da *Action Pflichtfeld ist und die
+     Kindzeilen über Relationship=Variation zugeordnet werden. Sollte
+     die reale Vorlage leeres Action verlangen, hier auf "" ändern.
+   • ConditionID bleibt leer (Beschreibung macht bewusst KEINE
+     Zustandsangabe). Verlangt eBay einen Pflichtwert, ist 4000
+     (Gebraucht/Sehr gut) für Einzelkarten üblich.
+   ===================================================================== */
+function makeRowB(){ const o={}; COLS_B.forEach(c=>o[c]=""); return o; }
+function buildCsvB(){
+  const variants = exRows.filter(o=>o.mode==="variant" && o.price!=null);
+  if (!variants.length) return null;
+
+  const groups={};
+  variants.forEach(o=>{ (groups[o.setCode]=groups[o.setCode]||[]).push(o); });
+
+  const st = {
+    location:    byId("setLocation").value.trim(),
+    dispatch:    byId("setDispatch").value.trim(),
+    shipService: byId("setShipService").value.trim(),
+    shipCost:    parsePrice(byId("setShipCost").value),
+    returns:     byId("setReturns").value
+  };
+  const returnsOpt = st.returns==="yes" ? "ReturnsAccepted" : "ReturnsNotAccepted";
+  const lines=[HEADER_B];
+
+  Object.keys(groups).forEach(code=>{
+    const list = groups[code];
+    const set  = list[0].set;
+    const lang = list[0].lang;
+    const pTitle = parentTitle(set, lang);
+    const values = list.map(o=>`${o.cardName} ${o.num3}`);
+
+    /* ---- Elternzeile ---- */
+    const P = makeRowB();
+    P["*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)"] = "Add";
+    P["*Category"]   = CATEGORY_ID;
+    P["*Title"]      = pTitle;
+    P["Relationship"]= "";
+    P["RelationshipDetails"] = "Kartenname=" + values.join(";");
+    P["*C:Spiel"]    = "Pokémon TCG";
+    P["C:Sprache"]   = lang;
+    P["PicURL"]      = exportUrl(list[0]);
+    P["*Description"]= description(pTitle,true);
+    P["*Format"]     = "FixedPrice";
+    P["*Duration"]   = "GTC";
+    P["*StartPrice"] = "";
+    P["*Quantity"]   = "";
+    P["ImmediatePayRequired"] = "1";
+    P["*Location"]   = st.location;
+    P["ShippingType"]= "Flat";
+    P["ShippingService-1:Option"] = st.shipService;
+    P["ShippingService-1:Cost"]   = st.shipCost!=null ? priceDot(st.shipCost) : "";
+    P["*DispatchTimeMax"] = st.dispatch;
+    P["*ReturnsAcceptedOption"] = returnsOpt;
+    if (st.returns==="yes"){ P["ReturnsWithinOption"]="Days_30"; P["RefundOption"]="MoneyBack"; P["ShippingCostPaidByOption"]="Buyer"; }
+    lines.push(COLS_B.map(c=>csvEsc(P[c])).join(";"));
+
+    /* ---- Kindzeilen ---- */
+    list.forEach(o=>{
+      const C = makeRowB();
+      C["*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)"] = "Add";  // ANNAHME s. o.
+      C["CustomLabel"] = sku(o);
+      C["*Category"]   = CATEGORY_ID;
+      C["*Title"]      = pTitle;
+      C["Relationship"]= "Variation";
+      C["RelationshipDetails"] = "Kartenname=" + `${o.cardName} ${o.num3}`;
+      C["*C:Spiel"]    = "Pokémon TCG";
+      C["C:Kartenname"]= `${o.cardName} ${o.num3}`;
+      C["C:Kartennummer"] = o.num3;
+      C["C:Sprache"]   = lang;
+      C["PicURL"]      = exportUrl(o);
+      C["*Format"]     = "FixedPrice";
+      C["*Duration"]   = "GTC";
+      C["*StartPrice"] = priceDot(o.price);
+      C["*Quantity"]   = String(o.qty);
+      lines.push(COLS_B.map(c=>csvEsc(C[c])).join(";"));
+    });
+  });
+  return "﻿" + lines.join("\r\n");
+}
+
+function doExportA(){
+  const csv=buildCsvA();
+  const skipped=exRows.filter(o=>o.mode==="single" && o.price==null).length;
+  if (!csv){ toastX("Keine exportierbaren Zeilen auf „Einzelangebot“ – keine Datei erzeugt.", true); return; }
+  downloadFile(FILE_A, csv, "text/csv;charset=utf-8");
+  toastX("Export A gespeichert" + (skipped?` (${skipped} Zeile(n) ohne Preis ausgeschlossen)`:""));
+}
+function doExportB(){
+  const csv=buildCsvB();
+  const skipped=exRows.filter(o=>o.mode==="variant" && o.price==null).length;
+  if (!csv){ toastX("Keine exportierbaren Zeilen auf „Variante“ – keine Datei erzeugt.", true); return; }
+  downloadFile(FILE_B, csv, "text/csv;charset=utf-8");
+  toastX("Export B gespeichert" + (skipped?` (${skipped} Zeile(n) ohne Preis ausgeschlossen)`:""));
+}
+
+/* =====================================================================
+   TITELBILD-GENERATOR (Canvas 1600×1600)
+   ===================================================================== */
+const FLAGS = {
+  "Deutsch":   "<svg xmlns='http://www.w3.org/2000/svg' width='90' height='60'><rect width='90' height='60' fill='#000'/><rect y='20' width='90' height='20' fill='#D00'/><rect y='40' width='90' height='20' fill='#FFCE00'/></svg>",
+  "Japanisch": "<svg xmlns='http://www.w3.org/2000/svg' width='90' height='60'><rect width='90' height='60' fill='#fff'/><circle cx='45' cy='30' r='16' fill='#bc002d'/></svg>",
+  "Chinesisch":"<svg xmlns='http://www.w3.org/2000/svg' width='90' height='60'><rect width='90' height='60' fill='#de2910'/><g fill='#ffde00'><polygon points='15,10 18,19 27,19 20,25 22,34 15,28 8,34 10,25 3,19 12,19'/><polygon points='33,6 35,10 39,10 36,13 37,17 33,15 30,17 31,13 28,10 32,10'/><polygon points='38,14 40,18 44,18 41,21 42,25 38,23 35,25 36,21 33,18 37,18'/><polygon points='38,24 40,28 44,28 41,31 42,35 38,33 35,35 36,31 33,28 37,28'/><polygon points='33,32 35,36 39,36 36,39 37,43 33,41 30,43 31,39 28,36 32,36'/></g></svg>",
+  "Englisch":  "<svg xmlns='http://www.w3.org/2000/svg' width='90' height='60'><rect width='90' height='60' fill='#012169'/><path d='M0,0 90,60 M90,0 0,60' stroke='#fff' stroke-width='12'/><path d='M0,0 90,60 M90,0 0,60' stroke='#C8102E' stroke-width='6'/><path d='M45,0 V60 M0,30 H90' stroke='#fff' stroke-width='20'/><path d='M45,0 V60 M0,30 H90' stroke='#C8102E' stroke-width='12'/></svg>",
+  "Koreanisch":"<svg xmlns='http://www.w3.org/2000/svg' width='90' height='60'><rect width='90' height='60' fill='#fff'/><circle cx='45' cy='30' r='13' fill='#cd2e3a'/><path d='M45,17 a13,13 0 0,1 0,26 a6.5,6.5 0 0,1 0,-13 a6.5,6.5 0 0,0 0,-13' fill='#0047a0'/></svg>"
+};
+function flagImage(lang){
+  return new Promise((resolve)=>{
+    const svg=FLAGS[lang]||FLAGS["Japanisch"];
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>resolve(null);
+    img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+  });
+}
+let tbState = {};
+function buildTitleImageSets(){
+  const card=byId("titleImgCard"), sel=byId("tbSetSel");
+  const variants = exRows.filter(o=>o.mode==="variant");
+  if (!variants.length){ card.style.display="none"; return; }
+  card.style.display="block";
+
+  const groups={};
+  variants.forEach(o=>{ (groups[o.setCode]=groups[o.setCode]||[]).push(o); });
+
+  const prevSel = sel.value;
+  tbState={};
+  Object.keys(groups).forEach(code=>{
+    const list=groups[code].slice().sort((a,b)=>(b.price||0)-(a.price||0)); // höchstpreisige zuerst
+    tbState[code]={
+      set:list[0].set, lang:list[0].lang,
+      cards:list.map((o,i)=>({o, selected:i<12}))
+    };
+  });
+  sel.innerHTML="";
+  Object.keys(tbState).forEach(code=>{
+    const t=tbState[code];
+    const opt=document.createElement("option");
+    opt.value=code; opt.textContent=`${code} · ${t.set.name} (${t.cards.length} Karten)`;
+    sel.appendChild(opt);
+  });
+  if (prevSel && tbState[prevSel]) sel.value=prevSel;
+  sel.onchange=renderTitlePicker;
+  renderTitlePicker();
+}
+function renderTitlePicker(){
+  const code=byId("tbSetSel").value;
+  const t=tbState[code]; if(!t) return;
+  const pick=byId("tbPick"); pick.innerHTML="";
+  t.cards.forEach((c)=>{
+    const d=document.createElement("div");
+    d.className="pk"+(c.selected?" sel":"");
+    const url=exportUrl(c.o) || (c.o.urls&&c.o.urls[0]);
+    d.innerHTML = url ? `<img src="${esc(url)}" alt="">` : `<div class="no">${esc(c.o.num3)}</div>`;
+    d.title = `${c.o.cardName} ${c.o.num3}` + (c.o.price!=null?` · ${priceComma(c.o.price)} €`:"");
+    d.onclick=()=>{ c.selected=!c.selected; d.classList.toggle("sel",c.selected); drawTitleImage(); };
+    pick.appendChild(d);
+  });
+  drawTitleImage();
+}
+async function drawTitleImage(){
+  const code=byId("tbSetSel").value;
+  const t=tbState[code]; if(!t) return;
+  const cv=byId("tbCanvas"), ctx=cv.getContext("2d");
+  const W=1600,H=1600;
+  byId("tbTaintNote").textContent="";
+
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#f4f6f8"); g.addColorStop(1,"#dfe5ea");
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle="#1a2028"; ctx.fillRect(0,0,W,240);
+  ctx.fillStyle="#5eead4"; ctx.fillRect(0,240,W,10);
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillStyle="#ffffff";
+  ctx.font="bold 92px Arial, sans-serif";
+  ctx.fillText(fitText(ctx, t.set.name, W-120, 92), W/2, 108);
+  ctx.fillStyle="#5eead4";
+  ctx.font="bold 56px Arial, sans-serif";
+  ctx.fillText("Karten zum Aussuchen", W/2, 188);
+
+  const sel=t.cards.filter(c=>c.selected).slice(0,12);
+  let tainted=false;
+  if (sel.length){
+    const cols = sel.length<=4?2 : sel.length<=9?3 : 4;
+    const rowsN = Math.ceil(sel.length/cols);
+    const areaTop=300, areaBottom=H-70, areaLeft=70, areaRight=W-70;
+    const gapX=30, gapY=30;
+    const cellW=(areaRight-areaLeft-gapX*(cols-1))/cols;
+    const cellH=(areaBottom-areaTop-gapY*(rowsN-1))/rowsN;
+    for (let i=0;i<sel.length;i++){
+      const cx=areaLeft + (i%cols)*(cellW+gapX);
+      const cy=areaTop + Math.floor(i/cols)*(cellH+gapY);
+      const url=exportUrl(sel[i].o) || (sel[i].o.urls&&sel[i].o.urls[0]);
+      const img = await loadCorsImage(url);
+      ctx.fillStyle="#ffffff";
+      roundRect(ctx,cx,cy,cellW,cellH,14); ctx.fill();
+      if (img){
+        if (img._tainted) tainted=true;
+        const padPx=12, iw=cellW-padPx*2, ih=cellH-padPx*2;
+        const r=Math.min(iw/img.width, ih/img.height);
+        const dw=img.width*r, dh=img.height*r;
+        try{ ctx.drawImage(img, cx+(cellW-dw)/2, cy+(cellH-dh)/2, dw, dh); }
+        catch(e){ tainted=true; }
+      } else {
+        ctx.fillStyle="#9aa5b1"; ctx.font="28px Arial"; ctx.textAlign="center";
+        ctx.fillText(sel[i].o.num3, cx+cellW/2, cy+cellH/2);
+      }
+    }
+  }
+
+  const flag=await flagImage(t.lang);
+  if (flag){
+    const fw=200, fh=Math.round(fw*flag.height/flag.width);
+    const fx=W-fw-60, fy=H-fh-60;
+    ctx.save();
+    ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=18; ctx.shadowOffsetY=6;
+    ctx.fillStyle="#fff"; roundRect(ctx,fx-6,fy-6,fw+12,fh+12,10); ctx.fill();
+    ctx.restore();
+    ctx.drawImage(flag, fx, fy, fw, fh);
+  }
+
+  cv._tainted = tainted;
+  if (tainted){
+    byId("tbTaintNote").textContent =
+      "⚠️ Die Kartenbilder konnten wegen Browser-Sicherheit (CORS) nicht in den PNG-Export übernommen werden. "+
+      "Vorschau wird angezeigt, aber der PNG-Download ist eingeschränkt. Notfalls Screenshot nutzen "+
+      "oder Kartenbilder über den Kartensuche-Tab einzeln speichern.";
+  }
+}
+function loadCorsImage(url){
+  return new Promise((resolve)=>{
+    if (!url) return resolve(null);
+    const img=new Image();
+    img.crossOrigin="anonymous";
+    img.onload=()=>resolve(img);
+    img.onerror=()=>{
+      const img2=new Image();       // Fallback ohne CORS → Canvas wird tainted
+      img2.onload=()=>{ img2._tainted=true; resolve(img2); };
+      img2.onerror=()=>resolve(null);
+      img2.src=url;
+    };
+    img.src=url;
+  });
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function fitText(ctx, text, maxW, startPx){
+  let px=startPx;
+  while (px>36){ ctx.font=`bold ${px}px Arial, sans-serif`; if (ctx.measureText(text).width<=maxW) break; px-=4; }
+  ctx.font=`bold ${px}px Arial, sans-serif`;
+  return text;
+}
+function downloadTitleImage(){
+  const cv=byId("tbCanvas"), code=byId("tbSetSel").value;
+  if (cv._tainted) toastX("PNG-Export wegen CORS eingeschränkt – bitte Screenshot nutzen.", true);
+  try{
+    cv.toBlob(blob=>{
+      if (!blob){ toastX("Export fehlgeschlagen (CORS).", true); return; }
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download=`titelbild-${code}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+      toastX("Titelbild gespeichert");
+    },"image/png");
+  }catch(e){ toastX("PNG-Export blockiert (CORS). Screenshot nutzen.", true); }
+}
+
+/* =====================================================================
+   INIT EBAY-EXPORT
+   ===================================================================== */
+function initEbayExport(){
+  loadExSettings();
+  ["setLocation","setDispatch","setShipService","setShipCost","setReturns","priceThreshold"]
+    .forEach(id=>byId(id).addEventListener("change", saveExSettings));
+
+  // Preisregeln
+  renderRules();
+  byId("markupPct").value = RULESET.markupPct;
+  byId("roundingSel").value = RULESET.rounding;
+  byId("markupPct").addEventListener("change", ()=>{
+    RULESET.markupPct = Math.max(0, parseFloat(byId("markupPct").value)||0);
+    rulesChanged();
+  });
+  byId("roundingSel").addEventListener("change", ()=>{
+    RULESET.rounding = byId("roundingSel").value;
+    rulesChanged();
+  });
+  byId("addRule").addEventListener("click", ()=>{
+    RULESET.rules.splice(RULESET.rules.length-1, 0,
+      { condLang:"", condSet:"", condName:"", condNote:"", basis:1.00, min:1.00, isDefault:false });
+    renderRules(); rulesChanged();
+  });
+  byId("resetRules").addEventListener("click", ()=>{
+    if (!confirm("Preisregeln auf die Standard-Regeln zurücksetzen?")) return;
+    RULESET = defaultRuleset();
+    renderRules();
+    byId("markupPct").value = RULESET.markupPct;
+    byId("roundingSel").value = RULESET.rounding;
+    rulesChanged();
+  });
+
+  // Import & Aktionen
+  byId("xlsxFile").addEventListener("change", e=>{
+    const f=e.target.files&&e.target.files[0];
+    if (f) handleFile(f);
+    e.target.value="";
+  });
+  byId("globalLang").addEventListener("change", ()=>{
+    if (lastDet) parseExcelRows(lastDet);   // Sprache gilt global → neu abgleichen
+  });
+  byId("applyThreshold").addEventListener("click", ()=>{
+    applyThresholdPrefill(); renderPreview(); buildTitleImageSets();
+    toastX("Einzel/Variante nach Preisgrenze vorbelegt");
+  });
+  byId("allSingle").addEventListener("click", ()=>{ exRows.forEach(o=>o.mode="single"); renderPreview(); buildTitleImageSets(); });
+  byId("allVariant").addEventListener("click", ()=>{ exRows.forEach(o=>o.mode="variant"); renderPreview(); buildTitleImageSets(); });
+  byId("exportA").addEventListener("click", doExportA);
+  byId("exportB").addEventListener("click", doExportB);
+  byId("tbDownload").addEventListener("click", downloadTitleImage);
+
+  // Direkteinstieg per Hash (Hub-Link zeigt auf #ebay)
+  if (location.hash==="#ebay" || location.hash==="#export") switchMainTab("export");
+}
+initEbayExport();
 </script>
 </body>
 </html>
