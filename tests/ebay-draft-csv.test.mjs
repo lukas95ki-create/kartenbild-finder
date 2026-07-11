@@ -1,14 +1,18 @@
 /* =====================================================================
-   Automatisierte Tests für den eBay-Entwurfs-Export (Export A) in
-   kartenbild-finder-v6.html.
+   Automatisierte Tests für die beiden eBay-CSV-Exporte in
+   kartenbild-finder-v6.html – Export A (Entwurfs-Vorlage
+   "eBay-draft-listings-template_DE") und Export B (Kategorie-Vorlage
+   fx_category_template_EBAY_DE, Kategorie 183454). Die Kopfzeilen
+   werden zusätzlich gegen die Original-Vorlagendateien in templates/
+   abgeglichen.
 
    Ausführen (im Repo-Hauptverzeichnis):  node --test
    (benötigt nur Node ≥ 18, keine Abhängigkeiten)
 
    Die CSV-Logik liegt DOM-frei zwischen den Markern
-   @EBAY_DRAFT_CSV_START / @EBAY_DRAFT_CSV_END in der HTML-Datei und
-   wird hier extrahiert und direkt ausgeführt – getestet wird also
-   exakt der Code, der auch im Browser läuft.
+   @EBAY_DRAFT_CSV / @EBAY_EXPORT_RULES / @EBAY_CATEGORY_CSV in der
+   HTML-Datei und wird hier extrahiert und direkt ausgeführt –
+   getestet wird also exakt der Code, der auch im Browser läuft.
    ===================================================================== */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -27,6 +31,43 @@ assert.ok(mRules, "Marker-Block @EBAY_EXPORT_RULES_START/_END nicht gefunden");
 const { exportScope, selectExportRows, missingVariantSettings } =
   new Function(mRules[1] +
     "; return { exportScope, selectExportRows, missingVariantSettings };")();
+
+/* Kategorie-Block braucht csvEsc aus dem Draft-Block → beide konkateniert. */
+const mCat = html.match(/\/\* @EBAY_CATEGORY_CSV_START \*\/([\s\S]*?)\/\* @EBAY_CATEGORY_CSV_END \*\//);
+assert.ok(mCat, "Marker-Block @EBAY_CATEGORY_CSV_START/_END nicht gefunden");
+const { EBAY_CATEGORY_INFO_LINE, EBAY_CATEGORY_HEADER, COLS_B, makeRowB, buildCategoryCsv } =
+  new Function(m[1] + ";" + mCat[1] +
+    "; return { EBAY_CATEGORY_INFO_LINE, EBAY_CATEGORY_HEADER, COLS_B, makeRowB, buildCategoryCsv };")();
+
+/* ---------- Offizielle Vorlagendateien aus templates/ ---------- */
+import { readdirSync } from "node:fs";
+const tplDir = new URL("../templates/", import.meta.url);
+function readTemplate(prefix) {
+  const name = readdirSync(tplDir).find(f => f.startsWith(prefix) && f.endsWith(".csv"));
+  assert.ok(name, `Vorlagendatei ${prefix}*.csv fehlt in templates/`);
+  return readFileSync(new URL(name, tplDir), "utf8");
+}
+const draftTpl    = readTemplate("eBay-draft-listing-template");
+const categoryTpl = readTemplate("eBay-category-listing-template");
+/* Vorlagen zeilenweise – die Kategorie-Vorlage nutzt CR-only-Zeilenenden. */
+const tplLines = t => t.replace(/^\uFEFF/, "").split(/\r\n|\r|\n/);
+
+/* Eine CSV-Zeile in Felder zerlegen (Semikolon, "…"-Quoting, ""-Escape). */
+function splitCsvLine(line) {
+  const out = []; let cur = "", inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inQ = false; }
+      else cur += ch;
+    }
+    else if (ch === '"') inQ = true;
+    else if (ch === ";") { out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
 
 const BOM = "﻿";
 const REC = {
@@ -225,12 +266,89 @@ test("UI: Warnhinweis 'sofort live' und Standard-Modus 'Alle als Einzelentwürfe
 });
 
 test("Varianten-Export nutzt einen ANDEREN Header (Draft-Vorlage kann keine Varianten)", () => {
-  // HEADER_B (File Exchange) muss weiterhin existieren und darf nicht mit
-  // dem Draft-Header identisch sein; der UI-Hinweis dazu muss vorhanden sein.
-  const hb = html.match(/const HEADER_B =\s*\n?\s*"([^"]+)"/);
-  assert.ok(hb, "HEADER_B nicht gefunden");
-  assert.notEqual(hb[1], EBAY_DRAFT_HEADER);
-  assert.ok(hb[1].startsWith("*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);"));
+  assert.notEqual(EBAY_CATEGORY_HEADER, EBAY_DRAFT_HEADER);
+  assert.ok(EBAY_CATEGORY_HEADER.startsWith("*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);"));
   assert.ok(html.includes("unterstützt <b>keine Varianten</b>"),
     "UI-Hinweis zum Varianten-Export fehlt");
+});
+
+/* =====================================================================
+   Abgleich mit den offiziellen Vorlagendateien in templates/
+   ===================================================================== */
+test("Vorlagendateien: beide beginnen mit UTF-8 BOM", () => {
+  assert.ok(draftTpl.startsWith("﻿"), "Draft-Vorlage ohne BOM");
+  assert.ok(categoryTpl.startsWith("﻿"), "Kategorie-Vorlage ohne BOM");
+});
+
+test("Export A: #INFO-Zeilen und Kopfzeile identisch mit der Draft-Vorlagendatei", () => {
+  const tpl = tplLines(draftTpl);
+  assert.deepEqual(EBAY_DRAFT_INFO_LINES, tpl.slice(0, 4),
+    "#INFO-Zeilen weichen von der Vorlagendatei ab");
+  assert.equal(EBAY_DRAFT_HEADER, tpl[4],
+    "Kopfzeile weicht von der Vorlagendatei ab");
+  // und die ERZEUGTE Datei beginnt exakt mit diesen 5 Zeilen:
+  const out = linesFor();
+  assert.deepEqual(out.slice(0, 5), tpl.slice(0, 5));
+});
+
+test("Export B: Info-Zeile und Kopfzeile identisch mit der Kategorie-Vorlagendatei", () => {
+  const tpl = tplLines(categoryTpl);
+  assert.equal(EBAY_CATEGORY_INFO_LINE, tpl[0],
+    "Info-Kennungszeile weicht von der Vorlagendatei ab");
+  assert.equal(EBAY_CATEGORY_HEADER, tpl[1],
+    "Kopfzeile weicht von der Vorlagendatei ab (Spalten exakt wie im Original)");
+  assert.equal(COLS_B.length, tpl[1].split(";").length, "Spaltenanzahl weicht ab");
+});
+
+test("Export B: erzeugte CSV – BOM, CRLF, Kopfzeilen aus der Vorlage", () => {
+  const P = makeRowB();
+  P["*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)"] = "Add";
+  P["*Category"] = "183454";
+  P["*Title"] = "Pokemon Testset SV8a Japanisch - Einzelkarten zum Aussuchen";
+  P["RelationshipDetails"] = "Kartenname=Karte A 005;Karte B 006";
+  const C = makeRowB();
+  C["*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)"] = "Add";
+  C["Relationship"] = "Variation";
+  C["RelationshipDetails"] = "Kartenname=Karte A 005";
+  C["*StartPrice"] = "1.50";
+  C["*Quantity"] = "2";
+  const csv = buildCategoryCsv([P, C]);
+
+  assert.ok(csv.startsWith("﻿"), "BOM fehlt");
+  assert.ok(!csv.slice(1).includes("﻿"), "BOM mehrfach");
+  const rest = csv.slice(1).replace(/\r\n/g, "");
+  assert.ok(!rest.includes("\n") && !rest.includes("\r"), "Zeilenenden nicht durchgehend CRLF");
+  assert.ok(csv.endsWith("\r\n"), "Datei endet nicht mit CRLF");
+
+  const lines = csv.slice(1).split("\r\n");
+  const tpl = tplLines(categoryTpl);
+  assert.equal(lines[0], tpl[0], "Zeile 1 (Info) weicht von der Vorlage ab");
+  assert.equal(lines[1], tpl[1], "Zeile 2 (Kopfzeile) weicht von der Vorlage ab");
+});
+
+test("Export B: jede Zeile hat exakt so viele Spalten wie die Vorlagen-Kopfzeile", () => {
+  const P = makeRowB();
+  P["*Title"] = "Titel; mit Semikolon";                      // erzwingt Quoting
+  P["RelationshipDetails"] = 'Kartenname=Wert "A";Wert B';   // Quotes + Semikolon
+  const C = makeRowB();
+  C["Relationship"] = "Variation";
+  const csv = buildCategoryCsv([P, C]);
+  const nCols = tplLines(categoryTpl)[1].split(";").length;
+  const lines = csv.slice(1).split("\r\n").filter(l => l !== "");
+  assert.equal(lines.length, 4);   // Info + Header + 2 Datenzeilen
+  lines.slice(1).forEach((l, i) =>
+    assert.equal(splitCsvLine(l).length, nCols, `Zeile ${i + 2} hat falsche Spaltenanzahl`));
+});
+
+test("Export A: jede Datenzeile hat exakt so viele Spalten wie die Draft-Kopfzeile", () => {
+  const nCols = tplLines(draftTpl)[4].split(";").length;
+  const lines = csvFor({ title: "Karte; mit Semikolon" }).slice(1).split("\r\n").filter(l => l !== "");
+  assert.equal(splitCsvLine(lines[4]).length, nCols, "Kopfzeile");
+  assert.equal(splitCsvLine(lines[5]).length, nCols, "Datenzeile");
+});
+
+test("buildCsvB im HTML nutzt buildCategoryCsv (Vorlagen-Kopfzeilen) statt eigener Header", () => {
+  assert.ok(/function buildCsvB\(\)\{[\s\S]*?return buildCategoryCsv\(rows\);/.test(html),
+    "buildCsvB gibt nicht buildCategoryCsv(rows) zurück");
+  assert.ok(!/const HEADER_B\b/.test(html), "alte HEADER_B-Konstante existiert noch");
 });

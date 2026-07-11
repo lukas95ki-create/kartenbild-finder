@@ -1,26 +1,36 @@
-# eBay-Vorlagen (File Exchange)
+# eBay-Vorlagen (Originale)
 
-Hier gehören die beiden **originalen eBay-Vorlagen-CSVs** hinein, aus denen die
-Header für `ebay-export.html` stammen:
+Hier liegen die beiden **originalen eBay-Vorlagen-CSVs**, aus denen die
+Kopfzeilen der Exporte in `kartenbild-finder-v6.html` stammen:
 
 | Datei | Zweck | Ziel-Export |
 |-------|-------|-------------|
-| *(Einzel-/Draft-Vorlage)* | Kopfzeile für Einzel-Entwürfe | Export A → `ebay-entwuerfe.csv` |
-| *(Varianten-/Kategorie-Vorlage)* | Kopfzeile für Varianten-Angebote | Export B → `ebay-varianten.csv` |
-
-> Die konkreten Vorlagendateien werden vom Projektinhaber committet.
+| `eBay-draft-listing-template-*.csv` | Entwurfs-Vorlage „eBay-draft-listings-template_DE“ (4 `#INFO`-Zeilen + Kopfzeile) | Export A → `ebay-entwuerfe.csv` |
+| `eBay-category-listing-template-*.csv` | Kategorie-Vorlage `fx_category_template_EBAY_DE` für Kategorie 183454 (Info-Zeile + Kopfzeile, 105 Spalten) | Export B → `ebay-varianten.csv` |
 
 ## Wichtig
 
-Die beiden Header sind in `ebay-export.html` **fest hinterlegt** (Konstanten
-`HEADER_A` und `HEADER_B`) und stimmen 1:1 mit den in der Aufgabe angegebenen
-Vorlagen überein. Das Tool funktioniert also auch, wenn dieser Ordner (noch)
-leer ist.
+Die Kopf-/Info-Zeilen sind in `kartenbild-finder-v6.html` **buchstabengetreu
+fest hinterlegt** – in den DOM-freien Code-Blöcken zwischen den Markern
+`@EBAY_DRAFT_CSV_START/_END` (Export A) und `@EBAY_CATEGORY_CSV_START/_END`
+(Export B). Die Spaltenreihenfolge dort steuert direkt die CSV-Serialisierung.
 
-Wenn sich eine offizielle eBay-Vorlage ändert (z. B. neue File-Exchange-Version
-oder zusätzliche Pflichtspalten), bitte:
+Die automatisierten Tests (`node --test`, siehe
+`tests/ebay-draft-csv.test.mjs`) gleichen die hinterlegten Kopfzeilen **gegen
+die Dateien in diesem Ordner** ab. Die Dateinamen dürfen sich ändern, solange
+sie mit `eBay-draft-listing-template` bzw. `eBay-category-listing-template`
+beginnen und auf `.csv` enden – die Tests finden sie per Präfix.
 
-1. die neue Vorlage hier ablegen,
-2. den entsprechenden Header in `ebay-export.html` (`HEADER_A` / `HEADER_B`)
-   aktualisieren – die Spaltenreihenfolge steuert dort direkt die
-   CSV-Serialisierung.
+Wenn sich eine offizielle eBay-Vorlage ändert (z. B. neue Version oder
+zusätzliche Pflichtspalten), bitte:
+
+1. die neue Vorlage **unverändert** hier ablegen (nicht in Excel öffnen und
+   neu speichern – das verfälscht BOM/Trennzeichen/Zeilenenden),
+2. die alte Vorlagendatei entfernen,
+3. `node --test` ausführen – die Tests zeigen dann exakt, welche
+   hinterlegten Kopfzeilen angepasst werden müssen.
+
+Hinweis: Die Original-Kategorie-Vorlage enthält unterhalb der Kopfzeile nur
+noch `Info;…`-Hinweiszeilen (Pflicht-Aspekte, empfohlene Werte). Diese werden
+im Export **nicht** mit ausgegeben – eBay identifiziert den Upload an der
+Info-Kennungszeile und der Kopfzeile.

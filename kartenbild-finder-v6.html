@@ -726,10 +726,30 @@ function missingVariantSettings(st){
 }
 /* @EBAY_EXPORT_RULES_END */
 
-/* Export B – exakter Header (Varianten-Angebote, eBay File Exchange). */
-const HEADER_B =
-  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
-const COLS_B = HEADER_B.split(";");
+/* =====================================================================
+   Export B – Kategorie-CSV exakt nach der offiziellen eBay-Vorlage
+   "eBay-category-listing-template" (fx_category_template_EBAY_DE,
+   Kategorie 183454) – Original in templates/. Info-Zeile und Kopfzeile
+   sind buchstabengetreu aus der Vorlagendatei übernommen; Pflicht-
+   Aspekt laut Vorlage: "Spiel". Nicht benötigte Spalten bleiben leer,
+   werden aber nicht weggelassen.
+   Der Block ist DOM-frei (nutzt csvEsc aus dem @EBAY_DRAFT_CSV-Block)
+   und wird von tests/ebay-draft-csv.test.mjs u. a. gegen die
+   Vorlagendatei getestet.
+   ===================================================================== */
+/* @EBAY_CATEGORY_CSV_START */
+const EBAY_CATEGORY_INFO_LINE = "Info;Version=1.0.0;Template=fx_category_template_EBAY_DE";
+const EBAY_CATEGORY_HEADER =
+  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;C:Kartenanzahl;C:Kartenzustand;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
+const COLS_B = EBAY_CATEGORY_HEADER.split(";");
+function makeRowB(){ const o={}; COLS_B.forEach(c=>o[c]=""); return o; }
+/* rows: fertige Zeilenobjekte (makeRowB) in Ausgabereihenfolge. */
+function buildCategoryCsv(rows){
+  const lines = [EBAY_CATEGORY_INFO_LINE, EBAY_CATEGORY_HEADER];
+  rows.forEach(r=>lines.push(COLS_B.map(c=>csvEsc(r[c])).join(";")));
+  return "\uFEFF" + lines.join("\r\n") + "\r\n";   // UTF-8 BOM + CRLF
+}
+/* @EBAY_CATEGORY_CSV_END */
 
 /* ---------- Zustand ---------- */
 let exRows = [];       // aufgelöste Zeilen (Vorschau/Export)
@@ -1426,7 +1446,8 @@ function buildCsvA(){
    -------------------------------------------------------------------
    ACHTUNG: nutzt NICHT die Entwurfs-Vorlage von Export A – die
    "eBay-draft-listings-template_DE" unterstützt keine Varianten.
-   Export B behält daher den File-Exchange-Header (HEADER_B) und
+   Export B nutzt die offizielle Kategorie-Vorlage 183454 (Info-Zeile
+   + Kopfzeile aus templates/, siehe @EBAY_CATEGORY_CSV-Block) mit
    Action=Add (erzeugt aktive Angebote). Hinweis dazu steht sichtbar
    in der UI (CSV-Export-Karte).
    -------------------------------------------------------------------
@@ -1447,7 +1468,6 @@ function buildCsvA(){
      Zustandsangabe). Verlangt eBay einen Pflichtwert, ist 4000
      (Gebraucht/Sehr gut) für Einzelkarten üblich.
    ===================================================================== */
-function makeRowB(){ const o={}; COLS_B.forEach(c=>o[c]=""); return o; }
 function buildCsvB(){
   const variants = selectExportRows(exRows, currentExportMode(), "variant");
   if (!variants.length) return null;
@@ -1463,7 +1483,7 @@ function buildCsvB(){
     returns:     byId("setReturns").value
   };
   const returnsOpt = st.returns==="yes" ? "ReturnsAccepted" : "ReturnsNotAccepted";
-  const lines=[HEADER_B];
+  const rows=[];
 
   Object.keys(groups).forEach(code=>{
     const list = groups[code];
@@ -1495,7 +1515,7 @@ function buildCsvB(){
     P["*DispatchTimeMax"] = st.dispatch;
     P["*ReturnsAcceptedOption"] = returnsOpt;
     if (st.returns==="yes"){ P["ReturnsWithinOption"]="Days_30"; P["RefundOption"]="MoneyBack"; P["ShippingCostPaidByOption"]="Buyer"; }
-    lines.push(COLS_B.map(c=>csvEsc(P[c])).join(";"));
+    rows.push(P);
 
     /* ---- Kindzeilen ---- */
     list.forEach(o=>{
@@ -1515,10 +1535,10 @@ function buildCsvB(){
       C["*Duration"]   = "GTC";
       C["*StartPrice"] = priceDot(o.price);
       C["*Quantity"]   = String(o.qty);
-      lines.push(COLS_B.map(c=>csvEsc(C[c])).join(";"));
+      rows.push(C);
     });
   });
-  return "﻿" + lines.join("\r\n");
+  return buildCategoryCsv(rows);
 }
 
 function doExportA(){

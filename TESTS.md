@@ -8,8 +8,10 @@
 > CRLF-Zeilenenden, Semikolon-/Anführungszeichen-Escaping, `Action=Draft`,
 > Punkt-Dezimaltrenner, Category ID pro Zeile, die Export-Modi
 > (u. a. „Alle als Einzelentwürfe“ → genau eine CSV, Duplikate über
-> Quantity zusammengefasst) und die Export-B-Blockade bei leeren
-> Pflichtfeldern.
+> Quantity zusammengefasst), die Export-B-Blockade bei leeren
+> Pflichtfeldern sowie der **Abgleich beider Exporte gegen die
+> Original-Vorlagendateien in `templates/`** (identische Info-/Kopfzeilen,
+> gleiche Spaltenanzahl pro Zeile, BOM, CRLF).
 
 Diese Punkte sollten nach Änderungen kurz von Hand geprüft werden.
 Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet**
@@ -154,13 +156,17 @@ und einer unbekannten Kartennummer.
 - [ ] **Export A hochladen**: Verkäufercockpit Pro → Berichte → Hochladen
       akzeptiert die Datei (keine Meldung „Wir konnten Ihre Vorlage nicht
       identifizieren“); Entwürfe erscheinen unter ebay.de/sh/lst/drafts.
-- [ ] **Export B** (`ebay-varianten.csv`): pro Set eine Elternzeile (`Add`,
-      `RelationshipDetails=Kartenname=Wert1;Wert2;…`) + Kindzeilen
-      (`Relationship=Variation`, eigener Preis/Menge). **Achtung:** nutzt
-      bewusst NICHT die Entwurfs-Vorlage (die kann keine Varianten), sondern
-      das File-Exchange-Format – Upload erzeugt aktive Angebote. Der
-      Warnhinweis „Variationsangebote gehen beim Hochladen sofort live“ ist
-      in der UI (CSV-Export-Karte) sichtbar.
+- [ ] **Export B** (`ebay-varianten.csv`): beginnt mit der Info-Kennungszeile
+      `Info;Version=1.0.0;Template=fx_category_template_EBAY_DE` und der
+      105-Spalten-Kopfzeile der offiziellen Kategorie-Vorlage 183454
+      (`templates/eBay-category-listing-template-*.csv`); danach pro Set eine
+      Elternzeile (`Add`, `RelationshipDetails=Kartenname=Wert1;Wert2;…`,
+      Angebots-Einstellungen in Standort-/Versand-/Rücknahme-Spalten) +
+      Kindzeilen (`Relationship=Variation`, eigener Preis/Menge/PicURL).
+      **Achtung:** nutzt bewusst NICHT die Entwurfs-Vorlage (die kann keine
+      Varianten) – Upload erzeugt aktive Angebote. Der Warnhinweis
+      „Variationsangebote gehen beim Hochladen sofort live“ ist in der UI
+      (CSV-Export-Karte) sichtbar.
 - [ ] **Export-B-Blockade**: Sind Standort, Versandart, Versandkosten oder
       Bearbeitungszeit in den Angebots-Einstellungen leer, erzeugt Export B
       KEINE Datei; eine rote Meldung nennt die fehlenden Felder.
