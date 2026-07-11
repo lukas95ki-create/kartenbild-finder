@@ -6,7 +6,10 @@
 > Geprüft werden: die vier `#INFO`-Zeilen der offiziellen Vorlage
 > „eBay-draft-listings-template_DE“, die exakte Kopfzeile, UTF-8-BOM,
 > CRLF-Zeilenenden, Semikolon-/Anführungszeichen-Escaping, `Action=Draft`,
-> Punkt-Dezimaltrenner und Category ID pro Zeile.
+> Punkt-Dezimaltrenner, Category ID pro Zeile, die Export-Modi
+> (u. a. „Alle als Einzelentwürfe“ → genau eine CSV, Duplikate über
+> Quantity zusammengefasst) und die Export-B-Blockade bei leeren
+> Pflichtfeldern.
 
 Diese Punkte sollten nach Änderungen kurz von Hand geprüft werden.
 Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet**
@@ -128,8 +131,18 @@ und einer unbekannten Kartennummer.
       **orange** markiert, Hinweis am Export, **nicht** in der CSV.
 
 ### Export & Titelbild
-- [ ] **Umschalter**: Vorbelegung Einzel/Variante nach Preisgrenze (Default
-      4,00 €); pro Zeile umschaltbar; Massenaktionen „Alle → …“ funktionieren.
+- [ ] **Export-Modus** (Dropdown im Import-Block, wird gemerkt): Standard ist
+      **„Alle als Einzelentwürfe“** — Preisgrenzen-Feld ausgeblendet, nur der
+      Export-A-Button sichtbar, ALLE Karten landen in der Entwurfs-CSV
+      (doppelte Karten als EINE Zeile mit summierter Quantity).
+      „Automatisch aufteilen“ zeigt Preisgrenze + beide Export-Buttons;
+      „Alle als Variationen“ blendet Export A aus. Nach Neuladen ist der
+      gewählte Modus noch da.
+- [ ] **Umschalter** (nur im Modus „Automatisch aufteilen“ aktiv): Vorbelegung
+      Einzel/Variante nach Preisgrenze (Default 4,00 €); pro Zeile
+      umschaltbar; Massenaktionen „Alle → …“ funktionieren. In den festen
+      Modi sind „Alle → …“ deaktiviert und der Zeilen-Umschalter zeigt einen
+      Hinweis-Toast.
 - [ ] **Einstellungen** (Standort, Bearbeitungszeit, Versand, Rücknahme) werden
       gemerkt (nach Neuladen noch da).
 - [ ] **Export A** (`ebay-entwuerfe.csv`): beginnt mit den **vier `#INFO`-Zeilen**
@@ -145,8 +158,12 @@ und einer unbekannten Kartennummer.
       `RelationshipDetails=Kartenname=Wert1;Wert2;…`) + Kindzeilen
       (`Relationship=Variation`, eigener Preis/Menge). **Achtung:** nutzt
       bewusst NICHT die Entwurfs-Vorlage (die kann keine Varianten), sondern
-      das File-Exchange-Format – Upload erzeugt aktive Angebote. Der Hinweis
-      dazu ist in der UI (CSV-Export-Karte) sichtbar.
+      das File-Exchange-Format – Upload erzeugt aktive Angebote. Der
+      Warnhinweis „Variationsangebote gehen beim Hochladen sofort live“ ist
+      in der UI (CSV-Export-Karte) sichtbar.
+- [ ] **Export-B-Blockade**: Sind Standort, Versandart, Versandkosten oder
+      Bearbeitungszeit in den Angebots-Einstellungen leer, erzeugt Export B
+      KEINE Datei; eine rote Meldung nennt die fehlenden Felder.
 - [ ] Ist eine der beiden Gruppen leer, wird die jeweilige Datei **nicht**
       erzeugt.
 - [ ] **CSV in Texteditor öffnen**: beginnt mit BOM, Felder mit `;` getrennt,

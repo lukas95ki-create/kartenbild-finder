@@ -18,9 +18,15 @@ const html = readFileSync(new URL("../kartenbild-finder-v6.html", import.meta.ur
 const m = html.match(/\/\* @EBAY_DRAFT_CSV_START \*\/([\s\S]*?)\/\* @EBAY_DRAFT_CSV_END \*\//);
 assert.ok(m, "Marker-Block @EBAY_DRAFT_CSV_START/_END in kartenbild-finder-v6.html nicht gefunden");
 
-const { EBAY_DRAFT_INFO_LINES, EBAY_DRAFT_HEADER, csvEsc, priceDot, buildDraftCsv } =
+const { EBAY_DRAFT_INFO_LINES, EBAY_DRAFT_HEADER, csvEsc, priceDot, buildDraftCsv, mergeDraftRecords } =
   new Function(m[1] +
-    "; return { EBAY_DRAFT_INFO_LINES, EBAY_DRAFT_HEADER, csvEsc, priceDot, buildDraftCsv };")();
+    "; return { EBAY_DRAFT_INFO_LINES, EBAY_DRAFT_HEADER, csvEsc, priceDot, buildDraftCsv, mergeDraftRecords };")();
+
+const mRules = html.match(/\/\* @EBAY_EXPORT_RULES_START \*\/([\s\S]*?)\/\* @EBAY_EXPORT_RULES_END \*\//);
+assert.ok(mRules, "Marker-Block @EBAY_EXPORT_RULES_START/_END nicht gefunden");
+const { exportScope, selectExportRows, missingVariantSettings } =
+  new Function(mRules[1] +
+    "; return { exportScope, selectExportRows, missingVariantSettings };")();
 
 const BOM = "﻿";
 const REC = {
@@ -129,6 +135,93 @@ test("priceDot: Punkt als Dezimaltrenner, zwei Nachkommastellen", () => {
   assert.equal(priceDot(2), "2.00");
   assert.equal(priceDot(0.99), "0.99");
   assert.equal(priceDot(null), "");
+});
+
+test("Duplikate (gleiche SKU + Titel) werden zu EINER Zeile mit summierter Quantity", () => {
+  const csv = buildDraftCsv([
+    { ...REC, qty: 1 },
+    { ...REC, qty: 2 },
+    { ...REC, sku: "SV8A-006", title: "Pokemon Andere Karte 006 SV8a Japanisch", qty: 1 }
+  ]);
+  const dataLines = csv.slice(BOM.length).split("\r\n").slice(5).filter(l => l !== "");
+  assert.equal(dataLines.length, 2, "Duplikat wurde nicht zusammengefasst");
+  assert.equal(dataLines[0].split(";")[6], "3", "Quantity nicht summiert (1+2)");
+});
+
+test("Ball-Varianten (gleiche SKU, anderer Titel) bleiben getrennte Zeilen", () => {
+  const merged = mergeDraftRecords([
+    { ...REC, qty: 1 },
+    { ...REC, qty: 1, title: REC.title + " Master Ball" }
+  ]);
+  assert.equal(merged.length, 2);
+});
+
+test("Export-Modus 'singles': ALLE Karten in die Entwurfs-CSV, Export B leer (nur eine Datei)", () => {
+  const rows = [
+    { mode: "single",  price: 1.5, id: 1 },
+    { mode: "variant", price: 2.0, id: 2 },
+    { mode: "variant", price: null, id: 3 }   // ohne Preis → ausgeschlossen
+  ];
+  const singles = selectExportRows(rows, "singles", "single");
+  assert.deepEqual(singles.map(o => o.id), [1, 2], "nicht alle bepreisten Karten im Draft-Export");
+  assert.equal(selectExportRows(rows, "singles", "variant").length, 0,
+    "Export B müsste im Modus 'singles' leer sein (keine zweite Datei)");
+});
+
+test("Export-Modus 'singles' + Duplikate: genau eine CSV mit einer Zeile pro Karte", () => {
+  const rows = [
+    { mode: "variant", price: 1.5, sku: "SV8A-005", qty: 1 },
+    { mode: "single",  price: 1.5, sku: "SV8A-005", qty: 2 },  // Duplikat
+    { mode: "variant", price: 2.0, sku: "SV8A-006", qty: 1 }
+  ];
+  const selected = selectExportRows(rows, "singles", "single");
+  assert.equal(selected.length, 3);
+  const csv = buildDraftCsv(selected.map(o => ({
+    ...REC, sku: o.sku, title: "Pokemon Karte " + o.sku, price: o.price, qty: o.qty
+  })));
+  const dataLines = csv.slice(BOM.length).split("\r\n").slice(5).filter(l => l !== "");
+  assert.equal(dataLines.length, 2, "erwartet: eine Zeile pro Karte (Duplikat via Quantity)");
+  assert.equal(dataLines[0].split(";")[6], "3");
+  assert.equal(selectExportRows(rows, "singles", "variant").length, 0,
+    "im Modus 'singles' darf keine Varianten-CSV entstehen");
+});
+
+test("Export-Modus 'auto' teilt nach o.mode auf, 'variants' schickt alles in Export B", () => {
+  const rows = [
+    { mode: "single",  price: 1.5, id: 1 },
+    { mode: "variant", price: 2.0, id: 2 }
+  ];
+  assert.deepEqual(selectExportRows(rows, "auto", "single").map(o => o.id), [1]);
+  assert.deepEqual(selectExportRows(rows, "auto", "variant").map(o => o.id), [2]);
+  assert.deepEqual(selectExportRows(rows, "variants", "variant").map(o => o.id), [1, 2]);
+  assert.equal(selectExportRows(rows, "variants", "single").length, 0);
+  // exportScope zählt auch preislose Zeilen (für die Übersprungen-Meldung):
+  assert.equal(exportScope([{ mode: "single", price: null }], "singles", "single").length, 1);
+});
+
+test("Export B wird bei leeren Pflichtfeldern blockiert (fehlende Felder benannt)", () => {
+  assert.deepEqual(
+    missingVariantSettings({ location: "", dispatch: "", shipService: "", shipCost: null }),
+    ["Standort", "Versandart", "Versandkosten", "Bearbeitungszeit"]);
+  assert.deepEqual(
+    missingVariantSettings({ location: "Berlin", dispatch: "2", shipService: "DE_DeutschePostBrief", shipCost: null }),
+    ["Versandkosten"]);
+  assert.deepEqual(
+    missingVariantSettings({ location: "Berlin", dispatch: "2", shipService: "DE_DeutschePostBrief", shipCost: 1.8 }),
+    []);
+  // Blockade ist in doExportB verdrahtet: keine Datei, sichtbare Meldung
+  assert.ok(/doExportB\(\)\{[\s\S]*?missingVariantSettings\([\s\S]*?if \(miss\.length\)\{[\s\S]*?showExportBError\([\s\S]*?return;/.test(html),
+    "doExportB blockiert nicht sichtbar bei fehlenden Pflichtfeldern");
+});
+
+test("UI: Warnhinweis 'sofort live' und Standard-Modus 'Alle als Einzelentwürfe' vorhanden", () => {
+  const flat = html.replace(/\s+/g, " ");
+  assert.ok(flat.includes("Variationsangebote gehen beim Hochladen <b>sofort live</b> – Entwürfe sind hier nicht möglich"),
+    "Warnhinweis zum Sofort-live-Verhalten fehlt");
+  assert.ok(flat.includes('<option value="singles">Alle als Einzelentwürfe</option>'),
+    "Export-Modus-Option 'Alle als Einzelentwürfe' fehlt");
+  assert.ok(html.includes('? s.exportMode : "singles"'),
+    "Standard-Export-Modus ist nicht 'singles'");
 });
 
 test("Varianten-Export nutzt einen ANDEREN Header (Draft-Vorlage kann keine Varianten)", () => {
