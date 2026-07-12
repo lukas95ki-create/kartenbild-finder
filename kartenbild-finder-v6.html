@@ -291,9 +291,10 @@
   </div>
   <div class="chips">
     <button class="chip" onclick="showAll()">Alle Karten</button>
+    <button class="chip" onclick="showCat('common')">🃏 Common-Karten</button>
     <button class="chip" onclick="showCat('ex')">⭐ ex-Karten</button>
-    <button class="chip" onclick="showCat('AR')">🎨 Alt Arts (AR)</button>
     <button class="chip" onclick="showCat('SAR')">✨ SAR</button>
+    <button class="chip" onclick="showCat('AR')">🎨 Alt Arts (AR)</button>
     <button class="chip" onclick="showCat('SR')">👑 SR/UR/Gold</button>
   </div>
 
@@ -535,9 +536,16 @@ function run(){
     '<div class="notice">Nichts gefunden. Tipp: deutschen Kartennamen oder die Nummer eingeben.</div>';
 }
 
+/* "-ex" nur als eigenes Namensteil-Ende werten – nicht in Namen wie
+   "Owei-Exeggcute" oder "Krawumms-Exploud" (kein Buchstabe direkt danach). */
+const EX_NAME_RE = /-ex(?![a-z])/i;
+function isExCard(c){ return c[3]==="ex" || EX_NAME_RE.test(c[1]); }
 function showCat(cat){
   let hits;
-  if (cat==="ex") hits = CUR.cards.filter(c=>/-ex/i.test(c[1]) || c[3]==="ex");
+  if (cat==="ex") hits = CUR.cards.filter(isExCard);
+  else if (cat==="common")
+    /* Common = Basisset-Karte (Nr ≤ total) ohne Raritätsmarkierung und ohne ex */
+    hits = CUR.cards.filter(c=>!c[3] && !EX_NAME_RE.test(c[1]) && c[0]<=CUR.total);
   else if (cat==="SR") hits = CUR.cards.filter(c=>["SR","UR","MUR","ACE","Gold"].includes(c[3]));
   else hits = CUR.cards.filter(c=>c[3]===cat);
   if (!hits.length){

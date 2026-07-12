@@ -22,7 +22,7 @@ def base_name(fn):
     fn = re.sub(r'-scaled\.jpg$', '.jpg', fn)
     return fn
 
-def categorize(fn):
+def categorize(fn, name=None):
     s = fn
     # order matters: gold/UR first, then SAR, then SR, then AR
     if re.search(r'[-_](MUR|UR|HR)[-_]', s) or re.search(r'Ultra-Rare-Gold|Hyper-Rare|Gold-Rare|Rainbow|[-_]Gold[-_]', s, re.I):
@@ -33,7 +33,12 @@ def categorize(fn):
         return 'SR'
     if re.search(r'[-_]AR[-_]', s) or re.search(r'Art-Rare|Art-Illustration-Rare|Illustration-Rare', s, re.I):
         return 'AR'
-    if re.search(r'[-_]ex(?=[-_.])', s, re.I):
+    # 'ex' NUR im extrahierten Kartennamen werten: im vollen Dateinamen
+    # steckt auch der Set-Name, und der enthaelt bei manchen Sets selbst
+    # "ex" (Shiny-Treasure-ex, Mega-Dream-ex) -> frueher wurde dadurch
+    # JEDE Karte dieser Sets als ex getaggt.
+    target = name if name is not None else s
+    if re.search(r'[-_]ex(?=$|[-_.])', target, re.I):
         return 'ex'
     return ''
 
@@ -146,7 +151,7 @@ def build(paths, total, code, marker=None, scheme='auto'):
         order = extract_loose(paths, marker or code)
         cards, known = [], {}
         for i, fn in enumerate(order, 1):
-            cat = categorize(fn)
+            cat = categorize(fn, name_of_loose(fn))
             cards.append([i, name_of_loose(fn), None, cat])
             known[i] = fn
         return {'code': code, 'total': len(order), 'cards': cards, 'known': known,
@@ -161,7 +166,7 @@ def build(paths, total, code, marker=None, scheme='auto'):
             base.setdefault(n, fn)
         for n in sorted(base):
             fn = base[n]
-            cards.append([n, name_of_lead(fn, n, code), None, categorize(fn)])
+            cards.append([n, name_of_lead(fn, n, code), None, categorize(fn, name_of_lead(fn, n, code))])
             known[n] = fn
         missing = [n for n in range(1, (total or 0)+1) if n not in base]
         return {'code': code, 'total': total or 0, 'cards': cards, 'known': known,
@@ -175,7 +180,7 @@ def build(paths, total, code, marker=None, scheme='auto'):
     secret = []    # list of (num, fn, cat)
     for fn in order:
         num = seen[fn]
-        cat = categorize(fn)
+        cat = categorize(fn, name_of(fn, num))
         if num <= total and cat in ('', 'ex'):
             if num in base:
                 base_notes.append(f'dup base {num}: {fn}')
@@ -198,7 +203,7 @@ def build(paths, total, code, marker=None, scheme='auto'):
     for n in range(1, total+1):
         if n in base:
             fn = base[n]
-            cat = categorize(fn)
+            cat = categorize(fn, name_of(fn, n))
             cards.append([n, name_of(fn, n), None, cat])
             known[n] = fn
     # secret rares: assign keys continuing above total, keep order
