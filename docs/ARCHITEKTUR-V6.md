@@ -421,7 +421,7 @@ die Kein-Build-Bedingung zu verletzen.
 | Listing Engine | in `ebay-export.html`: Titel-/Beschreibungs-/Modus-Logik gegen eine **Backend-Schnittstelle** (`CsvBackend` heute, `ApiBackend` später am Worker) — das ist die entscheidende Naht für Kap. 5 |
 | CSV Export | `CsvBackend` (existiert faktisch in `ebay-export.html`) |
 | eBay API | `ApiBackend` + Cloudflare Worker (Stufe 3, später) |
-| Dashboard | `dashboard.html` liest über `inventar.js` |
+| Dashboard | `dashboard.html` ✅ **umgesetzt** (Phase 2): liest über `inventar.js`; KPIs, Status-Verteilung, Sprache/Set-Aufteilung, Backup-Erinnerung |
 
 **Die Standalone-Tool-Struktur bleibt** (jedes Werkzeug eine HTML-Datei,
 einzeln per Doppelklick lauffähig). Eine Migration zu einer SPA/Plattform
@@ -497,9 +497,13 @@ bleibt). Zusätzlich vorgezogen: Lagerplatz-Feld in der Erfassung, Lagerplatz
 in der SKU (Kap. 10), `kartencode`/`lagerplatz` in der CSV-Ausgabe.
 
 **Phase 2 — Auswertung & Preis (rein Browser, hoher Alltagsnutzen):**
-`dashboard.html` · `preislogik.js` (Regel-Pipeline + Editor) ·
-Deep-Link-Preishelfer · Titelgenerator v2 (SEO-Template mit
-Prioritäts-Kürzung) · Modus-C-Regeleditor · Lagerplatz in SKU.
+`dashboard.html` ✅ **umgesetzt** (KPIs, Status-Verteilung, Sprache/Set,
+Backup-Erinnerung) · Lagerplatz in SKU ✅ (Phase 1 vorgezogen) ·
+Modus-C-Regeleditor ✅ (Preisregel-System existiert bereits) ·
+Deep-Link-Preishelfer ✅ („Verkäufe prüfen“-Link existiert). **Offen:**
+`preislogik.js` (Regel-Pipeline aus `kartenbild-finder-v6.html` in eigenes
+Modul auslagern) · Titelgenerator v2 (SEO-Template mit Prioritäts-Kürzung
+und gepflegter Seltenheit).
 
 **Phase 3 — Hosting & Bilder (Stufe 2):**
 GitHub Pages/Netlify einrichten · lokale Bilddatenbank für aktiv verkaufte

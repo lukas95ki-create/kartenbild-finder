@@ -790,6 +790,7 @@ function exportCSV(){
 function exportJSON(){
   const data = { app:"kartenbild-finder/erfassung", version:1, exportedAt:new Date().toISOString(), entries:inventory };
   download("kartenbestand_backup_" + dateStamp() + ".json", JSON.stringify(data, null, 2), "application/json");
+  const st = loadSettings(); st.lastBackup = new Date().toISOString(); saveSettings(st);  // fürs Dashboard
   toast("Backup gespeichert");
 }
 function dateStamp(){

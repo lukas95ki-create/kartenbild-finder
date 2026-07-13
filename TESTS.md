@@ -11,11 +11,11 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 
 ## 0. Dateien / Struktur
 - [ ] Im Hauptverzeichnis liegen: `index.html`, `erfassung.html`,
-      `kartenbild-finder-v6.html`, `sets-data.js`, **`shared.js`**
-      (gemeinsame Bild-/Kartenlogik), **`inventar.js`** (Bestands-Modul,
-      Schema v2) sowie der Ordner **`vendor/`** mit `xlsx.full.min.js`
-      (lokale Excel-Bibliothek für den eBay-Export). **Alle** diese Dateien
-      müssen beim Hochladen/Kopieren **mitgenommen** werden.
+      `kartenbild-finder-v6.html`, `dashboard.html`, `sets-data.js`,
+      **`shared.js`** (gemeinsame Bild-/Kartenlogik), **`inventar.js`**
+      (Bestands-Modul, Schema v2) sowie der Ordner **`vendor/`** mit
+      `xlsx.full.min.js` (lokale Excel-Bibliothek für den eBay-Export).
+      **Alle** diese Dateien müssen beim Hochladen/Kopieren **mitgenommen** werden.
 - [ ] Alles öffnet sich per Doppelklick (Protokoll `file://`) ohne Fehler.
 - [ ] Optional (Phase 3): Ordner `assets/cards/` mit lokalen Bildern
       `SETCODE-NNN.jpg` (z. B. `M5-004.jpg`). Fehlt der Ordner, ist das
@@ -23,11 +23,13 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
       (Auflösungs-Kaskade: lokal → pokezentrum → Platzhalter).
 
 ## 1. Startseite `index.html`
-- [ ] Drei Kacheln sichtbar: „Kartenbild-Finder“, „Karten-Erfassung“ und „eBay-Export“.
+- [ ] Vier Kacheln sichtbar: „Kartenbild-Finder“, „Karten-Erfassung“,
+      „eBay-Export“ und „Dashboard“.
 - [ ] Klick auf Kachel 1 öffnet `kartenbild-finder-v6.html`.
 - [ ] Klick auf Kachel 2 öffnet `erfassung.html`.
 - [ ] Klick auf Kachel 3 öffnet die Haupt-App **direkt im Tab „eBay-Export“**
       (`kartenbild-finder-v6.html#ebay`).
+- [ ] Klick auf Kachel 4 öffnet `dashboard.html`.
 
 ## 2. Kartenbild-Finder `kartenbild-finder-v6.html`, Tab „Kartensuche“ (unverändertes Verhalten)
 - [ ] Oben zwei Tabs: **„Kartensuche“** (aktiv) und **„eBay-Export“**.
@@ -161,3 +163,21 @@ und einer unbekannten Kartennummer.
       Sprach-Flagge und Kartenraster; Auswahl der Rasterbilder per Klick
       änderbar; PNG-Download (bei blockierten Bildern erscheint der
       CORS-Hinweis).
+
+## 8. Dashboard (`dashboard.html`)
+- [ ] Liest **denselben Bestand** wie die Erfassung (Browser-Speicher);
+      bei leerem Bestand erscheint ein Hinweis mit Link zur Erfassung.
+- [ ] **KPI-Kacheln**: Karten gesamt (Σ Menge), verschiedene Karten,
+      **Einkaufswert** (Σ Einkaufspreis × Menge), Ø Einkaufspreis (je
+      bewerteter Karte), **unbewertet** (Anzahl ohne Einkaufspreis).
+- [ ] Karten **ohne Einkaufspreis** werden als „unbewertet“ gezählt, **nicht**
+      mit 0 € in den Wert eingerechnet.
+- [ ] **Status-Verteilung**: gestapelter Balken + Liste (Im Bestand / Gelistet /
+      Verkauft) mit Menge, Prozent und Wert je Status; jede Zeile hat Farbfeld
+      **und** Textlabel (nicht nur Farbe).
+- [ ] **Nach Sprache** und **Top-Sets**: Balken nach Menge, absteigend sortiert,
+      mit Zahl am Ende.
+- [ ] **Backup-Erinnerung**: nach einem JSON-Backup in der Erfassung zeigt das
+      Dashboard „Letztes Backup vor X Tagen“ (ab 7 Tagen als Warnung); ohne
+      Backup einen neutralen Hinweis.
+- [ ] Mobil: Kacheln und Balken brechen sauber um, **kein** horizontales Scrollen.
