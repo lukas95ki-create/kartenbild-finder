@@ -303,6 +303,7 @@
       <div class="field"><label>Menge</label><input type="number" id="eQty" inputmode="numeric" min="0" step="1"></div>
       <div class="field"><label>Einkaufspreis (€, optional)</label><input type="text" id="ePrice" inputmode="decimal" placeholder="z. B. 2,50"></div>
     </div>
+    <div class="field"><label>Lagerplatz (optional)</label><input type="text" id="ePlace" placeholder="z. B. R2-B5-F12"></div>
     <div class="field"><label>Status</label>
       <select id="eStatus">
         <option>Im Bestand</option><option>Gelistet</option><option>Verkauft</option>
@@ -319,11 +320,12 @@
 <div class="toast" id="toast"></div>
 
 <script src="sets-data.js"></script>
+<script src="shared.js"></script>
+<script src="inventar.js"></script>
 <script>
 "use strict";
 
 /* ============ Konstanten & Zustand ============ */
-const STORE_KEY   = "kartenErfassung.v1";
 const SETTINGS_KEY= "kartenErfassung.settings";
 const STATUSES    = ["Im Bestand", "Gelistet", "Verkauft"];
 
@@ -331,44 +333,14 @@ let inventory = [];      // Array der Einträge
 let undoStack = [];      // Schnappschüsse (JSON-Strings) für Rückgängig
 let editingId = null;
 
-/* ============ Bild-Auflösung (portiert aus v6) ============ */
-function pad(n){ return String(n).padStart(3,"0"); }
-function findCard(set, n){ return set.cards.find(c=>c[0]===n); }
-
-function imgCandidates(set, n){
-  if (set.known && set.known[n]) return [BASE + set.known[n]];
-  const e = findCard(set, n);
-  if (!e) return [];
-  const files = [e[1], ...(e[2]||[])];
-  if (set.suffix){
-    return files.map(f => `${BASE}${f}-${pad(n)}${set.suffix}`);
-  }
-  const isEx = /-ex/i.test(e[1]);
-  const isTrainer = n >= 137 && set.code==="SV8a";
-  let mids, posts;
-  if (isEx){ mids=["-Terakristall","-Terakistall","-Holo","","-Holo-Terakristall"]; posts=["-RR",""]; }
-  else if (isTrainer){ mids=["-Holo","","-ASS-KLASSE","-Holo-ASS-KLASSE"]; posts=["","-ACE"]; }
-  else { mids=["-Holo",""]; posts=[""]; }
-  const tails=["-TCG",""];
-  const urls=[];
-  for (const f of files) for (const p of posts) for (const m of mids) for (const t of tails)
-    urls.push(`${BASE}${f}-${pad(n)}-${set.total}${p}-SV8a-Terastal-Festival-ex${m}-Pokemon-Karte-Japan${t}.jpg`);
-  return urls;
-}
-
-// Karten-Info für die Kontrollanzeige
-function cardInfo(set, n){
-  const e = findCard(set, n);
-  if (!e) return null;
-  const name = (e[1]||("Nr. "+pad(n))).replace(/-/g," ");
-  let rarity = e[3] || "";
-  if (!rarity && /-ex/i.test(e[1])) rarity = "ex";
-  return { name, rarity, urls: imgCandidates(set, n) };
-}
-
-function setByCodeLang(code, lang){
-  return SETS.find(s=>s.code===code && s.lang===lang);
-}
+/* ============ Bild-Auflösung (gemeinsames Modul shared.js) ============
+   Als Wrapper (nicht als Alias-const), damit ein verspätet/nachgeladenes
+   shared.js nicht schon beim Parsen dieses Skripts einen Fehler auslöst. */
+function pad(n){ return Shared.pad(n); }
+function findCard(set, n){ return Shared.findCardIn(set, n); }
+function imgCandidates(set, n){ return Shared.imgCandidatesFor(set, n); }
+function cardInfo(set, n){ return Shared.cardInfo(set, n); }
+function setByCodeLang(code, lang){ return Shared.setByCodeLang(code, lang); }
 
 // <img> mit Fallback über mehrere Kandidaten-URLs
 function fallbackImg(urls, alt, onDone){
@@ -392,14 +364,12 @@ function fallbackImg(urls, alt, onDone){
   return box;
 }
 
-/* ============ Speicherung ============ */
+/* ============ Speicherung (gemeinsames Modul inventar.js) ============ */
 function load(){
-  try { inventory = JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-  catch(e){ inventory = []; }
-  if (!Array.isArray(inventory)) inventory = [];
+  inventory = Inventar.load();          // lädt + migriert auf Schema v2
 }
 function save(){
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(inventory)); }
+  try { Inventar.save(inventory); }
   catch(e){ toast("Speichern fehlgeschlagen (Speicher voll?)", true); }
 }
 function loadSettings(){
@@ -505,14 +475,11 @@ function onAdd(){
 }
 
 function makeEntry(set, num, name, rarity, qty, manual){
-  return {
-    id: (Date.now().toString(36) + Math.random().toString(36).slice(2,7)),
+  return Inventar.newEntry({
     setCode: set.code, setName: set.name, lang: set.lang,
     num: num, name: name, rarity: rarity || "",
-    qty: qty, status: STATUSES[0],
-    price: null, note: "", manual: !!manual,
-    date: new Date().toISOString()
-  };
+    qty: qty, manual: !!manual
+  });
 }
 
 function resetInput(){
@@ -561,6 +528,7 @@ function showDuplicate(existing, set, num, info, qty){
   document.getElementById("dupYes").onclick = () => {
     pushUndo();
     existing.qty += qty;
+    Inventar.touch(existing);
     save();
     showSuccess(set, num, info, qty, existing);
     refreshCounts();
@@ -596,7 +564,7 @@ function showNotFound(set, num, qty){
     const nm = document.getElementById("manualName").value.trim() || ("Nr. " + pad(num));
     const existing = findEntry(set.code, num, set.lang);
     if (existing){
-      pushUndo(); existing.qty += qty; save();
+      pushUndo(); existing.qty += qty; Inventar.touch(existing); save();
       toast("Menge erhöht"); fb.innerHTML = ""; refreshCounts(); resetInput(); return;
     }
     const entry = makeEntry(set, num, nm, "", qty, true);
@@ -696,11 +664,12 @@ function itemEl(e){
 
   const body = document.createElement("div"); body.className = "item-body";
   const priceTxt = (e.price!=null && e.price!=="") ? " · EK " + fmtPrice(e.price) + " €" : "";
+  const placeTxt = e.lagerplatz ? ' · &#128230; ' + esc(e.lagerplatz) : "";
   const noteTxt  = e.note ? " · " + esc(e.note) : "";
   body.innerHTML = `
     <div class="item-name">${esc(e.name)}${e.manual ? ' <span style="color:var(--muted);font-size:12px">(manuell)</span>':''}</div>
     <div class="item-meta">${esc(e.setCode)} · Nr. ${pad(e.num)} <span class="sep">·</span> ${esc(e.lang)}${e.rarity ? ' <span class="sep">·</span> '+esc(e.rarity):''}</div>
-    <div class="item-extra"><span class="qtybadge">${e.qty}×</span>${priceTxt}${noteTxt}</div>
+    <div class="item-extra"><span class="qtybadge">${e.qty}×</span>${priceTxt}${placeTxt}${noteTxt}</div>
     <span class="statuspill ${pillClass(e.status)}" title="Tippen: Status wechseln">${esc(e.status)}</span>`;
   body.querySelector(".statuspill").onclick = () => cycleStatus(e.id);
 
@@ -721,6 +690,7 @@ function cycleStatus(id){
   pushUndo();
   const i = STATUSES.indexOf(e.status);
   e.status = STATUSES[(i+1) % STATUSES.length];
+  Inventar.touch(e);
   save(); renderList();
   toast("Status: " + e.status);
 }
@@ -743,6 +713,7 @@ function openEdit(id){
   document.getElementById("eName").value = e.name || "";
   document.getElementById("eQty").value = e.qty;
   document.getElementById("ePrice").value = (e.price!=null && e.price!=="") ? fmtPrice(e.price) : "";
+  document.getElementById("ePlace").value = e.lagerplatz || "";
   document.getElementById("eStatus").value = e.status;
   document.getElementById("eNote").value = e.note || "";
   document.getElementById("editModal").classList.add("open");
@@ -760,8 +731,10 @@ function saveEdit(){
   e.qty = (!q || q < 0) ? 0 : q;
   const p = parsePrice(document.getElementById("ePrice").value);
   e.price = p;
+  e.lagerplatz = document.getElementById("ePlace").value.trim();
   e.status = document.getElementById("eStatus").value;
   e.note = document.getElementById("eNote").value.trim();
+  Inventar.touch(e);
   save(); closeEdit(); renderList();
   toast("Gespeichert");
 }
@@ -803,10 +776,11 @@ function csvEsc(v){
 }
 function exportCSV(){
   if (!inventory.length){ toast("Nichts zu exportieren", true); return; }
-  const head = ["Set","Nummer","Name","Sprache","Seltenheit","Menge","Status","Einkaufspreis","Notiz","Datum"];
+  const head = ["Set","Nummer","Kartencode","Name","Sprache","Seltenheit","Menge","Status","Einkaufspreis","Lagerplatz","Notiz","Datum"];
   const rows = inventory.map(e => [
-    e.setCode, pad(e.num), e.name, e.lang, e.rarity||"", e.qty, e.status,
-    (e.price!=null && e.price!=="") ? fmtPrice(e.price) : "", e.note||"", fmtDate(e.date)
+    e.setCode, pad(e.num), e.kartencode || Inventar.codeOf(e.setCode, e.num),
+    e.name, e.lang, e.rarity||"", e.qty, e.status,
+    (e.price!=null && e.price!=="") ? fmtPrice(e.price) : "", e.lagerplatz||"", e.note||"", fmtDate(e.date)
   ]);
   const body = [head, ...rows].map(r => r.map(csvEsc).join(";")).join("\r\n");
   const content = "﻿" + body;   // UTF-8 BOM für deutsches Excel
@@ -846,7 +820,7 @@ function importJSON(ev){
     } else {
       clean.forEach(imp => {
         const ex = findEntry(imp.setCode, imp.num, imp.lang);
-        if (ex) ex.qty += imp.qty;
+        if (ex){ ex.qty += imp.qty; Inventar.touch(ex); }
         else inventory.push(imp);
       });
     }
@@ -858,21 +832,7 @@ function importJSON(ev){
 }
 
 function normalizeEntry(e){
-  return {
-    id: e.id || (Date.now().toString(36)+Math.random().toString(36).slice(2,7)),
-    setCode: String(e.setCode),
-    setName: e.setName || "",
-    lang: e.lang || "",
-    num: parseInt(e.num,10) || 0,
-    name: e.name || ("Nr. " + pad(parseInt(e.num,10)||0)),
-    rarity: e.rarity || "",
-    qty: parseInt(e.qty,10) || 1,
-    status: STATUSES.includes(e.status) ? e.status : STATUSES[0],
-    price: (e.price!=null && e.price!=="") ? (parseFloat(String(e.price).replace(",",".")) || null) : null,
-    note: e.note || "",
-    manual: !!e.manual,
-    date: e.date || new Date().toISOString()
-  };
+  return Inventar.normalize(e);
 }
 
 /* ============ Helpers ============ */
@@ -912,39 +872,51 @@ function init(){
 }
 
 /* ============ Daten-Bootstrap (robust) ============
-   sets-data.js wird oben per <script src> geladen und definiert SETS + BASE.
-   Falls das fehlschlägt (z. B. Host liefert .js mit falschem MIME-Typ, oder
-   veralteter Cache), laden wir die Datei als Text nach und werten sie aus.
-   Klappt auch das nicht, erscheint eine deutliche Fehlermeldung statt einer
-   stumm leeren Set-Auswahl. */
-function dataReady(){
+   sets-data.js, shared.js und inventar.js werden oben per <script src>
+   geladen (SETS+BASE, das Shared- und das Inventar-Modul). Falls eine dieser
+   Dateien fehlschlägt (z. B. Host liefert .js mit falschem MIME-Typ, oder
+   veralteter Cache), laden wir sie als Text nach und werten sie aus. Klappt
+   das nicht, erscheint eine deutliche Fehlermeldung statt einer stumm leeren
+   Set-Auswahl. */
+function setsReady(){
   return typeof SETS !== "undefined" && Array.isArray(SETS) && SETS.length > 0;
 }
+function modulesReady(){
+  return typeof Shared !== "undefined" && typeof Inventar !== "undefined";
+}
+function dataReady(){ return setsReady() && modulesReady(); }
 function showDataError(msg){
   const sel = document.getElementById("setSel");
   if (sel) sel.innerHTML = '<option value="">⚠ Kartendaten nicht geladen</option>';
   const sc = document.getElementById("setCount");
-  if (sc){ sc.className = "setcount err"; sc.textContent = "⚠ sets-data.js nicht geladen" + (msg ? " (" + msg + ")" : ""); }
+  if (sc){ sc.className = "setcount err"; sc.textContent = "⚠ Daten/Module nicht geladen" + (msg ? " (" + msg + ")" : ""); }
   const fb = document.getElementById("feedback");
   if (fb) fb.innerHTML =
     '<div class="fbcard warn"><div class="fb-body">' +
     '<div class="fb-title" style="color:var(--warn)">&#9888; Kartendaten konnten nicht geladen werden</div>' +
-    '<div class="fb-line">Die Datei <b>sets-data.js</b> muss im selben Ordner wie <b>erfassung.html</b> liegen. ' +
-    'Auf dem Handy oder gehostet hilft meist ein <b>hartes Neuladen</b> (Cache leeren) oder erneutes Hochladen von sets-data.js.</div>' +
+    '<div class="fb-line">Die Dateien <b>sets-data.js</b>, <b>shared.js</b> und <b>inventar.js</b> müssen im selben Ordner wie <b>erfassung.html</b> liegen. ' +
+    'Auf dem Handy oder gehostet hilft meist ein <b>hartes Neuladen</b> (Cache leeren) oder erneutes Hochladen dieser Dateien.</div>' +
     '</div></div>';
 }
 function safeInit(){
   try { init(); }
   catch(e){ showDataError("Init-Fehler: " + (e && e.message ? e.message : e)); }
 }
+/* Fehlende Abhängigkeit per fetch+eval nachladen (gibt Promise zurück). */
+function ensureScript(url){
+  return fetch(url, { cache: "no-store" })
+    .then(r => r.ok ? r.text() : Promise.reject(new Error(url + ": HTTP " + r.status)))
+    .then(txt => { (0, eval)(txt); });
+}
 function boot(){
   if (dataReady()){ safeInit(); return; }
-  try {
-    fetch("sets-data.js", { cache: "no-store" })
-      .then(r => r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status)))
-      .then(txt => { (0, eval)(txt); if (dataReady()) safeInit(); else showDataError("leer/ungueltig"); })
-      .catch(err => showDataError(err && err.message ? err.message : "fetch fehlgeschlagen"));
-  } catch(e){ showDataError(e && e.message ? e.message : "Ausnahme"); }
+  const jobs = [];
+  if (!setsReady())    jobs.push(ensureScript("sets-data.js"));
+  if (typeof Shared   === "undefined") jobs.push(ensureScript("shared.js"));
+  if (typeof Inventar === "undefined") jobs.push(ensureScript("inventar.js"));
+  Promise.all(jobs)
+    .then(() => { if (dataReady()) safeInit(); else showDataError("leer/ungueltig"); })
+    .catch(err => showDataError(err && err.message ? err.message : "fetch fehlgeschlagen"));
 }
 boot();
 </script>

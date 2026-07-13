@@ -357,9 +357,12 @@
 
     <!-- Import -->
     <div class="xcard">
-      <h2><span class="step">1</span> Excel importieren</h2>
+      <h2><span class="step">1</span> Bestand laden</h2>
       <label class="filebtn" for="xlsxFile">📥 Excel-Datei auswählen …
         <input type="file" id="xlsxFile" accept=".xlsx,.xls" style="display:none"></label>
+      <button class="chip" id="loadInventory" style="width:100%; margin-top:10px">📦 Aus Erfassung-Bestand übernehmen (ohne Excel)</button>
+      <p class="hintline" style="margin-top:6px">Übernimmt die in der <b>Karten-Erfassung</b> gespeicherten Karten (Status „Im&nbsp;Bestand“/„Gelistet“) direkt.
+        Der dort erfasste <b>Einkaufspreis</b> wird <b>nicht</b> als Verkaufspreis übernommen – die Verkaufspreise berechnen die Preisregeln unten.</p>
       <div class="grid3x" style="margin-top:12px">
         <div><label>Sprache (gilt für den ganzen Import)</label>
           <select id="globalLang">
@@ -441,6 +444,8 @@
 <div class="toast2" id="exToast"></div>
 
 <script src="sets-data.js"></script>
+<script src="shared.js"></script>
+<script src="inventar.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
 <script>
 
@@ -474,31 +479,10 @@ function fillSets(){
   CUR = SETS[sel.value]; clearOut();
 }
 
-function pad(n){ return String(n).padStart(3,"0"); }
-function entry(n){ return CUR.cards.find(c=>c[0]===n); }
-
-function candidates(n){
-  if (CUR.known && CUR.known[n]) return [BASE + CUR.known[n]];
-  const e = entry(n);
-  if (!e) return [];
-  const files = [e[1], ...(e[2]||[])];
-  // Exakter Modus: Set hat festes Dateinamens-Ende
-  if (CUR.suffix){
-    return files.map(f => `${BASE}${f}-${pad(n)}${CUR.suffix}`);
-  }
-  // Rate-Modus (SV8a): Varianten durchprobieren
-  const isEx = /-ex/i.test(e[1]);
-  const isTrainer = n >= 137 && CUR.code==="SV8a";
-  let mids, posts;
-  if (isEx){ mids=["-Terakristall","-Terakistall","-Holo","","-Holo-Terakristall"]; posts=["-RR",""]; }
-  else if (isTrainer){ mids=["-Holo","","-ASS-KLASSE","-Holo-ASS-KLASSE"]; posts=["","-ACE"]; }
-  else { mids=["-Holo",""]; posts=[""]; }
-  const tails=["-TCG",""];
-  const urls=[];
-  for (const f of files) for (const p of posts) for (const m of mids) for (const t of tails)
-    urls.push(`${BASE}${f}-${pad(n)}-${CUR.total}${p}-SV8a-Terastal-Festival-ex${m}-Pokemon-Karte-Japan${t}.jpg`);
-  return urls;
-}
+/* Bild-/Kartenlogik kommt aus dem gemeinsamen Modul shared.js. */
+function pad(n){ return Shared.pad(n); }
+function entry(n){ return Shared.findCardIn(CUR, n); }
+function candidates(n){ return Shared.imgCandidatesFor(CUR, n); }
 
 function clearOut(){
   document.getElementById("out").innerHTML="";
@@ -675,36 +659,10 @@ function ballOf(note){
   return "";
 }
 
-/* ---------- Bild-Auflösung (set-bezogen; Suchtab nutzt weiter CUR) ---------- */
-function findCardIn(set, n){ return set.cards.find(c=>c[0]===n); }
-function imgCandidatesFor(set, n){
-  if (set.known && set.known[n]) return [BASE + set.known[n]];
-  const e = findCardIn(set, n);
-  if (!e) return [];
-  const files = [e[1], ...(e[2]||[])];
-  if (set.suffix){
-    return files.map(f => `${BASE}${f}-${pad(n)}${set.suffix}`);
-  }
-  const isEx = /-ex/i.test(e[1]);
-  const isTrainer = n >= 137 && set.code==="SV8a";
-  let mids, posts;
-  if (isEx){ mids=["-Terakristall","-Terakistall","-Holo","","-Holo-Terakristall"]; posts=["-RR",""]; }
-  else if (isTrainer){ mids=["-Holo","","-ASS-KLASSE","-Holo-ASS-KLASSE"]; posts=["","-ACE"]; }
-  else { mids=["-Holo",""]; posts=[""]; }
-  const tails=["-TCG",""];
-  const urls=[];
-  for (const f of files) for (const p of posts) for (const m of mids) for (const t of tails)
-    urls.push(`${BASE}${f}-${pad(n)}-${set.total}${p}-SV8a-Terastal-Festival-ex${m}-Pokemon-Karte-Japan${t}.jpg`);
-  return urls;
-}
-/* Set-Suche: case-insensitiv, bevorzugt gewählte Sprache; sonst erste Fundstelle. */
-function findSetByCode(code, lang){
-  const c = code.trim().toLowerCase();
-  let s = SETS.find(x => x.code.toLowerCase()===c && x.lang===lang);
-  if (s) return { set:s, langMismatch:false };
-  s = SETS.find(x => x.code.toLowerCase()===c);
-  return s ? { set:s, langMismatch:true } : null;
-}
+/* ---------- Bild-Auflösung (gemeinsames Modul shared.js) ---------- */
+function findCardIn(set, n){ return Shared.findCardIn(set, n); }
+function imgCandidatesFor(set, n){ return Shared.imgCandidatesFor(set, n); }
+function findSetByCode(code, lang){ return Shared.findSetByCode(code, lang); }
 function loadThumb(box, urls, row){
   if (!urls || !urls.length){ box.innerHTML='<span class="ph">kein Bild</span>'; return; }
   const img = document.createElement("img");
@@ -1081,6 +1039,98 @@ function parseExcelRows(det){
   toastX(out.length + " Karte(n) eingelesen");
 }
 
+/* =====================================================================
+   INVENTAR-BRÜCKE (ARCHITEKTUR-V6, Kap. 2/14)
+   eBay-Export direkt aus dem in der Erfassung gespeicherten Bestand,
+   ohne den Umweg über eine Excel-Datei. Der Excel-Import bleibt daneben
+   erhalten. Der in der Erfassung erfasste Einkaufspreis wird bewusst NICHT
+   als Verkaufspreis übernommen – die Preisregeln berechnen den Verkaufspreis.
+   ===================================================================== */
+function loadFromInventory(){
+  let inv;
+  try { inv = Inventar.load(); }
+  catch(e){
+    showImportStatus("err", "❌ Bestand konnte nicht gelesen werden.",
+      e && e.message ? e.message : String(e));
+    return;
+  }
+  if (!inv.length){
+    showImportStatus("err",
+      "❌ Kein Bestand gefunden. Bitte zuerst in der <b>Karten-Erfassung</b> Karten erfassen.");
+    return;
+  }
+
+  const out = [], errs = [];
+  let skippedSold = 0, skippedEmpty = 0;
+
+  inv.forEach(e => {
+    if (e.status === "Verkauft"){ skippedSold++; return; }
+    if (!e.qty || e.qty < 1){ skippedEmpty++; return; }
+
+    const num  = e.num;
+    const num3 = pad(num);
+    const rowObj = {
+      xlsRow: null, setCodeRaw: e.setCode, num, num3, qty: e.qty, lang: e.lang,
+      note: e.note || "", nameXls: e.name || "", ball: ballOf(e.note),
+      priceManual: null, priceMode: "auto",   // Einkaufspreis ≠ Verkaufspreis
+      salesAvg: null, price: null, priceSource: "rule",
+      mode: "variant", resolvedUrl: null,
+      lagerplatz: e.lagerplatz || ""
+    };
+
+    const hit = findSetByCode(e.setCode, e.lang);
+    if (!hit){
+      errs.push({ ...rowObj, reason: `Set-Code „${e.setCode}“ nicht in den Kartendaten` });
+      return;
+    }
+    const set = hit.set;
+    const cardEntry = findCardIn(set, num);
+    rowObj.set = set;
+    rowObj.setCode = set.code;                // kanonische Schreibweise
+    rowObj.setName = set.name;
+    rowObj.langMismatch = hit.langMismatch;
+    rowObj.cardName = (e.name || (cardEntry && cardEntry[1]) || ("Nr. " + num3)).replace(/-/g, " ");
+    rowObj.rarity = e.rarity || (cardEntry && cardEntry[3]) || "";
+    rowObj.urls = imgCandidatesFor(set, num);
+    out.push(rowObj);
+  });
+
+  // Duplikate markieren (gleicher kanonischer Set-Code + Nummer)
+  const seen = {};
+  out.forEach(o => { const k = o.setCode + "|" + o.num; (seen[k] = seen[k] || []).push(o); });
+  Object.values(seen).forEach(g => { if (g.length > 1) g.forEach(o => o.dup = true); });
+
+  lastDet = null;              // kein Excel-Kontext → Sprachwechsel überschreibt nicht
+  exRows = out;
+  exErrs = errs;
+  applyPrices();
+  applyThresholdPrefill();
+  renderErrors();
+  renderPreview();
+  buildTitleImageSets();
+
+  const totalQty = out.reduce((a, o) => a + o.qty, 0);
+  const diag =
+    "Quelle: Karten-Erfassung (localStorage)" +
+    "\nBestand gesamt: " + inv.length + " Einträge" +
+    "\nÜbernommen: " + out.length + " Karten (" + totalQty + " Stück)" +
+    (skippedSold ? "\nVerkauft übersprungen: " + skippedSold : "") +
+    (skippedEmpty ? "\nOhne Menge übersprungen: " + skippedEmpty : "") +
+    (errs.length ? "\nNicht auflösbar: " + errs.length : "");
+
+  if (!out.length){
+    showImportStatus("err",
+      "❌ Keine übernehmbaren Karten im Bestand (" + errs.length + " nicht auflösbar, " +
+      skippedSold + " verkauft).", diag);
+    return;
+  }
+  showImportStatus("ok",
+    "✅ Aus Bestand übernommen: <b>" + out.length + "</b> Karten (" + totalQty + " Stück)" +
+    (errs.length ? " · <b style='color:var(--err)'>" + errs.length + " nicht auflösbar</b> (siehe rote Liste)" : "") +
+    (skippedSold ? " · " + skippedSold + " verkaufte übersprungen" : ""), diag);
+  toastX(out.length + " Karte(n) aus Bestand übernommen");
+}
+
 /* Vorbelegung Einzel/Variante nach Preisgrenze (auf Basis der aktuellen Preise) */
 function applyThresholdPrefill(){
   const th = parsePrice(byId("priceThreshold").value);
@@ -1249,7 +1299,16 @@ function draftTitle(o){
 function parentTitle(set, lang){
   return capTitle(`Pokemon ${set.name} ${set.code} ${lang} - Einzelkarten zum Aussuchen`);
 }
-function sku(o){ return `${o.setCode.toUpperCase()}-${o.num3}`; }
+function sku(o){
+  const base = `${o.setCode.toUpperCase()}-${o.num3}`;
+  // Lagerplatz an die SKU/CustomLabel hängen → eBay zeigt sie auf dem
+  // Bestellzettel, d. h. der Lagerplatz steht beim Verkauf direkt dabei.
+  if (o.lagerplatz){
+    const lp = String(o.lagerplatz).trim().replace(/[^A-Za-z0-9-]+/g, "");
+    if (lp) return base + "-" + lp;
+  }
+  return base;
+}
 /* Feste HTML-Beschreibung (kein Freitext, OHNE Zustandsangabe). */
 function description(headline, isVariant){
   const stock = "Hinweis: Beim Produktbild handelt es sich um ein Beispielbild (Stockfoto). "+
@@ -1611,6 +1670,7 @@ function initEbayExport(){
     if (f) handleFile(f);
     e.target.value="";
   });
+  byId("loadInventory").addEventListener("click", loadFromInventory);
   byId("globalLang").addEventListener("change", ()=>{
     if (lastDet) parseExcelRows(lastDet);   // Sprache gilt global → neu abgleichen
   });

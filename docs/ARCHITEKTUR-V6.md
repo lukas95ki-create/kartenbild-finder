@@ -414,8 +414,8 @@ die Kein-Build-Bedingung zu verletzen.
 | Gefordertes Modul | Umsetzung im Repo |
 |-------------------|-------------------|
 | Kartendaten (implizit) | `sets-data.js` (existiert) |
-| Bildverwaltung | `shared.js` (neu): `imgCandidates`/`pad`/`findCard` + Auflösungs-Kaskade aus Kap. 3 — heute in 3 Dateien dupliziert |
-| Inventar | `inventar.js` (neu): Schema, CRUD, Migration, Duplikat-Logik über localStorage/IndexedDB |
+| Bildverwaltung | `shared.js` ✅ **umgesetzt** (Phase 1): `pad`/`findCardIn`/`imgCandidatesFor`/`cardInfo`/`findSetByCode`/`setByCodeLang` + Auflösungs-Kaskade aus Kap. 3 (lokal → pokezentrum). Von `erfassung.html` und `kartenbild-finder-v6.html` gemeinsam genutzt (vorher in beiden dupliziert) |
+| Inventar | `inventar.js` ✅ **umgesetzt** (Phase 1): Schema v2 (`kartencode`, `lagerplatz`, `owner`, `updatedAt`, `version`), Laden/Speichern mit idempotenter Migration, `newEntry`/`normalize`/`touch`, Duplikat-Helfer über localStorage |
 | Preislogik | `preislogik.js` (neu): Regel-Pipeline aus Kap. 4 |
 | Scanner | `scanner.js` (neu, Phase 4): ROI-OCR-Kern mit zwei Eingängen (Foto/Stream) |
 | Listing Engine | in `ebay-export.html`: Titel-/Beschreibungs-/Modus-Logik gegen eine **Backend-Schnittstelle** (`CsvBackend` heute, `ApiBackend` später am Worker) — das ist die entscheidende Naht für Kap. 5 |
@@ -488,11 +488,13 @@ Stufe 3 = Cloudflare Worker (gratis-Tarif) oder VPS 3–5 €/Monat.
 (`ebay-export.html`), Beschreibungs-Template, Titelbild-Generator v1.
 Der Kernprozess „Karte erfassen → eBay-Entwurf" funktioniert bereits.
 
-**Phase 1 — Fundament konsolidieren (klein, risikolos):**
-`shared.js` (Bildlogik entdoppeln) + `inventar.js` mit Schema v2
-(`kartencode`, `lagerplatz`, `owner`, `updatedAt`, `version`, `accountId`-
-Vorbereitung) + Inventar→Export-Brücke (eBay-Export direkt aus dem
-Inventar, Excel-Import bleibt).
+**Phase 1 — Fundament konsolidieren (klein, risikolos): ✅ umgesetzt.**
+`shared.js` (Bildlogik entdoppelt, von beiden HTML-Tools genutzt) +
+`inventar.js` mit Schema v2 (`kartencode`, `lagerplatz`, `owner`,
+`updatedAt`, `version`; `accountId` noch offen) + Inventar→Export-Brücke
+(Button „Aus Erfassung-Bestand übernehmen“ im eBay-Export, Excel-Import
+bleibt). Zusätzlich vorgezogen: Lagerplatz-Feld in der Erfassung, Lagerplatz
+in der SKU (Kap. 10), `kartencode`/`lagerplatz` in der CSV-Ausgabe.
 
 **Phase 2 — Auswertung & Preis (rein Browser, hoher Alltagsnutzen):**
 `dashboard.html` · `preislogik.js` (Regel-Pipeline + Editor) ·

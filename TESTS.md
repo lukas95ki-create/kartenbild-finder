@@ -11,10 +11,16 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 
 ## 0. Dateien / Struktur
 - [ ] Im Hauptverzeichnis liegen: `index.html`, `erfassung.html`,
-      `kartenbild-finder-v6.html`, `sets-data.js` sowie der Ordner
-      **`vendor/`** mit `xlsx.full.min.js` (lokale Excel-Bibliothek für den
-      eBay-Export — muss beim Hochladen/Kopieren **mitgenommen** werden).
+      `kartenbild-finder-v6.html`, `sets-data.js`, **`shared.js`**
+      (gemeinsame Bild-/Kartenlogik), **`inventar.js`** (Bestands-Modul,
+      Schema v2) sowie der Ordner **`vendor/`** mit `xlsx.full.min.js`
+      (lokale Excel-Bibliothek für den eBay-Export). **Alle** diese Dateien
+      müssen beim Hochladen/Kopieren **mitgenommen** werden.
 - [ ] Alles öffnet sich per Doppelklick (Protokoll `file://`) ohne Fehler.
+- [ ] Optional (Phase 3): Ordner `assets/cards/` mit lokalen Bildern
+      `SETCODE-NNN.jpg` (z. B. `M5-004.jpg`). Fehlt der Ordner, ist das
+      **kein Fehler** — die App lädt dann automatisch die pokezentrum-Bilder
+      (Auflösungs-Kaskade: lokal → pokezentrum → Platzhalter).
 
 ## 1. Startseite `index.html`
 - [ ] Drei Kacheln sichtbar: „Kartenbild-Finder“, „Karten-Erfassung“ und „eBay-Export“.
@@ -52,10 +58,13 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 ## 4. Bestand (`erfassung.html`, Tab „Bestand“)
 - [ ] Kopf zeigt: Karten gesamt, verschiedene Karten, „im Bestand“ + Aufteilung nach Sprache.
 - [ ] Liste zeigt Mini-Kartenbild, Name, Set/Nummer/Sprache/Seltenheit, Menge, Status.
+      Ist ein **Lagerplatz** gesetzt, erscheint er in der Extra-Zeile (📦 R2-B5-F12).
 - [ ] **Suche** (Name oder Nummer) filtert die Liste.
 - [ ] **Filter** Set / Sprache / Status funktionieren (auch kombiniert).
 - [ ] **Statuswechsel** durch Antippen der Status-Pille: Im Bestand → Gelistet → Verkauft → …
-- [ ] **Bearbeiten** öffnet Dialog (Name, Menge, Einkaufspreis, Status, Notiz) und speichert.
+- [ ] **Bearbeiten** öffnet Dialog (Name, Menge, Einkaufspreis, **Lagerplatz**,
+      Status, Notiz) und speichert. Lagerplatz (z. B. `R2-B5-F12`) bleibt nach
+      Neuladen erhalten.
 - [ ] **Löschen** fragt zur Sicherheit nach und entfernt den Eintrag erst nach Bestätigung.
 
 ## 5. Speicherung & Sicherung
@@ -63,7 +72,9 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 - [ ] **CSV-Export**: Datei lädt herunter; in **deutschem Excel** öffnen →
       - [ ] Umlaute korrekt (UTF-8 mit BOM),
       - [ ] Spalten korrekt getrennt (Semikolon),
-      - [ ] Spalten: Set; Nummer; Name; Sprache; Seltenheit; Menge; Status; Einkaufspreis; Notiz; Datum,
+      - [ ] Spalten: Set; Nummer; **Kartencode**; Name; Sprache; Seltenheit;
+            Menge; Status; Einkaufspreis; **Lagerplatz**; Notiz; Datum,
+      - [ ] Kartencode kanonisch als `SETCODE-NNN` (z. B. `M5-004`),
       - [ ] Einkaufspreis mit Komma (z. B. `12,50`), Datum als `TT.MM.JJJJ`.
 - [ ] **JSON-Backup** exportiert eine `.json`-Datei.
 - [ ] **JSON-Import** fragt bei vorhandenem Bestand: **Zusammenführen** (OK) oder **Ersetzen** (Abbrechen).
@@ -86,6 +97,14 @@ und einer unbekannten Kartennummer.
 ### Import & Rückmeldungen
 - [ ] **Import**: Datei-Auswahl lädt die xlsx über die **lokale** Bibliothek
       `vendor/xlsx.full.min.js` (kein Internet nötig; CDN nur als Notfall-Fallback).
+- [ ] **Aus Erfassung-Bestand übernehmen** (Button ohne Excel): übernimmt die in
+      der Karten-Erfassung gespeicherten Karten direkt in die Vorschau.
+      - [ ] Verkaufte Karten werden übersprungen, Karten ohne Menge ebenfalls.
+      - [ ] Jede Karte behält ihre **eigene Sprache** (unabhängig vom globalen
+            Sprach-Dropdown).
+      - [ ] Der in der Erfassung erfasste **Einkaufspreis** taucht **nicht** als
+            Verkaufspreis auf — die Preise kommen aus den Preisregeln (Badge „Regel“).
+      - [ ] Grüne Erfolgsmeldung mit Anzahl; leerer Bestand → **rote** Meldung.
 - [ ] Während des Einlesens erscheint ein Ladehinweis; danach ein **grüner
       Erfolgs-Haken** mit Zusammenfassung („X Zeilen gelesen · Y Karten
       erkannt · …“) und aufklappbarer **Diagnose** (Blatt, Kopfzeile, Spalten).
@@ -127,6 +146,9 @@ und einer unbekannten Kartennummer.
 - [ ] **Export A** (`ebay-entwuerfe.csv`): nur Einzel-Zeilen, Action `Draft`,
       SKU `SETCODE-NNN`, Category `183454`, Price mit **Punkt**, Format
       `FixedPrice`.
+- [ ] **Lagerplatz in SKU**: Karten, die per „Aus Erfassung-Bestand übernehmen“
+      geladen wurden und einen Lagerplatz haben, tragen ihn an der SKU/CustomLabel
+      (z. B. `M5-004-R2B5F12`) — sichtbar in Export A und in den Kindzeilen von Export B.
 - [ ] **Export B** (`ebay-varianten.csv`): pro Set eine Elternzeile (`Add`,
       `RelationshipDetails=Kartenname=Wert1;Wert2;…`) + Kindzeilen
       (`Relationship=Variation`, eigener Preis/Menge).
