@@ -1,5 +1,18 @@
 # Test-Checkliste (manuell)
 
+> **Automatisierte Tests:** Für den eBay-Entwurfs-Export (Export A) gibt es
+> automatisierte Tests in `tests/ebay-draft-csv.test.mjs`. Ausführen im
+> Repo-Hauptverzeichnis mit `node --test` (Node ≥ 18, keine Abhängigkeiten).
+> Geprüft werden: die vier `#INFO`-Zeilen der offiziellen Vorlage
+> „eBay-draft-listings-template_DE“, die exakte Kopfzeile, UTF-8-BOM,
+> CRLF-Zeilenenden, Semikolon-/Anführungszeichen-Escaping, `Action=Draft`,
+> Punkt-Dezimaltrenner, Category ID pro Zeile, die Export-Modi
+> (u. a. „Alle als Einzelentwürfe“ → genau eine CSV, Duplikate über
+> Quantity zusammengefasst), die Export-B-Blockade bei leeren
+> Pflichtfeldern sowie der **Abgleich beider Exporte gegen die
+> Original-Vorlagendateien in `templates/`** (identische Info-/Kopfzeilen,
+> gleiche Spaltenanzahl pro Zeile, BOM, CRLF).
+
 Diese Punkte sollten nach Änderungen kurz von Hand geprüft werden.
 Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet**
 (z. B. Netlify), sowie einmal am **Handy**.
@@ -29,7 +42,18 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 - [ ] Sprach-Dropdown und Set-Dropdown sind befüllt.
 - [ ] Nummer eingeben (z. B. `46`) + „Suchen“ → Karte(n) werden angezeigt.
 - [ ] Namenssuche (z. B. `Darkrai`) funktioniert.
-- [ ] Buttons „Alle Karten“, „ex-Karten“ usw. zeigen passende Karten.
+- [ ] **Raritäts-Filter**: „Alle Karten“, „Common-Karten“, „ex-Karten“,
+      „SAR“, „AR“, „SR/UR/Gold“ zeigen jeweils passende **Teilmengen**.
+      Gegenprobe SV4a: „ex-Karten“ liefert 23 Karten, NICHT alle 186.
+      SV8: `Owei-Exeggcute`/`Kokowei-Exeggutor` erscheinen NICHT als ex.
+- [ ] Set **SV10 „The Glory of Team Rocket“** ist im Dropdown (132 Karten,
+      davon 90 Common, 8 ex im Basisset, 12 AR, 6 SAR, 13 SR, 3 UR).
+- [ ] **ZIP-Download** (gehostete Version, z. B. Netlify): „Als ZIP
+      herunterladen“ lädt genau die aktuell angezeigten Karten, zeigt
+      „Lade Karte X/Y …“, packt sie als `SETCODE/dateiname.jpg` ins ZIP;
+      fehlgeschlagene Bilder werden übersprungen und am Ende aufgelistet.
+      Lokal per `file://` erklärt der Button stattdessen den CORS-Grund.
+      (Benötigt `vendor/jszip.min.js` und die `_redirects`-Datei im Root.)
 - [ ] Tab-Wechsel zu „eBay-Export“ und zurück lässt die Suche unverändert.
 
 ## 3. Erfassen (`erfassung.html`, Tab „Erfassen“)
@@ -120,16 +144,43 @@ und einer unbekannten Kartennummer.
       **orange** markiert, Hinweis am Export, **nicht** in der CSV.
 
 ### Export & Titelbild
-- [ ] **Umschalter**: Vorbelegung Einzel/Variante nach Preisgrenze (Default
-      4,00 €); pro Zeile umschaltbar; Massenaktionen „Alle → …“ funktionieren.
+- [ ] **Export-Modus** (Dropdown im Import-Block, wird gemerkt): Standard ist
+      **„Alle als Einzelentwürfe“** — Preisgrenzen-Feld ausgeblendet, nur der
+      Export-A-Button sichtbar, ALLE Karten landen in der Entwurfs-CSV
+      (doppelte Karten als EINE Zeile mit summierter Quantity).
+      „Automatisch aufteilen“ zeigt Preisgrenze + beide Export-Buttons;
+      „Alle als Variationen“ blendet Export A aus. Nach Neuladen ist der
+      gewählte Modus noch da.
+- [ ] **Umschalter** (nur im Modus „Automatisch aufteilen“ aktiv): Vorbelegung
+      Einzel/Variante nach Preisgrenze (Default 4,00 €); pro Zeile
+      umschaltbar; Massenaktionen „Alle → …“ funktionieren. In den festen
+      Modi sind „Alle → …“ deaktiviert und der Zeilen-Umschalter zeigt einen
+      Hinweis-Toast.
 - [ ] **Einstellungen** (Standort, Bearbeitungszeit, Versand, Rücknahme) werden
       gemerkt (nach Neuladen noch da).
-- [ ] **Export A** (`ebay-entwuerfe.csv`): nur Einzel-Zeilen, Action `Draft`,
+- [ ] **Export A** (`ebay-entwuerfe.csv`): beginnt mit den **vier `#INFO`-Zeilen**
+      der offiziellen Vorlage „eBay-draft-listings-template_DE“ (Zeile 1:
+      `#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;`),
+      Zeile 5 ist die Kopfzeile; danach nur Einzel-Zeilen, Action `Draft`,
       SKU `SETCODE-NNN`, Category `183454`, Price mit **Punkt**, Format
       `FixedPrice`.
-- [ ] **Export B** (`ebay-varianten.csv`): pro Set eine Elternzeile (`Add`,
-      `RelationshipDetails=Kartenname=Wert1;Wert2;…`) + Kindzeilen
-      (`Relationship=Variation`, eigener Preis/Menge).
+- [ ] **Export A hochladen**: Verkäufercockpit Pro → Berichte → Hochladen
+      akzeptiert die Datei (keine Meldung „Wir konnten Ihre Vorlage nicht
+      identifizieren“); Entwürfe erscheinen unter ebay.de/sh/lst/drafts.
+- [ ] **Export B** (`ebay-varianten.csv`): beginnt mit der Info-Kennungszeile
+      `Info;Version=1.0.0;Template=fx_category_template_EBAY_DE` und der
+      105-Spalten-Kopfzeile der offiziellen Kategorie-Vorlage 183454
+      (`templates/eBay-category-listing-template-*.csv`); danach pro Set eine
+      Elternzeile (`Add`, `RelationshipDetails=Kartenname=Wert1;Wert2;…`,
+      Angebots-Einstellungen in Standort-/Versand-/Rücknahme-Spalten) +
+      Kindzeilen (`Relationship=Variation`, eigener Preis/Menge/PicURL).
+      **Achtung:** nutzt bewusst NICHT die Entwurfs-Vorlage (die kann keine
+      Varianten) – Upload erzeugt aktive Angebote. Der Warnhinweis
+      „Variationsangebote gehen beim Hochladen sofort live“ ist in der UI
+      (CSV-Export-Karte) sichtbar.
+- [ ] **Export-B-Blockade**: Sind Standort, Versandart, Versandkosten oder
+      Bearbeitungszeit in den Angebots-Einstellungen leer, erzeugt Export B
+      KEINE Datei; eine rote Meldung nennt die fehlenden Felder.
 - [ ] Ist eine der beiden Gruppen leer, wird die jeweilige Datei **nicht**
       erzeugt.
 - [ ] **CSV in Texteditor öffnen**: beginnt mit BOM, Felder mit `;` getrennt,

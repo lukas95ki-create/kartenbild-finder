@@ -234,6 +234,9 @@
   .stat b{color:var(--ink); font-size:15px;}
   .exporthint{font-size:12px; color:var(--orange); font-weight:700; margin-top:8px; display:none;}
   .exporthint.show{display:block;}
+  .exporterr{font-size:12px; color:var(--err); font-weight:700; margin-top:8px; display:none;}
+  .exporterr.show{display:block;}
+  button.chip:disabled{opacity:.45; cursor:not-allowed;}
 
   /* Titelbild */
   .tb-controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px;}
@@ -288,15 +291,18 @@
   </div>
   <div class="chips">
     <button class="chip" onclick="showAll()">Alle Karten</button>
+    <button class="chip" onclick="showCat('common')">🃏 Common-Karten</button>
     <button class="chip" onclick="showCat('ex')">⭐ ex-Karten</button>
-    <button class="chip" onclick="showCat('AR')">🎨 Alt Arts (AR)</button>
     <button class="chip" onclick="showCat('SAR')">✨ SAR</button>
+    <button class="chip" onclick="showCat('AR')">🎨 Alt Arts (AR)</button>
     <button class="chip" onclick="showCat('SR')">👑 SR/UR/Gold</button>
   </div>
 
   <div class="toolbar" id="toolbar">
     <span class="count" id="count"></span>
     <button class="chip" onclick="copyLinks()">🔗 Alle Bild-Links kopieren</button>
+    <button class="chip" onclick="downloadZip()" id="zipBtn">📦 Als ZIP herunterladen</button>
+    <span class="count" id="zipStatus"></span>
   </div>
 
   <div class="grid" id="out"></div>
@@ -366,10 +372,16 @@
             <option>Deutsch</option><option>Englisch</option><option>Japanisch</option>
             <option>Koreanisch</option><option>Chinesisch</option>
           </select></div>
-        <div><label>Preisgrenze Einzelangebot ab (€)</label>
-          <input type="text" id="priceThreshold" inputmode="decimal" value="4,00"></div>
-        <div style="align-self:end">
-          <button class="chip" id="applyThreshold" style="width:100%">Einzel/Variante nach Preisgrenze vorbelegen</button>
+        <div><label>Export-Modus (wird gemerkt)</label>
+          <select id="exportMode">
+            <option value="singles">Alle als Einzelentwürfe</option>
+            <option value="auto">Automatisch aufteilen (Preisgrenze)</option>
+            <option value="variants">Alle als Variationen</option>
+          </select></div>
+        <div id="autoSplitCtl">
+          <label>Preisgrenze Einzelangebot ab (€)</label>
+          <input type="text" id="priceThreshold" inputmode="decimal" value="4,00">
+          <button class="chip" id="applyThreshold" style="width:100%;margin-top:6px">Einzel/Variante nach Preisgrenze vorbelegen</button>
         </div>
       </div>
       <p class="hintline">Pflichtspalten: <code>Set-Code</code> · <code>Kartennummer</code> · <code>Anzahl</code> —
@@ -417,6 +429,14 @@
         <button class="go" id="exportB">⬇️ Export B · Varianten-Angebote (ebay-varianten.csv)</button>
       </div>
       <div class="exporthint" id="exportHint"></div>
+      <div class="exporterr" id="exportBError"></div>
+      <p class="hintline"><b>Export A</b> entspricht exakt der offiziellen eBay-Vorlage
+        „eBay-draft-listings-template_DE“ (beginnt mit den vier <code>#INFO</code>-Zeilen) und wird im
+        Verkäufercockpit Pro unter <i>Berichte → Hochladen</i> als <b>Entwurf</b> eingelesen.</p>
+      <p class="hintline" style="color:var(--warn)" id="exportBWarn"><b>⚠️ Achtung:</b> Variationsangebote
+        gehen beim Hochladen <b>sofort live</b> – Entwürfe sind hier nicht möglich. Die Entwurfs-Vorlage
+        unterstützt <b>keine Varianten</b>; Export B nutzt deshalb das klassische File-Exchange-Format
+        mit eigener Kopfzeile und <code>Action=Add</code>.</p>
       <p class="hintline">Semikolon-getrennt · UTF-8 mit BOM · Zeilenenden CRLF. Leere Gruppen erzeugen keine Datei.</p>
     </div>
 
@@ -518,9 +538,16 @@ function run(){
     '<div class="notice">Nichts gefunden. Tipp: deutschen Kartennamen oder die Nummer eingeben.</div>';
 }
 
+/* "-ex" nur als eigenes Namensteil-Ende werten – nicht in Namen wie
+   "Owei-Exeggcute" oder "Krawumms-Exploud" (kein Buchstabe direkt danach). */
+const EX_NAME_RE = /-ex(?![a-z])/i;
+function isExCard(c){ return c[3]==="ex" || EX_NAME_RE.test(c[1]); }
 function showCat(cat){
   let hits;
-  if (cat==="ex") hits = CUR.cards.filter(c=>/-ex/i.test(c[1]) || c[3]==="ex");
+  if (cat==="ex") hits = CUR.cards.filter(isExCard);
+  else if (cat==="common")
+    /* Common = Basisset-Karte (Nr ≤ total) ohne Raritätsmarkierung und ohne ex */
+    hits = CUR.cards.filter(c=>!c[3] && !EX_NAME_RE.test(c[1]) && c[0]<=CUR.total);
   else if (cat==="SR") hits = CUR.cards.filter(c=>["SR","UR","MUR","ACE","Gold"].includes(c[3]));
   else hits = CUR.cards.filter(c=>c[3]===cat);
   if (!hits.length){
@@ -535,6 +562,8 @@ function showAll(){ render(CUR.cards.map(c=>c[0])); }
 
 function render(nums){
   clearOut();
+  lastShown = nums.slice();          // Basis für den ZIP-Download
+  zipMsg("");
   const out = document.getElementById("out");
   nums.forEach(n=>out.appendChild(cardEl(n)));
   document.getElementById("toolbar").style.display="flex";
@@ -588,6 +617,117 @@ function copyLinks(){
   }).catch(()=>{ prompt("Links manuell kopieren:", links); });
 }
 
+/* =====================================================================
+   ZIP-DOWNLOAD der aktuell gefilterten Karten (Kartensuche)
+   Bilder: pokezentrum.de (Nutzung mit Erlaubnis). Der Bild-Server sendet
+   keine CORS-Header – der Browser darf die Bilddaten deshalb nicht
+   direkt per fetch lesen. Gehostet (Netlify) läuft der Abruf darum über
+   den Same-Origin-Pfad /pzimg/* (siehe _redirects im Repo-Root).
+   Lokal per file:// geöffnet ist der ZIP-Download technisch unmöglich;
+   der Button erklärt das dann statt still zu scheitern.
+   JSZip liegt lokal in vendor/ (kein CDN) und wird erst beim ersten
+   Klick nachgeladen.
+   ===================================================================== */
+let lastShown = [];               // zuletzt gerenderte Kartennummern
+const ZIP_BATCH    = 6;           // max. parallele Downloads (schont pokezentrum.de)
+const ZIP_PAUSE_MS = 250;         // Pause zwischen den Batches
+
+function ensureJSZip(){
+  if (window.JSZip) return Promise.resolve();
+  return new Promise((res, rej)=>{
+    const s=document.createElement("script");
+    s.src="vendor/jszip.min.js";
+    s.onload=res;
+    s.onerror=()=>rej(new Error("vendor/jszip.min.js fehlt – den Ordner vendor/ mit hochladen."));
+    document.head.appendChild(s);
+  });
+}
+function zipMsg(msg, isErr){
+  const el=document.getElementById("zipStatus");
+  el.textContent=msg||"";
+  el.style.color=isErr?"var(--err)":"";
+}
+/* Ein Bild als Blob holen: erst direkt (falls der Server irgendwann CORS
+   erlaubt), sonst über den Netlify-Proxy-Pfad. urls = Kandidatenliste. */
+async function fetchCardBlob(urls){
+  let lastErr="nicht erreichbar";
+  for (const url of urls){
+    try{
+      const r=await fetch(url, {mode:"cors"});
+      if (r.ok) return {blob: await r.blob(), url};
+      lastErr="HTTP "+r.status;
+    }catch(e){ lastErr="CORS/Netzwerk"; }
+    if (location.protocol!=="file:" && url.includes("/wp-content/uploads/")){
+      try{
+        const r2=await fetch("/pzimg/"+url.split("/wp-content/uploads/")[1]);
+        if (r2.ok) return {blob: await r2.blob(), url};
+        lastErr="HTTP "+r2.status;
+      }catch(e){ lastErr="Proxy nicht erreichbar"; }
+    }
+  }
+  throw new Error(lastErr);
+}
+async function downloadZip(){
+  if (!lastShown.length){ alert("Erst Karten anzeigen (Suche oder Filter), dann herunterladen."); return; }
+  if (location.protocol==="file:"){
+    alert("Der ZIP-Download funktioniert nur in der gehosteten Version (z. B. Netlify).\n\n"+
+      "Grund: pokezentrum.de erlaubt Browsern keinen Cross-Origin-Zugriff auf die Bilddaten (CORS). "+
+      "Gehostet leitet die Seite die Anfragen über den eigenen Pfad /pzimg/ um – "+
+      "bei einer lokal per Doppelklick geöffneten Datei gibt es diesen Ausweg nicht.");
+    return;
+  }
+  const btn=document.getElementById("zipBtn");
+  btn.disabled=true;
+  try{
+    await ensureJSZip();
+    const zip=new JSZip();
+    const folder=zip.folder(CUR.code);
+    const jobs=lastShown.map(n=>{
+      const resolved=foundUrls.get(CUR.code+"-"+n);
+      return {n, urls: resolved ? [resolved] : candidates(n)};
+    });
+    const failed=[];
+    const usedNames=new Set();
+    let done=0, ok=0;
+    for (let i=0;i<jobs.length;i+=ZIP_BATCH){
+      const batch=jobs.slice(i,i+ZIP_BATCH);
+      await Promise.all(batch.map(async j=>{
+        zipMsg(`Lade Karte ${++done}/${jobs.length} …`);
+        if (!j.urls.length){ failed.push(`Nr. ${pad(j.n)} – keine Bild-URL hinterlegt`); return; }
+        try{
+          const {blob, url}=await fetchCardBlob(j.urls);
+          let fname=decodeURIComponent(url.split("/").pop().split("?")[0]) || (pad(j.n)+".jpg");
+          if (usedNames.has(fname)) fname=pad(j.n)+"-"+fname;
+          usedNames.add(fname);
+          folder.file(fname, blob);
+          ok++;
+        }catch(e){
+          failed.push(`Nr. ${pad(j.n)} – ${e.message||e}`);
+        }
+      }));
+      if (i+ZIP_BATCH<jobs.length) await new Promise(r=>setTimeout(r,ZIP_PAUSE_MS));
+    }
+    if (!ok){
+      zipMsg("Kein Bild ladbar – kein ZIP erzeugt.", true);
+      if (failed.length) alert("Alle Downloads fehlgeschlagen:\n\n"+failed.join("\n"));
+      return;
+    }
+    zipMsg("Packe ZIP …");
+    const blob=await zip.generateAsync({type:"blob"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=CUR.code+"-karten.zip";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+    zipMsg(`Fertig: ${ok} Bild(er) im ZIP`+(failed.length?` · ${failed.length} übersprungen`:""), failed.length>0);
+    if (failed.length) alert("Diese Bilder fehlen im ZIP (übersprungen):\n\n"+failed.join("\n"));
+  }catch(e){
+    zipMsg("Fehler: "+(e.message||e), true);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
 document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
 init();
 
@@ -620,14 +760,119 @@ const SHEETJS_CDN     = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.f
 const FILE_A          = "ebay-entwuerfe.csv";
 const FILE_B          = "ebay-varianten.csv";
 
-/* Export A – exakter Header (Einzel-Entwürfe / Draft) */
-const HEADER_A =
+/* =====================================================================
+   Export A – Entwurfs-CSV exakt nach der offiziellen eBay-Vorlage
+   "eBay-draft-listings-template_DE" (Verkäufercockpit Pro → Berichte).
+   eBay identifiziert den Upload an der ERSTEN Zeile – die vier
+   #INFO-Zeilen und die Kopfzeile dürfen daher NICHT verändert werden.
+   Der Block ist bewusst DOM-frei; tests/ebay-draft-csv.test.mjs
+   extrahiert ihn über die Marker und testet ihn automatisiert.
+   ===================================================================== */
+/* @EBAY_DRAFT_CSV_START */
+const EBAY_DRAFT_INFO_LINES = [
+  "#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;",
+  "#INFO Action und Category ID sind erforderliche Felder. 1) Stellen Sie Action auf Draft ein. 2) Die Kategorie-ID für Ihre Angebote finden Sie hier: https://pages.ebay.com/sellerinformation/news/categorychanges.html;;;;;;;;;",
+  "#INFO Nachdem Sie Ihren Entwurf erfolgreich im Berichte-Tab Ihres Verkäufer-Cockpit Pro heruntergeladen haben; können Sie die Entwürfe hier zu aktiven Angeboten vervollständigen: https://www.ebay.de/sh/lst/drafts;;;;;;;;;",
+  "#INFO;;;;;;;;;;"
+];
+const EBAY_DRAFT_HEADER =
   "Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);Custom label (SKU);Category ID;Title;UPC;Price;Quantity;Item photo URL;Condition ID;Description;Format";
+function priceDot(n){ return n==null?"":(+n).toFixed(2); }                     // CSV: Punkt-Dezimaltrenner
+function csvEsc(v){
+  v = (v==null)?"":String(v);
+  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+/* Duplikate (gleiche SKU + gleicher Titel) zu einer Zeile zusammenfassen,
+   Mengen summieren. Ball-Varianten haben einen anderen Titel und bleiben
+   eigene Zeilen. */
+function mergeDraftRecords(records){
+  const map = new Map();
+  records.forEach(r=>{
+    const k = r.sku + "\u0000" + r.title;
+    const e = map.get(k);
+    if (e) e.qty = (+e.qty) + (+r.qty);
+    else map.set(k, Object.assign({}, r));
+  });
+  return Array.from(map.values());
+}
+/* records: [{sku, categoryId, title, price, qty, photoUrl, conditionId, description}] */
+function buildDraftCsv(records){
+  const lines = EBAY_DRAFT_INFO_LINES.concat([EBAY_DRAFT_HEADER]);
+  mergeDraftRecords(records).forEach(r=>{
+    lines.push([
+      "Draft",                 // Action – Pflichtfeld der Vorlage
+      r.sku,
+      r.categoryId,            // Category ID – Pflichtfeld, pro Zeile befüllt
+      r.title,
+      "",                      // UPC leer
+      priceDot(r.price),
+      String(r.qty),
+      r.photoUrl,
+      r.conditionId || "",
+      r.description,
+      "FixedPrice"
+    ].map(csvEsc).join(";"));
+  });
+  return "\uFEFF" + lines.join("\r\n") + "\r\n";   // UTF-8 BOM + CRLF
+}
+/* @EBAY_DRAFT_CSV_END */
 
-/* Export B – exakter Header (Varianten-Angebote, eBay File Exchange). */
-const HEADER_B =
-  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
-const COLS_B = HEADER_B.split(";");
+/* =====================================================================
+   Export-Modus & Export-B-Schutz – ebenfalls DOM-frei und über die
+   Marker von tests/ebay-draft-csv.test.mjs automatisiert getestet.
+   exportMode: "singles" (alle als Einzelentwürfe, Standard) |
+               "auto"    (Aufteilung nach o.mode / Preisgrenze) |
+               "variants"(alle als Variationen)
+   ===================================================================== */
+/* @EBAY_EXPORT_RULES_START */
+/* Zeilen, die im gewählten Export-Modus zum Ziel ("single"|"variant") gehören
+   – noch OHNE Preisfilter (für die Zählung übersprungener Zeilen). */
+function exportScope(rows, exportMode, target){
+  if (exportMode==="singles")  return target==="single"  ? rows.slice() : [];
+  if (exportMode==="variants") return target==="variant" ? rows.slice() : [];
+  return rows.filter(o=>o.mode===target);
+}
+/* Exportierbare Zeilen (Scope + Preis vorhanden). */
+function selectExportRows(rows, exportMode, target){
+  return exportScope(rows, exportMode, target).filter(o=>o.price!=null);
+}
+/* Pflichtfelder der Angebots-Einstellungen für Export B (Varianten).
+   Liefert die deutschen Feldnamen aller fehlenden Angaben. */
+function missingVariantSettings(st){
+  const miss = [];
+  if (!st.location)                          miss.push("Standort");
+  if (!st.shipService)                       miss.push("Versandart");
+  if (st.shipCost==null || st.shipCost==="") miss.push("Versandkosten");
+  if (!st.dispatch)                          miss.push("Bearbeitungszeit");
+  return miss;
+}
+/* @EBAY_EXPORT_RULES_END */
+
+/* =====================================================================
+   Export B – Kategorie-CSV exakt nach der offiziellen eBay-Vorlage
+   "eBay-category-listing-template" (fx_category_template_EBAY_DE,
+   Kategorie 183454) – Original in templates/. Info-Zeile und Kopfzeile
+   sind buchstabengetreu aus der Vorlagendatei übernommen; Pflicht-
+   Aspekt laut Vorlage: "Spiel". Nicht benötigte Spalten bleiben leer,
+   werden aber nicht weggelassen.
+   Der Block ist DOM-frei (nutzt csvEsc aus dem @EBAY_DRAFT_CSV-Block)
+   und wird von tests/ebay-draft-csv.test.mjs u. a. gegen die
+   Vorlagendatei getestet.
+   ===================================================================== */
+/* @EBAY_CATEGORY_CSV_START */
+const EBAY_CATEGORY_INFO_LINE = "Info;Version=1.0.0;Template=fx_category_template_EBAY_DE";
+const EBAY_CATEGORY_HEADER =
+  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;C:Kartenanzahl;C:Kartenzustand;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
+const COLS_B = EBAY_CATEGORY_HEADER.split(";");
+function makeRowB(){ const o={}; COLS_B.forEach(c=>o[c]=""); return o; }
+/* rows: fertige Zeilenobjekte (makeRowB) in Ausgabereihenfolge. */
+function buildCategoryCsv(rows){
+  const lines = [EBAY_CATEGORY_INFO_LINE, EBAY_CATEGORY_HEADER];
+  rows.forEach(r=>lines.push(COLS_B.map(c=>csvEsc(r[c])).join(";")));
+  return "\uFEFF" + lines.join("\r\n") + "\r\n";   // UTF-8 BOM + CRLF
+}
+/* @EBAY_CATEGORY_CSV_END */
 
 /* ---------- Zustand ---------- */
 let exRows = [];       // aufgelöste Zeilen (Vorschau/Export)
@@ -654,12 +899,7 @@ function parsePrice(v){
   return isNaN(n)?null:n;
 }
 function priceComma(n){ return n==null?"":(+n).toFixed(2).replace(".",","); }  // Anzeige
-function priceDot(n){ return n==null?"":(+n).toFixed(2); }                     // CSV
-function csvEsc(v){
-  v = (v==null)?"":String(v);
-  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
-  return v;
-}
+/* priceDot + csvEsc: siehe @EBAY_DRAFT_CSV-Block oben (auch von Export B genutzt). */
 function downloadFile(filename, content, mime){
   const blob = new Blob([content],{type:mime});
   const url = URL.createObjectURL(blob);
@@ -725,6 +965,7 @@ function loadExSettings(){
   byId("setShipService").value = s.shipService || "";
   byId("setShipCost").value    = s.shipCost    || "";
   byId("setReturns").value     = s.returns     || "no";
+  byId("exportMode").value     = ["auto","singles","variants"].includes(s.exportMode) ? s.exportMode : "singles";
   if (s.threshold) byId("priceThreshold").value = s.threshold;
 }
 function saveExSettings(){
@@ -734,6 +975,7 @@ function saveExSettings(){
     shipService: byId("setShipService").value.trim(),
     shipCost:    byId("setShipCost").value.trim(),
     returns:     byId("setReturns").value,
+    exportMode:  byId("exportMode").value,
     threshold:   byId("priceThreshold").value.trim()
   };
   try{ localStorage.setItem(EX_SETTINGS_KEY, JSON.stringify(s)); }catch(e){}
@@ -1048,7 +1290,7 @@ function parseExcelRows(det){
   exRows = out;
   exErrs = errs;
   applyPrices();
-  applyThresholdPrefill();
+  applyExportMode();       // Vorbelegung gemäß gewähltem Export-Modus
   renderErrors();
   renderPreview();
   buildTitleImageSets();
@@ -1086,6 +1328,39 @@ function applyThresholdPrefill(){
   const th = parsePrice(byId("priceThreshold").value);
   const t = th==null ? 4 : th;
   exRows.forEach(o=>{ o.mode = (o.price!=null && o.price>=t) ? "single" : "variant"; });
+}
+
+/* ---------- Export-Modus (siehe @EBAY_EXPORT_RULES-Block) ---------- */
+function currentExportMode(){
+  const v = byId("exportMode").value;
+  return (v==="auto" || v==="variants") ? v : "singles";
+}
+/* Wendet den gewählten Modus auf die Zeilen an und passt die UI an
+   (Preisgrenzen-Steuerung, Export-Buttons, Zeilen-Umschalter). */
+function applyExportMode(){
+  const m = currentExportMode();
+  byId("autoSplitCtl").style.display = (m==="auto") ? "" : "none";
+  if (m==="singles")       exRows.forEach(o=>o.mode="single");
+  else if (m==="variants") exRows.forEach(o=>o.mode="variant");
+  else                     applyThresholdPrefill();
+  updateExportButtons();
+  showExportBError("");
+}
+function updateExportButtons(){
+  const m = currentExportMode();
+  byId("exportA").style.display = (m==="variants") ? "none" : "";
+  byId("exportB").style.display = (m==="singles")  ? "none" : "";
+  byId("exportBWarn").style.display = (m==="singles") ? "none" : "";
+  const fixed = (m!=="auto");
+  byId("allSingle").disabled  = fixed;
+  byId("allVariant").disabled = fixed;
+  const t = fixed ? "Deaktiviert – Export-Modus steht fest; Aufteilung nur bei „Automatisch aufteilen“." : "";
+  byId("allSingle").title = t; byId("allVariant").title = t;
+}
+function showExportBError(msg){
+  const el = byId("exportBError");
+  el.textContent = msg;
+  el.classList.toggle("show", !!msg);
 }
 
 /* =====================================================================
@@ -1227,6 +1502,10 @@ function exRowEl(o){
   tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant");
   tg.innerHTML=`<span class="s-single">Einzel</span><span class="s-variant">Variante</span>`;
   tg.onclick=()=>{
+    if (currentExportMode()!=="auto"){
+      toastX("Export-Modus steht fest („Alle als …“) – Umschalten pro Zeile nur bei „Automatisch aufteilen“.", true);
+      return;
+    }
     o.mode = o.mode==="single" ? "variant" : "single";
     tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant");
     renderStats(); buildTitleImageSets();
@@ -1263,32 +1542,37 @@ function description(headline, isVariant){
 }
 
 /* =====================================================================
-   EXPORT A – Einzel-Entwürfe (Draft-CSV)
+   EXPORT A – Einzel-Entwürfe (Draft-CSV, Vorlage
+   "eBay-draft-listings-template_DE" – siehe @EBAY_DRAFT_CSV-Block).
    Zeilen ohne Preis werden ausgeschlossen (orange markiert).
    ===================================================================== */
 function buildCsvA(){
-  const singles = exRows.filter(o=>o.mode==="single" && o.price!=null);
+  const singles = selectExportRows(exRows, currentExportMode(), "single");
   if (!singles.length) return null;
-  const lines=[HEADER_A];
-  singles.forEach(o=>{
+  return buildDraftCsv(singles.map(o=>{
     const title = draftTitle(o);
-    const rec=[
-      "Draft", sku(o), CATEGORY_ID, title,
-      "",                      // UPC leer
-      priceDot(o.price),       // Punkt-Dezimaltrenner
-      String(o.qty),
-      exportUrl(o),
-      "",                      // Condition ID leer (bewusst, s. Beschreibung ohne Zustand)
-      description(title,false),
-      "FixedPrice"
-    ];
-    lines.push(rec.map(csvEsc).join(";"));
-  });
-  return "﻿" + lines.join("\r\n");   // UTF-8 BOM + CRLF
+    return {
+      sku: sku(o),
+      categoryId: CATEGORY_ID,
+      title,
+      price: o.price,
+      qty: o.qty,
+      photoUrl: exportUrl(o),
+      conditionId: "",         // bewusst leer (Beschreibung ohne Zustandsangabe)
+      description: description(title,false)
+    };
+  }));
 }
 
 /* =====================================================================
    EXPORT B – Varianten-Angebote (Kategorie-CSV)
+   -------------------------------------------------------------------
+   ACHTUNG: nutzt NICHT die Entwurfs-Vorlage von Export A – die
+   "eBay-draft-listings-template_DE" unterstützt keine Varianten.
+   Export B nutzt die offizielle Kategorie-Vorlage 183454 (Info-Zeile
+   + Kopfzeile aus templates/, siehe @EBAY_CATEGORY_CSV-Block) mit
+   Action=Add (erzeugt aktive Angebote). Hinweis dazu steht sichtbar
+   in der UI (CSV-Export-Karte).
    -------------------------------------------------------------------
    eBay-File-Exchange-Variantensyntax (verifiziert gg. eBay-Doku):
    • Elternzeile: Relationship leer,
@@ -1307,9 +1591,8 @@ function buildCsvA(){
      Zustandsangabe). Verlangt eBay einen Pflichtwert, ist 4000
      (Gebraucht/Sehr gut) für Einzelkarten üblich.
    ===================================================================== */
-function makeRowB(){ const o={}; COLS_B.forEach(c=>o[c]=""); return o; }
 function buildCsvB(){
-  const variants = exRows.filter(o=>o.mode==="variant" && o.price!=null);
+  const variants = selectExportRows(exRows, currentExportMode(), "variant");
   if (!variants.length) return null;
 
   const groups={};
@@ -1323,7 +1606,7 @@ function buildCsvB(){
     returns:     byId("setReturns").value
   };
   const returnsOpt = st.returns==="yes" ? "ReturnsAccepted" : "ReturnsNotAccepted";
-  const lines=[HEADER_B];
+  const rows=[];
 
   Object.keys(groups).forEach(code=>{
     const list = groups[code];
@@ -1355,7 +1638,7 @@ function buildCsvB(){
     P["*DispatchTimeMax"] = st.dispatch;
     P["*ReturnsAcceptedOption"] = returnsOpt;
     if (st.returns==="yes"){ P["ReturnsWithinOption"]="Days_30"; P["RefundOption"]="MoneyBack"; P["ShippingCostPaidByOption"]="Buyer"; }
-    lines.push(COLS_B.map(c=>csvEsc(P[c])).join(";"));
+    rows.push(P);
 
     /* ---- Kindzeilen ---- */
     list.forEach(o=>{
@@ -1375,22 +1658,37 @@ function buildCsvB(){
       C["*Duration"]   = "GTC";
       C["*StartPrice"] = priceDot(o.price);
       C["*Quantity"]   = String(o.qty);
-      lines.push(COLS_B.map(c=>csvEsc(C[c])).join(";"));
+      rows.push(C);
     });
   });
-  return "﻿" + lines.join("\r\n");
+  return buildCategoryCsv(rows);
 }
 
 function doExportA(){
   const csv=buildCsvA();
-  const skipped=exRows.filter(o=>o.mode==="single" && o.price==null).length;
+  const skipped=exportScope(exRows, currentExportMode(), "single").filter(o=>o.price==null).length;
   if (!csv){ toastX("Keine exportierbaren Zeilen auf „Einzelangebot“ – keine Datei erzeugt.", true); return; }
   downloadFile(FILE_A, csv, "text/csv;charset=utf-8");
   toastX("Export A gespeichert" + (skipped?` (${skipped} Zeile(n) ohne Preis ausgeschlossen)`:""));
 }
 function doExportB(){
+  /* Blockade: Varianten gehen sofort live – ohne vollständige
+     Angebots-Einstellungen keine Datei erzeugen. */
+  const miss = missingVariantSettings({
+    location:    byId("setLocation").value.trim(),
+    dispatch:    byId("setDispatch").value.trim(),
+    shipService: byId("setShipService").value.trim(),
+    shipCost:    parsePrice(byId("setShipCost").value)
+  });
+  if (miss.length){
+    const msg = "⛔ Export B blockiert – bitte zuerst die Angebots-Einstellungen ausfüllen. Es fehlt: " + miss.join(", ") + ".";
+    showExportBError(msg);
+    toastX(msg, true);
+    return;
+  }
+  showExportBError("");
   const csv=buildCsvB();
-  const skipped=exRows.filter(o=>o.mode==="variant" && o.price==null).length;
+  const skipped=exportScope(exRows, currentExportMode(), "variant").filter(o=>o.price==null).length;
   if (!csv){ toastX("Keine exportierbaren Zeilen auf „Variante“ – keine Datei erzeugt.", true); return; }
   downloadFile(FILE_B, csv, "text/csv;charset=utf-8");
   toastX("Export B gespeichert" + (skipped?` (${skipped} Zeile(n) ohne Preis ausgeschlossen)`:""));
@@ -1576,8 +1874,12 @@ function downloadTitleImage(){
    ===================================================================== */
 function initEbayExport(){
   loadExSettings();
-  ["setLocation","setDispatch","setShipService","setShipCost","setReturns","priceThreshold"]
+  ["setLocation","setDispatch","setShipService","setShipCost","setReturns","priceThreshold","exportMode"]
     .forEach(id=>byId(id).addEventListener("change", saveExSettings));
+  byId("exportMode").addEventListener("change", ()=>{
+    applyExportMode(); renderPreview(); buildTitleImageSets();
+  });
+  applyExportMode();   // gemerkten Modus anwenden (blendet Preisgrenze/Buttons passend ein)
 
   // Preisregeln
   renderRules();
