@@ -1,0 +1,5 @@
+# Netlify-Proxy für den ZIP-Download der Kartenbilder:
+# pokezentrum.de sendet keine CORS-Header, daher holt die App die
+# Bilddaten über diesen Same-Origin-Pfad (siehe downloadZip() in
+# kartenbild-finder-v6.html). Nutzung der Bilder mit Erlaubnis.
+/pzimg/*  https://pokezentrum.de/wp-content/uploads/:splat  200

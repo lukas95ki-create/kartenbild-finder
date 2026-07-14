@@ -301,6 +301,8 @@
   <div class="toolbar" id="toolbar">
     <span class="count" id="count"></span>
     <button class="chip" onclick="copyLinks()">🔗 Alle Bild-Links kopieren</button>
+    <button class="chip" onclick="downloadZip()" id="zipBtn">📦 Als ZIP herunterladen</button>
+    <span class="count" id="zipStatus"></span>
   </div>
 
   <div class="grid" id="out"></div>
@@ -560,6 +562,8 @@ function showAll(){ render(CUR.cards.map(c=>c[0])); }
 
 function render(nums){
   clearOut();
+  lastShown = nums.slice();          // Basis für den ZIP-Download
+  zipMsg("");
   const out = document.getElementById("out");
   nums.forEach(n=>out.appendChild(cardEl(n)));
   document.getElementById("toolbar").style.display="flex";
@@ -611,6 +615,117 @@ function copyLinks(){
     const t=document.getElementById("toast");
     t.style.display="block"; setTimeout(()=>t.style.display="none",1800);
   }).catch(()=>{ prompt("Links manuell kopieren:", links); });
+}
+
+/* =====================================================================
+   ZIP-DOWNLOAD der aktuell gefilterten Karten (Kartensuche)
+   Bilder: pokezentrum.de (Nutzung mit Erlaubnis). Der Bild-Server sendet
+   keine CORS-Header – der Browser darf die Bilddaten deshalb nicht
+   direkt per fetch lesen. Gehostet (Netlify) läuft der Abruf darum über
+   den Same-Origin-Pfad /pzimg/* (siehe _redirects im Repo-Root).
+   Lokal per file:// geöffnet ist der ZIP-Download technisch unmöglich;
+   der Button erklärt das dann statt still zu scheitern.
+   JSZip liegt lokal in vendor/ (kein CDN) und wird erst beim ersten
+   Klick nachgeladen.
+   ===================================================================== */
+let lastShown = [];               // zuletzt gerenderte Kartennummern
+const ZIP_BATCH    = 6;           // max. parallele Downloads (schont pokezentrum.de)
+const ZIP_PAUSE_MS = 250;         // Pause zwischen den Batches
+
+function ensureJSZip(){
+  if (window.JSZip) return Promise.resolve();
+  return new Promise((res, rej)=>{
+    const s=document.createElement("script");
+    s.src="vendor/jszip.min.js";
+    s.onload=res;
+    s.onerror=()=>rej(new Error("vendor/jszip.min.js fehlt – den Ordner vendor/ mit hochladen."));
+    document.head.appendChild(s);
+  });
+}
+function zipMsg(msg, isErr){
+  const el=document.getElementById("zipStatus");
+  el.textContent=msg||"";
+  el.style.color=isErr?"var(--err)":"";
+}
+/* Ein Bild als Blob holen: erst direkt (falls der Server irgendwann CORS
+   erlaubt), sonst über den Netlify-Proxy-Pfad. urls = Kandidatenliste. */
+async function fetchCardBlob(urls){
+  let lastErr="nicht erreichbar";
+  for (const url of urls){
+    try{
+      const r=await fetch(url, {mode:"cors"});
+      if (r.ok) return {blob: await r.blob(), url};
+      lastErr="HTTP "+r.status;
+    }catch(e){ lastErr="CORS/Netzwerk"; }
+    if (location.protocol!=="file:" && url.includes("/wp-content/uploads/")){
+      try{
+        const r2=await fetch("/pzimg/"+url.split("/wp-content/uploads/")[1]);
+        if (r2.ok) return {blob: await r2.blob(), url};
+        lastErr="HTTP "+r2.status;
+      }catch(e){ lastErr="Proxy nicht erreichbar"; }
+    }
+  }
+  throw new Error(lastErr);
+}
+async function downloadZip(){
+  if (!lastShown.length){ alert("Erst Karten anzeigen (Suche oder Filter), dann herunterladen."); return; }
+  if (location.protocol==="file:"){
+    alert("Der ZIP-Download funktioniert nur in der gehosteten Version (z. B. Netlify).\n\n"+
+      "Grund: pokezentrum.de erlaubt Browsern keinen Cross-Origin-Zugriff auf die Bilddaten (CORS). "+
+      "Gehostet leitet die Seite die Anfragen über den eigenen Pfad /pzimg/ um – "+
+      "bei einer lokal per Doppelklick geöffneten Datei gibt es diesen Ausweg nicht.");
+    return;
+  }
+  const btn=document.getElementById("zipBtn");
+  btn.disabled=true;
+  try{
+    await ensureJSZip();
+    const zip=new JSZip();
+    const folder=zip.folder(CUR.code);
+    const jobs=lastShown.map(n=>{
+      const resolved=foundUrls.get(CUR.code+"-"+n);
+      return {n, urls: resolved ? [resolved] : candidates(n)};
+    });
+    const failed=[];
+    const usedNames=new Set();
+    let done=0, ok=0;
+    for (let i=0;i<jobs.length;i+=ZIP_BATCH){
+      const batch=jobs.slice(i,i+ZIP_BATCH);
+      await Promise.all(batch.map(async j=>{
+        zipMsg(`Lade Karte ${++done}/${jobs.length} …`);
+        if (!j.urls.length){ failed.push(`Nr. ${pad(j.n)} – keine Bild-URL hinterlegt`); return; }
+        try{
+          const {blob, url}=await fetchCardBlob(j.urls);
+          let fname=decodeURIComponent(url.split("/").pop().split("?")[0]) || (pad(j.n)+".jpg");
+          if (usedNames.has(fname)) fname=pad(j.n)+"-"+fname;
+          usedNames.add(fname);
+          folder.file(fname, blob);
+          ok++;
+        }catch(e){
+          failed.push(`Nr. ${pad(j.n)} – ${e.message||e}`);
+        }
+      }));
+      if (i+ZIP_BATCH<jobs.length) await new Promise(r=>setTimeout(r,ZIP_PAUSE_MS));
+    }
+    if (!ok){
+      zipMsg("Kein Bild ladbar – kein ZIP erzeugt.", true);
+      if (failed.length) alert("Alle Downloads fehlgeschlagen:\n\n"+failed.join("\n"));
+      return;
+    }
+    zipMsg("Packe ZIP …");
+    const blob=await zip.generateAsync({type:"blob"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=CUR.code+"-karten.zip";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+    zipMsg(`Fertig: ${ok} Bild(er) im ZIP`+(failed.length?` · ${failed.length} übersprungen`:""), failed.length>0);
+    if (failed.length) alert("Diese Bilder fehlen im ZIP (übersprungen):\n\n"+failed.join("\n"));
+  }catch(e){
+    zipMsg("Fehler: "+(e.message||e), true);
+  }finally{
+    btn.disabled=false;
+  }
 }
 
 document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });

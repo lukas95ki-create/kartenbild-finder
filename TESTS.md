@@ -42,7 +42,18 @@ Am besten je einmal **lokal** (Datei per Doppelklick öffnen) **und** **gehostet
 - [ ] Sprach-Dropdown und Set-Dropdown sind befüllt.
 - [ ] Nummer eingeben (z. B. `46`) + „Suchen“ → Karte(n) werden angezeigt.
 - [ ] Namenssuche (z. B. `Darkrai`) funktioniert.
-- [ ] Buttons „Alle Karten“, „ex-Karten“ usw. zeigen passende Karten.
+- [ ] **Raritäts-Filter**: „Alle Karten“, „Common-Karten“, „ex-Karten“,
+      „SAR“, „AR“, „SR/UR/Gold“ zeigen jeweils passende **Teilmengen**.
+      Gegenprobe SV4a: „ex-Karten“ liefert 23 Karten, NICHT alle 186.
+      SV8: `Owei-Exeggcute`/`Kokowei-Exeggutor` erscheinen NICHT als ex.
+- [ ] Set **SV10 „The Glory of Team Rocket“** ist im Dropdown (132 Karten,
+      davon 90 Common, 8 ex im Basisset, 12 AR, 6 SAR, 13 SR, 3 UR).
+- [ ] **ZIP-Download** (gehostete Version, z. B. Netlify): „Als ZIP
+      herunterladen“ lädt genau die aktuell angezeigten Karten, zeigt
+      „Lade Karte X/Y …“, packt sie als `SETCODE/dateiname.jpg` ins ZIP;
+      fehlgeschlagene Bilder werden übersprungen und am Ende aufgelistet.
+      Lokal per `file://` erklärt der Button stattdessen den CORS-Grund.
+      (Benötigt `vendor/jszip.min.js` und die `_redirects`-Datei im Root.)
 - [ ] Tab-Wechsel zu „eBay-Export“ und zurück lässt die Suche unverändert.
 
 ## 3. Erfassen (`erfassung.html`, Tab „Erfassen“)
