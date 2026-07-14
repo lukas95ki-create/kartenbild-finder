@@ -140,11 +140,24 @@ und einer unbekannten Kartennummer.
 - [ ] Zeile ohne ermittelbaren Preis (Basispreis der Regel geleert) →
       **orange** markiert, Hinweis am Export, **nicht** in der CSV.
 
+### Titel (SEO v2)
+- [ ] Der Titel in der Vorschau folgt dem Muster **Pokemon [Name] [Nr/Total]
+      [Setname] [Set-Code] [Seltenheit] [Sprache] [Ball]**, z. B.
+      `Pokemon Pikachu 093/187 Terastal Festival ex SV8a AR Japanisch`.
+- [ ] Neben Set/Nummer/Sprache steht die **Titel-Länge** (`62/80`); nie über `80/80`.
+- [ ] **Sehr langer Kartenname**: Titel wird **nicht hart abgeschnitten**, sondern
+      Tokens werden in fester Reihenfolge geopfert (zuerst Zustand, dann Setname,
+      dann `Nr/Total`→`Nr`, dann Seltenheit, dann Sprache) — Marke, Name, Nummer
+      und Set-Code bleiben immer erhalten, Ergebnis ≤ 80 Zeichen.
+- [ ] **Zustand im Titel** (Einstellungen → Checkbox, Standard **aus**): aktiviert
+      + Kürzel (z. B. `NM`) → erscheint am Titelende; Warnhinweis (rechtliche
+      Zusicherung) ist sichtbar; Einstellung überlebt Neuladen.
+
 ### Export & Titelbild
 - [ ] **Umschalter**: Vorbelegung Einzel/Variante nach Preisgrenze (Default
       4,00 €); pro Zeile umschaltbar; Massenaktionen „Alle → …“ funktionieren.
-- [ ] **Einstellungen** (Standort, Bearbeitungszeit, Versand, Rücknahme) werden
-      gemerkt (nach Neuladen noch da).
+- [ ] **Einstellungen** (Standort, Bearbeitungszeit, Versand, Rücknahme,
+      Zustand-im-Titel) werden gemerkt (nach Neuladen noch da).
 - [ ] **Export A** (`ebay-entwuerfe.csv`): nur Einzel-Zeilen, Action `Draft`,
       SKU `SETCODE-NNN`, Category `183454`, Price mit **Punkt**, Format
       `FixedPrice`.

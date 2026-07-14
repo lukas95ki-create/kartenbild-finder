@@ -327,6 +327,17 @@
         </div>
         <p class="hintline">Diese Werte gelten für die <b>Varianten-Angebote</b> (Export B). Einzel-Entwürfe (Export A)
           sind reine Drafts – dort ergänzt du Versand/Standort später direkt in eBay.</p>
+
+        <div class="grid3x" style="margin-top:6px; border-top:1px solid var(--line); padding-top:12px">
+          <div style="grid-column:1 / -1"><label style="display:flex; align-items:center; gap:8px; margin:0">
+            <input type="checkbox" id="setUseCondition" style="width:auto; appearance:auto">
+            Zustand im Titel anzeigen (standardmäßig aus)</label></div>
+          <div><label>Zustands-Kürzel</label>
+            <input type="text" id="setConditionText" placeholder="z. B. NM" maxlength="12"></div>
+        </div>
+        <p class="hintline">⚠️ Ein Zustand im <b>Titel</b> ist eine rechtlich verbindliche Zusicherung. Die
+          Beschreibung macht bewusst <b>keine</b> Zustandsangabe – aktiviere dies nur, wenn du den Zustand
+          durchgängig setzt (auch die eBay-ConditionID). Standard: aus.</p>
       </div>
     </details>
 
@@ -683,6 +694,8 @@ function loadExSettings(){
   byId("setShipService").value = s.shipService || "";
   byId("setShipCost").value    = s.shipCost    || "";
   byId("setReturns").value     = s.returns     || "no";
+  byId("setUseCondition").checked  = !!s.useCondition;
+  byId("setConditionText").value   = s.conditionText || "";
   if (s.threshold) byId("priceThreshold").value = s.threshold;
 }
 function saveExSettings(){
@@ -692,6 +705,8 @@ function saveExSettings(){
     shipService: byId("setShipService").value.trim(),
     shipCost:    byId("setShipCost").value.trim(),
     returns:     byId("setReturns").value,
+    useCondition:  byId("setUseCondition").checked,
+    conditionText: byId("setConditionText").value.trim(),
     threshold:   byId("priceThreshold").value.trim()
   };
   try{ localStorage.setItem(EX_SETTINGS_KEY, JSON.stringify(s)); }catch(e){}
@@ -1218,9 +1233,11 @@ function exRowEl(o){
   if (o.dup)  tags+=`<span class="tag tag-dup" title="Doppelt erfasst – bitte prüfen (möglicher Zählfehler)">doppelt</span>`;
   if (o.ball) tags+=`<span class="tag tag-ball">${esc(o.ball)}</span>`;
   if (o.langMismatch) tags+=`<span class="tag tag-dup" title="Kein Set in dieser Sprache hinterlegt – Bild evtl. andere Sprache">Bildsprache?</span>`;
+  const title = draftTitle(o);
   tdTitle.innerHTML =
-    `<div class="t">${esc(draftTitle(o))}${tags}</div>`+
-    `<div class="m">${esc(o.setCode)} · Nr. ${esc(o.num3)} · ${esc(o.lang)}</div>`;
+    `<div class="t">${esc(title)}${tags}</div>`+
+    `<div class="m">${esc(o.setCode)} · Nr. ${esc(o.num3)} · ${esc(o.lang)} · `+
+      `<span title="Titel-Länge (eBay-Maximum 80)">${title.length}/80</span></div>`;
 
   // Anzahl
   const tdQ=document.createElement("td"); tdQ.textContent=o.qty;
@@ -1290,11 +1307,62 @@ function exRowEl(o){
 /* =====================================================================
    TITEL / BESCHREIBUNG / SKU
    ===================================================================== */
-function draftTitle(o){
-  // Pokemon [Kartenname] [Nummer] [Set-Code] [Sprache] [+ Master Ball/Poke Ball]
-  let t=`Pokemon ${o.cardName} ${o.num3} ${o.setCode} ${o.lang}`;
-  if (o.ball) t+=` ${o.ball}`;
-  return capTitle(t);
+/* SEO-Titel v2 (ARCHITEKTUR-V6, Kap. 7)
+   Keyword-first, alle 80 Zeichen nutzend:
+     Pokemon [Name] [Nr/Total] [Setname] [Set-Code] [Seltenheit] [Sprache]
+             [Ball] [Zustand?]
+   Bei >80 Zeichen werden Tokens in fester Reihenfolge geopfert
+   (Prioritäts-Kürzung statt hartem Abschneiden):
+     1. Zustand  2. Setname  3. Nr/Total → nur Nr  4. Seltenheit  5. Sprache
+   Immer erhalten: Marke, Kartenname, Nummer, Set-Code (+ Ball, wenn vorhanden).
+   „Zustand“ ist optional und standardmäßig deaktiviert (Kap. 16 #5). */
+function titleOpts(){
+  const cb = byId("setUseCondition");
+  return {
+    includeCondition: !!(cb && cb.checked),
+    conditionText: byId("setConditionText") ? byId("setConditionText").value.trim() : ""
+  };
+}
+function draftTitle(o, opts){
+  opts = opts || titleOpts();
+  const total  = (o.set && o.set.total) ? o.set.total : (o.total || "");
+  const numTok = total ? `${o.num3}/${total}` : o.num3;
+
+  // key, Text, drop-Reihenfolge (kleiner = zuerst opfern). keep=nie opfern.
+  const toks = [
+    { key:"brand",   text:"Pokemon",              keep:true },
+    { key:"name",    text:o.cardName || "",        keep:true },
+    { key:"num",     text:numTok, shrink:o.num3,   keep:true },
+    { key:"setName", text:o.setName || "",         drop:2 },
+    { key:"setCode", text:o.setCode || "",         keep:true },
+    { key:"rarity",  text:o.rarity || "",          drop:4 },
+    { key:"lang",    text:o.lang || "",            drop:5 },
+    { key:"ball",    text:o.ball || "",            drop:6 },
+    { key:"cond",    text:(opts.includeCondition ? opts.conditionText : "") || "", drop:1 }
+  ];
+
+  const clean = t => String(t.text || "").replace(/\s+/g, " ").trim();
+  const render = list => list.map(clean).filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+
+  let list = toks.slice();
+  let title = render(list);
+  if (title.length <= 80) return title;
+
+  // 1) Nr/Total → nur Nr verkürzen
+  const num = list.find(t => t.key === "num");
+  if (num && num.shrink && num.text !== num.shrink){
+    num.text = num.shrink;
+    title = render(list);
+    if (title.length <= 80) return title;
+  }
+  // 2) droppbare Tokens der Reihe nach opfern
+  list.filter(t => t.drop).sort((a,b) => a.drop - b.drop).forEach(d => {
+    if (title.length <= 80) return;
+    list = list.filter(t => t !== d);
+    title = render(list);
+  });
+  // 3) Sicherheitsnetz: harter Schnitt
+  return title.length > 80 ? title.slice(0, 80).trim() : title;
 }
 function parentTitle(set, lang){
   return capTitle(`Pokemon ${set.name} ${set.code} ${lang} - Einzelkarten zum Aussuchen`);
@@ -1637,6 +1705,9 @@ function initEbayExport(){
   loadExSettings();
   ["setLocation","setDispatch","setShipService","setShipCost","setReturns","priceThreshold"]
     .forEach(id=>byId(id).addEventListener("change", saveExSettings));
+  // Zustand-im-Titel wirkt direkt auf die Titel → nach Speichern neu rendern
+  ["setUseCondition","setConditionText"].forEach(id=>
+    byId(id).addEventListener("change", ()=>{ saveExSettings(); if (exRows.length) renderPreview(); }));
 
   // Preisregeln
   renderRules();

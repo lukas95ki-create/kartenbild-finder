@@ -502,8 +502,14 @@ Backup-Erinnerung) · Lagerplatz in SKU ✅ (Phase 1 vorgezogen) ·
 Modus-C-Regeleditor ✅ (Preisregel-System existiert bereits) ·
 Deep-Link-Preishelfer ✅ („Verkäufe prüfen“-Link existiert). **Offen:**
 `preislogik.js` (Regel-Pipeline aus `kartenbild-finder-v6.html` in eigenes
-Modul auslagern) · Titelgenerator v2 (SEO-Template mit Prioritäts-Kürzung
-und gepflegter Seltenheit).
+Modul auslagern).
+
+**Titelgenerator v2 ✅ umgesetzt:** Keyword-first-Titel
+(`Pokemon [Name] [Nr/Total] [Setname] [Set-Code] [Seltenheit] [Sprache]
+[Ball]`), Prioritäts-Kürzung statt hartem Abschneiden (Opfer-Reihenfolge
+Zustand → Setname → Nr/Total→Nr → Seltenheit → Sprache), Längen-Anzeige
+`NN/80` in der Vorschau, Zustand als optionales, default-deaktiviertes
+Token mit Warnhinweis.
 
 **Phase 3 — Hosting & Bilder (Stufe 2):**
 GitHub Pages/Netlify einrichten · lokale Bilddatenbank für aktiv verkaufte
