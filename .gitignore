@@ -1,0 +1,6 @@
+
+# Artwork-Binder-Generator
+.env
+output/
+__pycache__/
+*.pyc
