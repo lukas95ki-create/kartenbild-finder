@@ -74,6 +74,29 @@ def _feathered_paste(base, card, box, feather=2):
     return base
 
 
+# Arbeits-Kachelbreite fuer den Stability-Pfad; Ergebnis-Raster bleibt so
+# unter den Pixel-Limits der API und wird danach auf 300 DPI hochskaliert.
+STABILITY_TILE_W = 512
+
+
+def stability_plan(card_img, tile_w=STABILITY_TILE_W):
+    """Bereitet den Stability-Outpaint vor.
+
+    Die Karte wird auf Kachelmass verkleinert; erweitert wird um genau eine
+    Kachel je Seite, sodass die Karte die Mittelkachel eines 3x3-Rasters wird.
+    Rueckgabe: (card_tile, dict(left,right,up,down), geo) - geo ist mit
+    composite_card()/compose_outputs() kompatibel (Ergebnis == ganzes Raster).
+    """
+    tile_h = int(round(tile_w / GRID_RATIO))
+    card_tile = card_img.convert("RGB").resize((tile_w, tile_h), Image.LANCZOS)
+    grid_w, grid_h = tile_w * 3, tile_h * 3
+    geo = {"card_box": (tile_w, tile_h, tile_w, tile_h),
+           "grid_box": (0, 0, grid_w, grid_h),
+           "edit_size": (grid_w, grid_h)}
+    expand = {"left": tile_w, "right": tile_w, "up": tile_h, "down": tile_h}
+    return card_tile, expand, geo
+
+
 def composite_card(edit_result, card_tile, geo, feather=2):
     """Legt die Original-Karte exakt in die Mitte des Edit-Ergebnisses.
 

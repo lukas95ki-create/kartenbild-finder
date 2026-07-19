@@ -26,26 +26,64 @@ from . import types as T
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 
+def _resolve_outpaint_provider(requested, offline, log):
+    """Waehlt den Outpaint-Provider. 'auto' = Stability wenn Key da, sonst
+    gpt-image-2. Gibt (provider, openai_key) oder (None, None) zurueck."""
+    if offline:
+        return None, None
+    stab_key = os.environ.get("STABILITY_API_KEY")
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if requested == "stability":
+        if stab_key:
+            return "stability", openai_key
+        log("  Hinweis: STABILITY_API_KEY fehlt -> Fallback gpt-image-2")
+        return ("openai", openai_key) if openai_key else (None, None)
+    if requested == "openai":
+        return ("openai", openai_key) if openai_key else (None, None)
+    # auto
+    if stab_key:
+        return "stability", openai_key
+    if openai_key:
+        return "openai", openai_key
+    return None, None
+
+
 def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
-                   offline, api_key, base, outputs, seam_retries, log):
-    """Kern-Weg: masken-basiertes Card-Outpainting (Karte bleibt in der Mitte).
+                   offline, outpaint_provider, creativity, base, outputs,
+                   seam_retries, log):
+    """Kern-Weg: Card-Outpainting (Karte bleibt in der Mitte).
 
-    Generiert, prueft die Kanten-Anschluesse per Seam-Check und wiederholt bei
-    Problemen bis zu seam_retries mal mit gezielt verschaerftem Prompt fuer die
-    betroffenen Kanten. Behaelt das beste Ergebnis (Kosten gedeckelt auf
-    1 + seam_retries Generierungen).
-
-    Gibt (grid_pdf_img, gen_prompt, negative, gen_meta) zurueck oder None,
-    wenn kein Outpainting moeglich ist (offline / kein Key).
+    Zwei Backends:
+      - stability: echtes pixelbasiertes Outpainting (konditioniert auf die
+        realen Randpixel der Karte) - primaer, Best-of-2.
+      - openai:    masken-basiertes gpt-image-2 images.edit - Fallback.
+    In beiden Faellen: gpt-4o-Seam-Check, bei Problemen gezielte Retries,
+    bestes Ergebnis behalten. Gibt (grid_pdf, prompt, negative, meta) oder None.
     """
-    api_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if offline or not api_key:
+    provider, openai_key = _resolve_outpaint_provider(
+        outpaint_provider, offline, log)
+    if provider is None:
         return None
+    stab_key = os.environ.get("STABILITY_API_KEY")
 
     card = Image.open(image_path)
-    canvas, mask, card_tile, geo = OP.build_canvas(card)
-    size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
-    max_attempts = 1 + max(0, seam_retries)
+    if provider == "stability":
+        card_tile, expand, geo = OP.stability_plan(card)
+        size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
+        max_attempts = 2  # Best-of-2
+    else:
+        _canvas, _mask, card_tile, geo = OP.build_canvas(card)
+        size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
+        max_attempts = 1 + max(0, seam_retries)
+
+    def _generate(prompt):
+        if provider == "stability":
+            return GEN.outpaint_stability(
+                card_tile, expand["left"], expand["right"], expand["up"],
+                expand["down"], prompt=prompt, creativity=creativity,
+                api_key=stab_key)
+        return GEN.edit_openai(_canvas, _mask, prompt, model=edit_model,
+                               api_key=openai_key, size=size)
 
     unique_objects = analysis.get("unique_objects") or []
     best = None            # (score, result, prompt, check)
@@ -60,11 +98,10 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
             log(f"  Outpaint-Prompt: {gen_prompt}")
         else:
             log(f"  Retry {attempt-1}: Kanten={focus or []}, Duplikate={forbid or []}")
-        log(f"  Outpainting (Versuch {attempt}/{max_attempts}): "
-            f"{edit_model} images.edit @ {size} ...")
+        log(f"  Outpainting (Versuch {attempt}/{max_attempts}, {provider}) @ "
+            f"{size} ...")
         try:
-            result = GEN.edit_openai(canvas, mask, gen_prompt, model=edit_model,
-                                     api_key=api_key, size=size)
+            result = _generate(gen_prompt)
         except Exception as exc:
             if best is None:
                 log(f"  Outpaint-Fehler ({exc}) -> Text-zu-Bild-Fallback")
@@ -75,7 +112,7 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
         # Seam-Check auf dem Composite (Karte in der Mitte).
         composite = OP.composite_card(result, card_tile, geo)
         check = A.seam_check(composite, unique_objects=unique_objects,
-                             api_key=api_key, model=seam_model)
+                             api_key=openai_key, model=seam_model)
         if check is None:
             log("  Seam-Check uebersprungen (kein Key) - nehme dieses Ergebnis")
             best = (0, result, gen_prompt, {"skipped": True})
@@ -117,7 +154,10 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
     outputs["preview_png"] = preview_path
     log(f"  Vorschau (Karte in Mitte) gespeichert: {preview_path}")
 
-    meta = {"provider": "openai-outpaint", "model": edit_model,
+    meta = {"provider": ("stability-outpaint" if provider == "stability"
+                         else "openai-outpaint"),
+            "model": ("stable-image-outpaint" if provider == "stability"
+                      else edit_model),
             "edit_size": list(geo["edit_size"]), "card_box": list(geo["card_box"]),
             "seam_attempts": attempts_meta, "seam_final": check}
     return grid_pdf, gen_prompt, negative, meta
@@ -127,6 +167,7 @@ def process_card(image_path, out_dir, name=None, mode="empty", dpi=300,
                  cut_icons=False, crop_marks=False, provider="openai",
                  model="gpt-image-1", edit_model="gpt-image-2",
                  vision_model="gpt-4o-mini", seam_model="gpt-4o",
+                 outpaint_provider="auto", creativity=0.5,
                  use_vision=True, offline=False, no_outpaint=False,
                  seam_retries=2, type_override=None, prompt_override=None,
                  formats=None, log=print):
@@ -161,7 +202,8 @@ def process_card(image_path, out_dir, name=None, mode="empty", dpi=300,
     op = None
     if not no_outpaint and not prompt_override:
         op = _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
-                            offline, None, base, outputs, seam_retries, log)
+                            offline, outpaint_provider, creativity, base,
+                            outputs, seam_retries, log)
 
     if op is not None:
         grid_img, gen_prompt, negative, gen_meta = op

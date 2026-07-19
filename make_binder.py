@@ -56,6 +56,14 @@ def build_parser():
                    help="Modell fuer das Card-Outpainting via images.edit (Standard: gpt-image-2).")
     p.add_argument("--no-outpaint", action="store_true",
                    help="Kein Card-Outpainting, stattdessen reines Text-zu-Bild.")
+    p.add_argument("--outpaint-provider", default="auto",
+                   choices=["auto", "stability", "openai"],
+                   help="Outpaint-Backend: 'stability' (echtes pixelbasiertes "
+                        "Outpainting, primaer), 'openai' (gpt-image-2 Maske), "
+                        "'auto' = Stability wenn STABILITY_API_KEY da, sonst OpenAI.")
+    p.add_argument("--creativity", type=float, default=0.5,
+                   help="Stability-Outpaint Kreativitaet 0.1-1.0 (Standard: 0.5; "
+                        "niedriger = naeher an den echten Randpixeln).")
     p.add_argument("--seam-retries", type=int, default=2,
                    help="Max. Wiederholungen bei schlechtem Kanten-Anschluss "
                         "(Seam-Check); 0 = aus. Standard: 2 (=max 3 Generierungen).")
@@ -97,6 +105,7 @@ def main(argv=None):
         crop_marks=args.crop_marks, provider=args.provider, model=args.model,
         edit_model=args.edit_model, no_outpaint=args.no_outpaint,
         seam_retries=args.seam_retries, seam_model=args.seam_model,
+        outpaint_provider=args.outpaint_provider, creativity=args.creativity,
         vision_model=args.vision_model, use_vision=not args.no_vision,
         offline=args.offline, type_override=args.type_override,
         prompt_override=args.prompt_override, formats=formats,

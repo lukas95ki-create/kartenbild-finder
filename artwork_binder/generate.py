@@ -72,6 +72,46 @@ def generate_openai(prompt, width, height, model="gpt-image-1",
     return img
 
 
+STABILITY_OUTPAINT_URL = "https://api.stability.ai/v2beta/stable-image/edit/outpaint"
+
+
+def outpaint_stability(card_img, left, right, up, down, prompt=None,
+                       creativity=0.5, api_key=None, output_format="png"):
+    """Echtes pixelbasiertes Outpainting via Stability AI.
+
+    Das Eingabebild (die Kartenillustration) wird um die angegebenen
+    Pixelmengen nach links/rechts/oben/unten erweitert. Das Modell
+    konditioniert direkt auf die echten Randpixel - dadurch schliessen
+    Strukturen an der Kante an. Liefert ein PIL-Image (das fertige Raster).
+    """
+    api_key = api_key or os.environ.get("STABILITY_API_KEY")
+    if not api_key:
+        raise RuntimeError("STABILITY_API_KEY fehlt (in .env setzen).")
+    import requests
+    buf = BytesIO()
+    card_img.convert("RGB").save(buf, "PNG")
+    buf.seek(0)
+    data = {"left": int(left), "right": int(right), "up": int(up),
+            "down": int(down), "creativity": float(creativity),
+            "output_format": output_format}
+    if prompt:
+        data["prompt"] = prompt[:9000]
+    resp = requests.post(
+        STABILITY_OUTPAINT_URL,
+        headers={"Authorization": f"Bearer {api_key}", "Accept": "image/*"},
+        files={"image": ("card.png", buf, "image/png")},
+        data=data,
+        timeout=180,
+    )
+    if resp.status_code != 200:
+        try:
+            detail = resp.json()
+        except Exception:
+            detail = resp.text[:300]
+        raise RuntimeError(f"Stability {resp.status_code}: {detail}")
+    return Image.open(BytesIO(resp.content)).convert("RGB")
+
+
 def edit_openai(image_rgba, mask_rgba, prompt, model="gpt-image-2",
                 api_key=None, size="1024x1536", quality="high"):
     """Ruft OpenAI images.edit (Outpainting) auf und liefert ein PIL-Image.
