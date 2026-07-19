@@ -86,13 +86,13 @@ def build_prompt(analysis, extra_style=None):
 # (Die Karte in der Mitte darf/soll Kreatur, Rahmen und Text enthalten -
 #  nur der neu gemalte Rand muss frei davon sein.)
 OUTPAINT_NEGATIVE = (
-    "Extremely important: the outer painted areas must contain ONLY empty "
-    "natural landscape (snow, ice, water, rock, plants, sky). Do NOT repeat, "
-    "mirror, duplicate or extend the creature/character that sits on the card "
-    "- it must appear nowhere outside the card. No creatures, no animals, no "
-    "monsters, no pokemon-like beings, no characters, no people, no eyes, no "
-    "faces, no text, no letters, no numbers, no logos, no watermark, no card "
-    "frame, no borders, no panels in the generated areas"
+    "Extremely important: the outer painted areas must contain ONLY the same "
+    "kind of empty scenery and environment as the card's background. Do NOT "
+    "repeat, mirror, duplicate or extend the creature/character that sits on "
+    "the card - it must appear nowhere outside the card. No creatures, no "
+    "animals, no monsters, no pokemon-like beings, no characters, no people, "
+    "no eyes, no faces, no text, no letters, no numbers, no logos, no "
+    "watermark, no card frame, no borders, no panels in the generated areas"
 )
 
 
