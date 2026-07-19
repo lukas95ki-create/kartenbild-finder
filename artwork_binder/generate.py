@@ -72,6 +72,34 @@ def generate_openai(prompt, width, height, model="gpt-image-1",
     return img
 
 
+def edit_openai(image_rgba, mask_rgba, prompt, model="gpt-image-2",
+                api_key=None, size="1024x1536", quality="high"):
+    """Ruft OpenAI images.edit (Outpainting) auf und liefert ein PIL-Image.
+
+    image_rgba: Canvas mit Kartenpixeln in der Mitte, aussen transparent.
+    mask_rgba:  RGBA-Maske - transparente Bereiche werden generiert, opake
+                (die Kartenmitte) bleiben geschuetzt.
+    """
+    api_key = api_key or os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY fehlt (in .env setzen).")
+    from openai import OpenAI
+    client = OpenAI(api_key=api_key)
+    cb = BytesIO(); image_rgba.save(cb, "PNG"); cb.seek(0)
+    mb = BytesIO(); mask_rgba.save(mb, "PNG"); mb.seek(0)
+    resp = client.images.edit(
+        model=model,
+        image=("canvas.png", cb, "image/png"),
+        mask=("mask.png", mb, "image/png"),
+        prompt=prompt,
+        size=size,
+        quality=quality,
+        n=1,
+    )
+    b64 = resp.data[0].b64_json
+    return Image.open(BytesIO(base64.b64decode(b64))).convert("RGB")
+
+
 def generate_image(prompt, analysis, width, height, provider="openai",
                    model="gpt-image-1", api_key=None, offline=False,
                    log=print):

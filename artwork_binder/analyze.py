@@ -154,7 +154,8 @@ def vision_analysis(image_path, model="gpt-4o-mini", api_key=None):
                      "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
                 ]},
             ],
-            max_tokens=120,
+            response_format={"type": "json_object"},
+            max_tokens=600,
             temperature=0,
         )
         raw = resp.choices[0].message.content.strip()

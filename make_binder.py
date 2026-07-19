@@ -51,9 +51,13 @@ def build_parser():
     p.add_argument("--provider", default="openai",
                    help="Bild-API-Anbieter (Standard: openai).")
     p.add_argument("--model", default="gpt-image-1",
-                   help="Bild-Modell (Standard: gpt-image-1).")
+                   help="Bild-Modell fuer den Text-zu-Bild-Fallback (Standard: gpt-image-1).")
+    p.add_argument("--edit-model", default="gpt-image-2",
+                   help="Modell fuer das Card-Outpainting via images.edit (Standard: gpt-image-2).")
+    p.add_argument("--no-outpaint", action="store_true",
+                   help="Kein Card-Outpainting, stattdessen reines Text-zu-Bild.")
     p.add_argument("--vision-model", default="gpt-4o-mini",
-                   help="Vision-Modell fuer Typ/Name-Erkennung (Standard: gpt-4o-mini).")
+                   help="Vision-Modell fuer Szenen/Typ/Name-Erkennung (Standard: gpt-4o-mini).")
     p.add_argument("--no-vision", action="store_true",
                    help="Vision-Analyse abschalten, nur Farb-Heuristik nutzen.")
     p.add_argument("--offline", action="store_true",
@@ -85,6 +89,7 @@ def main(argv=None):
     common = dict(
         mode=args.mode, dpi=args.dpi, cut_icons=args.cut_icons,
         crop_marks=args.crop_marks, provider=args.provider, model=args.model,
+        edit_model=args.edit_model, no_outpaint=args.no_outpaint,
         vision_model=args.vision_model, use_vision=not args.no_vision,
         offline=args.offline, type_override=args.type_override,
         prompt_override=args.prompt_override, formats=formats,
