@@ -224,6 +224,77 @@ def vision_analysis(image_path, model="gpt-4o-mini", api_key=None):
         return {"error": str(exc), "source": "vision-failed"}
 
 
+ILLO_SYSTEM = (
+    "Du bekommst das Foto einer Pokemon-Sammelkarte. Bestimme den Bereich der "
+    "reinen ILLUSTRATION (Artwork), OHNE den silbernen/holografischen "
+    "Aussenrahmen der Karte. Zwei Kartentypen:\n"
+    "- Full-Art (Illustration fuellt die ganze Karte, Name/Attacken/Text "
+    "liegen als Overlay darueber): dann ist die Illustration die ganze Karte "
+    "abzueglich des schmalen Aussenrahmens; setze full_art=true. WICHTIG: Wenn "
+    "die gemalte Szene auch im UNTEREN Kartenteil hinter/um den Attacken-Text "
+    "herum sichtbar ist (kein einfarbiger Textkasten, sondern Illustration "
+    "hinter der Schrift), ist es Full-Art -> full_art=true.\n"
+    "- Klassisch (full_art=false) NUR, wenn der untere Kartenteil ein klar "
+    "abgetrennter, einfarbiger Text-/Attackenbereich OHNE Illustration ist und "
+    "die Illustration ein separates Fenster im oberen Teil bildet.\n"
+    "Im Zweifel full_art=true.\n"
+    "Gib die Bounding-Box als Bruchteile 0..1 der Bildbreite/-hoehe zurueck.\n"
+    "Antworte NUR als JSON: {\"full_art\": true|false, \"x0\":.., \"y0\":.., "
+    "\"x1\":.., \"y1\":..}."
+)
+
+
+def detect_illustration(image_path, model="gpt-4o", api_key=None,
+                        inset=0.05, log=None):
+    """Lokalisiert den Illustrations-Ausschnitt (ohne Rahmen/Textboxen).
+
+    Rueckgabe: dict(bbox=[x0,y0,x1,y1] als Bruchteile 0..1, full_art=bool,
+    source=str). Fallback bei fehlendem Key/Fehler: fester Rand-Inset (Rahmen
+    grob abschneiden). Bei full_art wird bewusst ein sauberer Inset genutzt
+    statt der (oft unpraezisen) Vision-Box.
+    """
+    def _fallback(reason):
+        return {"bbox": [inset, inset, 1 - inset, 1 - inset],
+                "full_art": True, "source": "inset-fallback:" + reason}
+
+    api_key = api_key or os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return _fallback("kein-key")
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        b64 = _encode_image(image_path, max_edge=768)
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": ILLO_SYSTEM},
+                {"role": "user", "content": [
+                    {"type": "text", "text": "Wo ist die Illustration?"},
+                    {"type": "image_url",
+                     "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                ]},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=120,
+            temperature=0,
+        )
+        d = json.loads(resp.choices[0].message.content)
+        full_art = bool(d.get("full_art"))
+        if full_art:
+            return {"bbox": [inset, inset, 1 - inset, 1 - inset],
+                    "full_art": True, "source": "vision-fullart:" + model}
+        x0 = min(max(float(d.get("x0", inset)), 0.0), 1.0)
+        y0 = min(max(float(d.get("y0", inset)), 0.0), 1.0)
+        x1 = min(max(float(d.get("x1", 1 - inset)), 0.0), 1.0)
+        y1 = min(max(float(d.get("y1", 1 - inset)), 0.0), 1.0)
+        if x1 - x0 < 0.2 or y1 - y0 < 0.2:   # unplausibel -> Fallback
+            return _fallback("box-zu-klein")
+        return {"bbox": [x0, y0, x1, y1], "full_art": False,
+                "source": "vision-window:" + model}
+    except Exception as exc:
+        return _fallback(f"error:{exc}")
+
+
 def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
                  api_key=None, log=print):
     """Kombinierte Analyse. Vision (falls verfuegbar) bestimmt Typ/Name,
@@ -239,12 +310,20 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
         "environment_dna": None,
         "unique_objects": None,
         "edges": None,
+        "illustration": None,
         "mood": colors["mood"],
         "dominant_colors": colors["dominant_colors"],
         "analysis_source": colors["source"],
     }
     log(f"  Farb-Analyse: Typ={colors['type']} "
         f"(Konfidenz {colors['type_confidence']}), Stimmung='{colors['mood']}'")
+
+    if use_vision:
+        illo = detect_illustration(image_path, api_key=api_key)
+        result["illustration"] = illo
+        bb = illo["bbox"]
+        log(f"  Illustration: {'Full-Art' if illo['full_art'] else 'Fenster'} "
+            f"bbox=[{bb[0]:.2f},{bb[1]:.2f},{bb[2]:.2f},{bb[3]:.2f}] ({illo['source']})")
 
     if use_vision:
         v = vision_analysis(image_path, model=vision_model, api_key=api_key)
@@ -303,12 +382,18 @@ SEAM_SYSTEM = (
     "Karte, ein zweiter grosser Baumstamm)? Dann ist DAS ein Duplikat und ein "
     "Fehler. Eine blosse Fortsetzung derselben durchgehenden Struktur ueber "
     "die Kante (ein Stamm/Ast, der weiterlaeuft) ist KEIN Duplikat.\n"
+    "HARTES K.O. - KREATUR IM AUSSENBEREICH: Die Kreatur/das Pokemon gehoert "
+    "NUR auf die Karte in der Mitte. Erscheint im generierten Aussenbereich "
+    "ein Tier/Pokemon/Fantasiewesen ODER ein Fragment davon (Pfote, Schwanz, "
+    "Ohr, Auge, Fell, Gesicht), setze creature=true. Das ist immer ein Fehler.\n"
     "bad_edges enthaelt AUSSCHLIESSLICH die Schluessel \"left\"/\"right\"/"
     "\"top\"/\"bottom\" der wirklich gebrochenen Kanten. \"duplicates\" listet "
-    "die duplizierten Objekte (aus der Liste) als englische Strings. \"ok\" "
-    "muss genau dann true sein, wenn bad_edges UND duplicates leer sind.\n"
+    "die duplizierten Objekte (aus der Liste) als englische Strings. "
+    "\"creature\" ist true, wenn im Aussenbereich ein Wesen/Fragment auftaucht. "
+    "\"ok\" muss genau dann true sein, wenn bad_edges UND duplicates leer sind "
+    "UND creature false ist.\n"
     "Antworte NUR als JSON: {\"ok\": true|false, \"bad_edges\": [...], "
-    "\"duplicates\": [...], \"notes\": \"kurz\"}."
+    "\"duplicates\": [...], \"creature\": true|false, \"notes\": \"kurz\"}."
 )
 
 
@@ -360,9 +445,11 @@ def seam_check(image, unique_objects=None, api_key=None, model="gpt-4o-mini",
         bad = [e for e in bad if e in ("left", "right", "top", "bottom")]
         dups = data.get("duplicates") or []
         dups = [str(d).strip() for d in dups if str(d).strip()]
-        return {"ok": bool(data.get("ok")) and not bad and not dups,
+        creature = bool(data.get("creature"))
+        return {"ok": bool(data.get("ok")) and not bad and not dups and not creature,
                 "bad_edges": bad,
                 "duplicates": dups,
+                "creature": creature,
                 "notes": data.get("notes", "")}
     except Exception as exc:
         return {"error": str(exc)}

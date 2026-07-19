@@ -59,6 +59,55 @@ def build_canvas(card_img, edit_size=EDIT_SIZE):
     return canvas, mask, card, geo
 
 
+def build_canvas_illustration(card_img, bbox, edit_size=EDIT_SIZE):
+    """Wie build_canvas, aber es wird nur die ILLUSTRATION geschuetzt.
+
+    bbox: [x0,y0,x1,y1] als Bruchteile 0..1 = Illustrations-Bereich in der
+    Karte (ohne Rahmen/Textboxen). Die Illustration wird an ihrer korrekten
+    relativen Position INNERHALB der Mittelkachel platziert; der schmale Ring
+    zwischen Illustrationsrand und Kachelgrenze (Rahmen) gehoert mit zum
+    generierten Bereich - so schliesst die Fortsetzung an der physischen
+    Kartenkante an, nicht an der Illustrationskante, und das Modell
+    konditioniert auf echte Szenerie statt auf den Kartenrahmen.
+
+    Rueckgabe: (canvas_rgba, mask_rgba, card_tile_full, geo).
+    """
+    W, H = edit_size
+    ox, oy, gw, gh = _grid_box(W, H)
+    tw, th = gw // 3, gh // 3
+    cx = (W - tw) // 2
+    cy = (H - th) // 2
+
+    card_rgb = card_img.convert("RGB")
+    cw, ch = card_rgb.size
+    x0, y0, x1, y1 = bbox
+    illo = card_rgb.crop((int(x0 * cw), int(y0 * ch), int(x1 * cw), int(y1 * ch)))
+
+    # Illustration an ihrer relativen Position in der Mittelkachel.
+    ix = cx + int(round(x0 * tw))
+    iy = cy + int(round(y0 * th))
+    iw = max(1, int(round((x1 - x0) * tw)))
+    ih = max(1, int(round((y1 - y0) * th)))
+    illo = illo.resize((iw, ih), Image.LANCZOS)
+
+    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    canvas.paste(illo, (ix, iy))
+
+    # Maske: nur die Illustration schuetzen (opak), Rest generieren.
+    mask = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(mask).rectangle([ix, iy, ix + iw, iy + ih],
+                                   fill=(255, 255, 255, 255))
+
+    # Fuer den Vorschau-Composite: die KOMPLETTE Original-Karte auf Kachelmass.
+    card_tile_full = card_rgb.resize((tw, th), Image.LANCZOS)
+
+    geo = {"card_box": (cx, cy, tw, th),
+           "illo_box": (ix, iy, iw, ih),
+           "grid_box": (ox, oy, gw, gh),
+           "edit_size": (W, H)}
+    return canvas, mask, card_tile_full, geo
+
+
 def _feathered_paste(base, card, box, feather=2):
     """Legt die Original-Karte exakt zurueck, mit optional weicher Kante."""
     cx, cy, tw, th = box
@@ -79,22 +128,32 @@ def _feathered_paste(base, card, box, feather=2):
 STABILITY_TILE_W = 512
 
 
-def stability_plan(card_img, tile_w=STABILITY_TILE_W):
+def stability_plan(card_img, bbox=None, tile_w=STABILITY_TILE_W):
     """Bereitet den Stability-Outpaint vor.
 
-    Die Karte wird auf Kachelmass verkleinert; erweitert wird um genau eine
-    Kachel je Seite, sodass die Karte die Mittelkachel eines 3x3-Rasters wird.
-    Rueckgabe: (card_tile, dict(left,right,up,down), geo) - geo ist mit
-    composite_card()/compose_outputs() kompatibel (Ergebnis == ganzes Raster).
+    Als Basis geht die ILLUSTRATION (falls bbox gegeben, ohne Rahmen/Text) auf
+    Kachelmass; erweitert wird um genau eine Kachel je Seite. Fuer den
+    Vorschau-Composite wird zusaetzlich die komplette Karte auf Kachelmass
+    geliefert.
+    Rueckgabe: (feed_tile, card_tile_full, dict(left,right,up,down), geo).
     """
     tile_h = int(round(tile_w / GRID_RATIO))
-    card_tile = card_img.convert("RGB").resize((tile_w, tile_h), Image.LANCZOS)
+    card_rgb = card_img.convert("RGB")
+    if bbox:
+        cw, ch = card_rgb.size
+        x0, y0, x1, y1 = bbox
+        feed = card_rgb.crop((int(x0 * cw), int(y0 * ch),
+                              int(x1 * cw), int(y1 * ch)))
+    else:
+        feed = card_rgb
+    feed_tile = feed.resize((tile_w, tile_h), Image.LANCZOS)
+    card_tile_full = card_rgb.resize((tile_w, tile_h), Image.LANCZOS)
     grid_w, grid_h = tile_w * 3, tile_h * 3
     geo = {"card_box": (tile_w, tile_h, tile_w, tile_h),
            "grid_box": (0, 0, grid_w, grid_h),
            "edit_size": (grid_w, grid_h)}
     expand = {"left": tile_w, "right": tile_w, "up": tile_h, "down": tile_h}
-    return card_tile, expand, geo
+    return feed_tile, card_tile_full, expand, geo
 
 
 def composite_card(edit_result, card_tile, geo, feather=2):

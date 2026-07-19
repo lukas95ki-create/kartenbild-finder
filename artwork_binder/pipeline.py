@@ -69,19 +69,25 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
     stab_key = os.environ.get("STABILITY_API_KEY")
 
     card = Image.open(image_path)
+    # Nur die Illustration (ohne Rahmen/Textboxen) als Basis - siehe Analyse.
+    illo = analysis.get("illustration") or {}
+    bbox = illo.get("bbox")
     if provider == "stability":
-        card_tile, expand, geo = OP.stability_plan(card)
+        _feed, card_tile, expand, geo = OP.stability_plan(card, bbox=bbox)
         size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
         max_attempts = 2  # Best-of-2
     else:
-        _canvas, _mask, card_tile, geo = OP.build_canvas(card)
+        if bbox:
+            _canvas, _mask, card_tile, geo = OP.build_canvas_illustration(card, bbox)
+        else:
+            _canvas, _mask, card_tile, geo = OP.build_canvas(card)
         size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
         max_attempts = 1 + max(0, seam_retries)
 
     def _generate(prompt):
         if provider == "stability":
             return GEN.outpaint_stability(
-                card_tile, expand["left"], expand["right"], expand["up"],
+                _feed, expand["left"], expand["right"], expand["up"],
                 expand["down"], prompt=prompt, creativity=creativity,
                 api_key=stab_key)
         return GEN.edit_openai(_canvas, _mask, prompt, model=edit_model,
@@ -126,12 +132,15 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
 
         bad = check.get("bad_edges", [])
         dups = check.get("duplicates", [])
-        score = 0 if check.get("ok") else (len(bad) + len(dups)) or 1
+        creature = check.get("creature", False)
+        # Kreatur im Aussenbereich ist hartes K.O. -> hohes Gewicht, damit ein
+        # kreaturfreies Ergebnis immer bevorzugt wird.
+        score = 0 if check.get("ok") else (len(bad) + len(dups) + (10 if creature else 0)) or 1
         attempts_meta.append({"attempt": attempt, "ok": check.get("ok"),
                               "bad_edges": bad, "duplicates": dups,
-                              "notes": check.get("notes", "")})
+                              "creature": creature, "notes": check.get("notes", "")})
         status = "OK" if check.get("ok") else \
-            f"Versatz={bad or []}, Duplikate={dups or []}"
+            f"Versatz={bad or []}, Duplikate={dups or []}, Kreatur={creature}"
         log(f"  Seam-Check: {status}"
             + (f" ({check.get('notes')})" if check.get('notes') else ""))
 
@@ -140,7 +149,8 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
         if check.get("ok"):
             break
         focus = bad or None
-        forbid = dups or None
+        # Kreatur/Duplikat -> Objekt-Verbot beim Retry verschaerfen.
+        forbid = dups or (["the creature / pokemon from the card"] if creature else None)
 
     score, result, gen_prompt, check = best
     negative = P.OUTPAINT_NEGATIVE
