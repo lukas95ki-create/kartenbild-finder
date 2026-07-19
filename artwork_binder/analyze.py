@@ -131,6 +131,23 @@ VISION_SYSTEM = (
     '   "lighting" (englische Beschreibung von Tageszeit/Wetter/Lichtstimmung),\n'
     '   "palette" (englische Beschreibung der dominanten Hintergrundfarben),\n'
     '   "viewpoint" (englische Beschreibung von Bildausschnitt/Blickrichtung/Tiefe);\n'
+    '"edges": Objekt mit den vier Schluesseln "left","right","top","bottom". '
+    'Pruefe JEDE der vier Kanten einzeln und sorgfaeltig. Jeder Wert ist eine '
+    'Liste der STRUKTUR-Elemente (Baumstamm, Ast, Zweig, Dach, Gebaeude, Wand, '
+    'Weg, Horizont, Bergkamm, Felskante, Gewaesserlinie o.ae.), die diese '
+    'Kante beruehren, schneiden ODER im aeusseren Randdrittel dieser Kante '
+    'klar auf sie zulaufen (also beim Fortsetzen ueber die Kante gefuehrt '
+    'werden muessten). Nur wirklich diffuse Kanten ohne jede lineare Struktur '
+    'bleiben leer. Pro Element ein Objekt mit: '
+    '"element" (was es ist, engl.), '
+    '"span" (Position entlang der Kante in Prozent - bei left/right als Hoehe '
+    '0%=oben..100%=unten, bei top/bottom als Breite 0%=links..100%=rechts, '
+    'z.B. "30-75%"), '
+    '"angle" (Richtung/Neigung wo es die Kante trifft, engl., z.B. "tilted '
+    'slightly right" oder "horizontal"), '
+    '"thickness" (Dicke, engl.), "color" (Farbe, engl.). '
+    'Diffuse Kanten (nur Himmel/Schnee/Wasser/Gras/Laub ohne klare Linien) '
+    '=> leere Liste []. Nenne nur wirklich kantenkreuzende Strukturen.;\n'
     '"mood": kurze englische Farbstimmungs-Beschreibung.'
 )
 
@@ -155,7 +172,7 @@ def vision_analysis(image_path, model="gpt-4o-mini", api_key=None):
                 ]},
             ],
             response_format={"type": "json_object"},
-            max_tokens=600,
+            max_tokens=1000,
             temperature=0,
         )
         raw = resp.choices[0].message.content.strip()
@@ -168,10 +185,14 @@ def vision_analysis(image_path, model="gpt-4o-mini", api_key=None):
         scene = data.get("scene")
         if not isinstance(scene, dict) or not scene.get("setting"):
             scene = None
+        edges = data.get("edges")
+        if not isinstance(edges, dict):
+            edges = None
         return {
             "type": norm or T.DEFAULT_TYPE,
             "name": (data.get("name") or None),
             "scene": scene,
+            "edges": edges,
             "mood": data.get("mood"),
             "source": "vision:" + model,
         }
@@ -191,6 +212,7 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
         "type_confidence": colors["type_confidence"],
         "name": None,
         "scene": None,
+        "edges": None,
         "mood": colors["mood"],
         "dominant_colors": colors["dominant_colors"],
         "analysis_source": colors["source"],
@@ -204,6 +226,7 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
             result["type"] = v["type"] or result["type"]
             result["name"] = v.get("name")
             result["scene"] = v.get("scene")
+            result["edges"] = v.get("edges")
             if v.get("mood"):
                 result["mood"] = v["mood"]
             result["analysis_source"] = v["source"]
@@ -212,9 +235,73 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
                 log(f"  Erkannte Szene: {v['scene'].get('setting')}")
             else:
                 log("  Hinweis: Vision lieferte keine Szene -> Typ-Fallback")
+            if v.get("edges"):
+                n = sum(len(x) for x in v["edges"].values() if isinstance(x, list))
+                log(f"  Edge-Map: {n} kantenkreuzende Struktur(en) erfasst")
         elif v and "error" in v:
             log(f"  Vision-Analyse uebersprungen ({v['error']})")
         else:
             log("  Vision-Analyse uebersprungen (kein API-Key)")
 
     return result
+
+
+SEAM_SYSTEM = (
+    "Du pruefst ein Binder-Mockup. In der MITTE liegt eine echte Sammelkarte; "
+    "der Bereich rundherum wurde per KI generiert, um die Illustration der "
+    "Karte ueber ihre Kanten hinaus fortzusetzen. Beurteile NUR, ob die "
+    "STRUKTUR-Elemente (Baumstamm, Ast, Dach, Wand, Weg, Horizont, Felskante), "
+    "die eine Kartenkante kreuzen, auf der anderen Seite an gleicher Position, "
+    "im gleichen Winkel, in gleicher Dicke und Farbe weiterlaufen - also ein "
+    "nahtloses Gesamtbild ergeben. Rein diffuse Flaechen (Himmel, Gras, "
+    "Wasser, Schnee, Laub), die nur farblich passen muessen, gelten als ok. "
+    "Ein sichtbarer Versatz einer kantenkreuzenden Struktur ist NICHT ok. "
+    "Antworte NUR als JSON: {\"ok\": true|false, \"bad_edges\": [\"left\","
+    "\"right\",\"top\",\"bottom\"], \"notes\": \"kurz\"}."
+)
+
+
+def seam_check(image, api_key=None, model="gpt-4o-mini", max_edge=768):
+    """Prueft ein Composite (Karte in der Mitte) auf saubere Kanten-Anschluesse.
+
+    image: Pfad oder PIL.Image. Gibt dict(ok, bad_edges, notes) zurueck oder
+    None, wenn kein Key/Fehler (dann wird die Pruefung uebersprungen).
+    """
+    api_key = api_key or os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    try:
+        from openai import OpenAI
+        from io import BytesIO
+        if isinstance(image, str):
+            im = Image.open(image)
+        else:
+            im = image
+        im = im.convert("RGB")
+        im.thumbnail((max_edge, max_edge))
+        buf = BytesIO(); im.save(buf, format="JPEG", quality=85)
+        b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        client = OpenAI(api_key=api_key)
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": SEAM_SYSTEM},
+                {"role": "user", "content": [
+                    {"type": "text", "text": "Schliessen alle kantenkreuzenden "
+                     "Strukturen sauber an?"},
+                    {"type": "image_url",
+                     "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                ]},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=200,
+            temperature=0,
+        )
+        data = json.loads(resp.choices[0].message.content)
+        bad = data.get("bad_edges") or []
+        bad = [e for e in bad if e in ("left", "right", "top", "bottom")]
+        return {"ok": bool(data.get("ok")) and not bad,
+                "bad_edges": bad,
+                "notes": data.get("notes", "")}
+    except Exception as exc:
+        return {"error": str(exc)}

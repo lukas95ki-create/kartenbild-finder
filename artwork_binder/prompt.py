@@ -96,16 +96,55 @@ OUTPAINT_NEGATIVE = (
 )
 
 
-def build_outpaint_prompt(analysis, extra_style=None):
+_EDGE_LABEL = {"left": "left", "right": "right", "top": "top", "bottom": "bottom"}
+_EDGE_AXIS = {"left": "height", "right": "height", "top": "width", "bottom": "width"}
+
+
+def _edge_instructions(edges):
+    """Baut pro Kante eine explizite Fortsetzungs-Anweisung aus der Edge-Map."""
+    lines = []
+    if not isinstance(edges, dict):
+        return lines
+    for side in ("left", "right", "top", "bottom"):
+        items = edges.get(side)
+        if not isinstance(items, (list, tuple)) or not items:
+            continue
+        axis = _EDGE_AXIS[side]
+        for it in items:
+            if not isinstance(it, dict) or not it.get("element"):
+                continue
+            desc = _clean(it["element"])
+            det = []
+            if it.get("span"):
+                det.append(f"at {_clean(it['span'])} along the {axis}")
+            if it.get("angle"):
+                det.append(_clean(it["angle"]))
+            if it.get("thickness"):
+                det.append(_clean(it["thickness"]))
+            if it.get("color"):
+                det.append(_clean(it["color"]))
+            tail = (" (" + ", ".join(det) + ")") if det else ""
+            lines.append(
+                f"At the {side} card edge, continue the {desc}{tail} straight "
+                f"beyond the edge at exactly the same position, scale, angle "
+                f"and color, perfectly aligned where it meets the card.")
+    return lines
+
+
+def build_outpaint_prompt(analysis, extra_style=None, focus_edges=None):
     """Prompt fuer das masken-basierte Card-Outpainting (images.edit).
 
     Das Modell sieht die echten Kartenpixel in der Mitte und soll die
     Illustration ueber die Kartenkanten hinaus NAHTLOS fortsetzen - gleiche
     Palette, gleiche Lichtrichtung, gleicher Malstil, durchgehende
-    Perspektive und Horizont. Die konkreten Szenenelemente kommen aus der
-    Vision-Analyse der jeweiligen Karte.
+    Perspektive und Horizont. Szene UND kantenkreuzende Strukturen (Edge-Map)
+    kommen aus der Vision-Analyse.
+
+    focus_edges: optionale Liste ("left"/"right"/"top"/"bottom") - bei einem
+    Retry wird die Anweisung fuer genau diese Kanten zusaetzlich verschaerft.
     """
     scene = analysis.get("scene") if isinstance(analysis.get("scene"), dict) else {}
+    edges = analysis.get("edges")
     mood = analysis.get("mood") or ""
 
     parts = [
@@ -142,6 +181,26 @@ def build_outpaint_prompt(analysis, extra_style=None):
         style_bits.append("a continuous horizon and perspective")
     parts.append("Match " + ", ".join(style_bits) + " so there is no visible "
                  "seam at the card edges.")
+
+    # Kantenweise Struktur-Fortsetzung aus der Edge-Map.
+    edge_lines = _edge_instructions(edges)
+    if edge_lines:
+        parts.extend(edge_lines)
+    parts.append(
+        "Every structural element touching the card boundary must continue at "
+        "exactly the same position, scale, angle and color where it meets the "
+        "edge. Maintain one consistent horizon line and perspective across the "
+        "entire image.")
+
+    # Retry: gezielte Verschaerfung fuer problematische Kanten.
+    if focus_edges:
+        sides = ", ".join(s for s in focus_edges if s in _EDGE_LABEL)
+        if sides:
+            parts.append(
+                f"CRITICAL: the {sides} edge(s) previously did not line up. "
+                f"Make every structure crossing the {sides} edge(s) continue "
+                f"perfectly aligned - same position along the edge, same angle, "
+                f"same thickness and color - with no visible offset or break.")
 
     if mood:
         parts.append(f"Overall mood: {mood}.")

@@ -74,6 +74,17 @@ def _feathered_paste(base, card, box, feather=2):
     return base
 
 
+def composite_card(edit_result, card_tile, geo, feather=2):
+    """Legt die Original-Karte exakt in die Mitte des Edit-Ergebnisses.
+
+    Rueckgabe in Edit-Aufloesung (nicht hochskaliert) - dient dem Seam-Check
+    und als Basis fuer die Vorschau.
+    """
+    out = edit_result.copy()
+    _feathered_paste(out, card_tile, geo["card_box"], feather=feather)
+    return out
+
+
 def compose_outputs(edit_result, card_tile, geo, dpi=300, feather=2):
     """Erzeugt (grid_pdf, preview) in Ziel-DPI.
 
@@ -85,8 +96,7 @@ def compose_outputs(edit_result, card_tile, geo, dpi=300, feather=2):
     ox, oy, gw, gh = geo["grid_box"]
     grid_scene = edit_result.crop((ox, oy, ox + gw, oy + gh))
 
-    preview_full = edit_result.copy()
-    _feathered_paste(preview_full, card_tile, geo["card_box"], feather=feather)
+    preview_full = composite_card(edit_result, card_tile, geo, feather=feather)
     preview_scene = preview_full.crop((ox, oy, ox + gw, oy + gh))
 
     tgt_w, tgt_h, _, _ = G.grid_pixels(dpi)

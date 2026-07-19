@@ -26,33 +26,76 @@ from . import types as T
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 
-def _outpaint_grid(image_path, analysis, dpi, edit_model, offline, api_key,
-                   base, outputs, log):
+def _outpaint_grid(image_path, analysis, dpi, edit_model, vision_model,
+                   offline, api_key, base, outputs, seam_retries, log):
     """Kern-Weg: masken-basiertes Card-Outpainting (Karte bleibt in der Mitte).
 
+    Generiert, prueft die Kanten-Anschluesse per Seam-Check und wiederholt bei
+    Problemen bis zu seam_retries mal mit gezielt verschaerftem Prompt fuer die
+    betroffenen Kanten. Behaelt das beste Ergebnis (Kosten gedeckelt auf
+    1 + seam_retries Generierungen).
+
     Gibt (grid_pdf_img, gen_prompt, negative, gen_meta) zurueck oder None,
-    wenn kein Outpainting moeglich ist (offline / kein Key) - dann greift der
-    Text-zu-Bild-Fallback.
+    wenn kein Outpainting moeglich ist (offline / kein Key).
     """
     api_key = api_key or os.environ.get("OPENAI_API_KEY")
     if offline or not api_key:
         return None
 
-    gen_prompt, negative = P.build_outpaint_prompt(analysis)
-    log(f"  Outpaint-Prompt: {gen_prompt}")
-
     card = Image.open(image_path)
     canvas, mask, card_tile, geo = OP.build_canvas(card)
-    log(f"  Outpainting: OpenAI {edit_model} images.edit @ "
-        f"{geo['edit_size'][0]}x{geo['edit_size'][1]} "
-        f"(Karte geschuetzt in der Mitte) ...")
-    try:
-        result = GEN.edit_openai(canvas, mask, gen_prompt, model=edit_model,
-                                 api_key=api_key,
-                                 size=f"{geo['edit_size'][0]}x{geo['edit_size'][1]}")
-    except Exception as exc:
-        log(f"  Outpaint-Fehler ({exc}) -> Text-zu-Bild-Fallback")
-        return None
+    size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
+    max_attempts = 1 + max(0, seam_retries)
+
+    best = None            # (score, result, prompt, check)
+    focus = None           # problematische Kanten fuer den naechsten Versuch
+    attempts_meta = []
+
+    for attempt in range(1, max_attempts + 1):
+        gen_prompt, negative = P.build_outpaint_prompt(analysis, focus_edges=focus)
+        if attempt == 1:
+            log(f"  Outpaint-Prompt: {gen_prompt}")
+        else:
+            log(f"  Retry {attempt-1}: verschaerfte Kanten {focus}")
+        log(f"  Outpainting (Versuch {attempt}/{max_attempts}): "
+            f"{edit_model} images.edit @ {size} ...")
+        try:
+            result = GEN.edit_openai(canvas, mask, gen_prompt, model=edit_model,
+                                     api_key=api_key, size=size)
+        except Exception as exc:
+            if best is None:
+                log(f"  Outpaint-Fehler ({exc}) -> Text-zu-Bild-Fallback")
+                return None
+            log(f"  Outpaint-Fehler ({exc}) -> behalte bisher bestes Ergebnis")
+            break
+
+        # Seam-Check auf dem Composite (Karte in der Mitte).
+        composite = OP.composite_card(result, card_tile, geo)
+        check = A.seam_check(composite, api_key=api_key, model=vision_model)
+        if check is None:
+            log("  Seam-Check uebersprungen (kein Key) - nehme dieses Ergebnis")
+            best = (0, result, gen_prompt, {"skipped": True})
+            break
+        if "error" in check:
+            log(f"  Seam-Check-Fehler ({check['error']}) - nehme dieses Ergebnis")
+            best = (0, result, gen_prompt, check)
+            break
+
+        bad = check.get("bad_edges", [])
+        score = 0 if check.get("ok") else len(bad) or 1
+        attempts_meta.append({"attempt": attempt, "ok": check.get("ok"),
+                              "bad_edges": bad, "notes": check.get("notes", "")})
+        log(f"  Seam-Check: {'OK' if check.get('ok') else 'Versatz an ' + str(bad)}"
+            + (f" ({check.get('notes')})" if check.get('notes') else ""))
+
+        if best is None or score < best[0]:
+            best = (score, result, gen_prompt, check)
+        if check.get("ok"):
+            break
+        focus = bad or ["left", "right", "top", "bottom"]
+
+    score, result, gen_prompt, check = best
+    negative = P.OUTPAINT_NEGATIVE
 
     # Rohes Edit-Ergebnis sichern (fuer Nachvollziehbarkeit).
     scene_path = base + "_scene.png"
@@ -60,14 +103,14 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, offline, api_key,
     outputs["scene_png"] = scene_path
 
     grid_pdf, preview = OP.compose_outputs(result, card_tile, geo, dpi=dpi)
-    # Vorschau MIT Karte in der Mitte (Etsy-Produktbild-Grundlage).
     preview_path = base + "_preview.png"
     preview.save(preview_path, dpi=(dpi, dpi))
     outputs["preview_png"] = preview_path
     log(f"  Vorschau (Karte in Mitte) gespeichert: {preview_path}")
 
     meta = {"provider": "openai-outpaint", "model": edit_model,
-            "edit_size": list(geo["edit_size"]), "card_box": list(geo["card_box"])}
+            "edit_size": list(geo["edit_size"]), "card_box": list(geo["card_box"]),
+            "seam_attempts": attempts_meta, "seam_final": check}
     return grid_pdf, gen_prompt, negative, meta
 
 
@@ -75,8 +118,8 @@ def process_card(image_path, out_dir, name=None, mode="empty", dpi=300,
                  cut_icons=False, crop_marks=False, provider="openai",
                  model="gpt-image-1", edit_model="gpt-image-2",
                  vision_model="gpt-4o-mini", use_vision=True, offline=False,
-                 no_outpaint=False, type_override=None, prompt_override=None,
-                 formats=None, log=print):
+                 no_outpaint=False, seam_retries=2, type_override=None,
+                 prompt_override=None, formats=None, log=print):
     """Fuehrt die komplette Pipeline fuer eine Karte aus. Gibt ein Ergebnis-
     Dict mit allen erzeugten Pfaden zurueck.
 
@@ -107,8 +150,8 @@ def process_card(image_path, out_dir, name=None, mode="empty", dpi=300,
     # 2-4) Kern: Card-Outpainting
     op = None
     if not no_outpaint and not prompt_override:
-        op = _outpaint_grid(image_path, analysis, dpi, edit_model, offline,
-                            None, base, outputs, log)
+        op = _outpaint_grid(image_path, analysis, dpi, edit_model, vision_model,
+                            offline, None, base, outputs, seam_retries, log)
 
     if op is not None:
         grid_img, gen_prompt, negative, gen_meta = op

@@ -56,6 +56,9 @@ def build_parser():
                    help="Modell fuer das Card-Outpainting via images.edit (Standard: gpt-image-2).")
     p.add_argument("--no-outpaint", action="store_true",
                    help="Kein Card-Outpainting, stattdessen reines Text-zu-Bild.")
+    p.add_argument("--seam-retries", type=int, default=2,
+                   help="Max. Wiederholungen bei schlechtem Kanten-Anschluss "
+                        "(Seam-Check); 0 = aus. Standard: 2 (=max 3 Generierungen).")
     p.add_argument("--vision-model", default="gpt-4o-mini",
                    help="Vision-Modell fuer Szenen/Typ/Name-Erkennung (Standard: gpt-4o-mini).")
     p.add_argument("--no-vision", action="store_true",
@@ -90,6 +93,7 @@ def main(argv=None):
         mode=args.mode, dpi=args.dpi, cut_icons=args.cut_icons,
         crop_marks=args.crop_marks, provider=args.provider, model=args.model,
         edit_model=args.edit_model, no_outpaint=args.no_outpaint,
+        seam_retries=args.seam_retries,
         vision_model=args.vision_model, use_vision=not args.no_vision,
         offline=args.offline, type_override=args.type_override,
         prompt_override=args.prompt_override, formats=formats,
