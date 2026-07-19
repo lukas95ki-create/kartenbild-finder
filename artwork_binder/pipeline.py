@@ -40,11 +40,13 @@ def _resolve_outpaint_provider(requested, offline, log):
         return ("openai", openai_key) if openai_key else (None, None)
     if requested == "openai":
         return ("openai", openai_key) if openai_key else (None, None)
-    # auto
-    if stab_key:
-        return "stability", openai_key
+    # auto: gpt-image-2 bevorzugt (empirisch besser fuers volle 3x3-Feld);
+    # Stability nur auf explizite Anforderung, da es das Fernfeld oft flach
+    # laesst und Randstrukturen literal verzerrt.
     if openai_key:
         return "openai", openai_key
+    if stab_key:
+        return "stability", openai_key
     return None, None
 
 
