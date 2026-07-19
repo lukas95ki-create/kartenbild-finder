@@ -131,6 +131,20 @@ VISION_SYSTEM = (
     '   "lighting" (englische Beschreibung von Tageszeit/Wetter/Lichtstimmung),\n'
     '   "palette" (englische Beschreibung der dominanten Hintergrundfarben),\n'
     '   "viewpoint" (englische Beschreibung von Bildausschnitt/Blickrichtung/Tiefe);\n'
+    '"environment_dna": Objekt, das NUR die WIEDERHOLBARE Umgebungs-Art '
+    'beschreibt (Typen, keine konkreten Einzel-Objekte) mit englischen '
+    'Feldern "vegetation" (Art der Pflanzen/Baeume, z.B. "lush deciduous '
+    'foliage and bushes"), "ground" (Bodenart, z.B. "grassy soil with a '
+    'stone path"), "sky" (Himmel, z.B. "bright blue sky with soft clouds"), '
+    '"style" (Maltechnik/Strichfuehrung, z.B. "soft watercolor with fine ink '
+    'outlines"), "horizon" (Perspektivhoehe/Horizontlinie, z.B. "low '
+    'viewpoint, high horizon, looking slightly up");\n'
+    '"unique_objects": englische Liste der KONKRETEN, WIEDERERKENNBAREN '
+    'Einzel-Objekte/Landmarken in der Illustration, die es je nur EINMAL gibt '
+    '(z.B. ["a house with a red tiled roof","a large brown tree trunk","a '
+    'thick horizontal tree branch"]). Diese Liste ist eine VERBOTSLISTE fuer '
+    'den Aussenbereich. Diffuse Flaechen (Gras, Himmel, Laub allgemein) '
+    'gehoeren NICHT hierher;\n'
     '"edges": Objekt mit den vier Schluesseln "left","right","top","bottom". '
     'Pruefe JEDE der vier Kanten einzeln und sorgfaeltig. Jeder Wert ist eine '
     'Liste der STRUKTUR-Elemente (Baumstamm, Ast, Zweig, Dach, Gebaeude, Wand, '
@@ -188,10 +202,20 @@ def vision_analysis(image_path, model="gpt-4o-mini", api_key=None):
         edges = data.get("edges")
         if not isinstance(edges, dict):
             edges = None
+        dna = data.get("environment_dna")
+        if not isinstance(dna, dict):
+            dna = None
+        uniq = data.get("unique_objects")
+        if not isinstance(uniq, list):
+            uniq = None
+        else:
+            uniq = [str(u).strip() for u in uniq if str(u).strip()]
         return {
             "type": norm or T.DEFAULT_TYPE,
             "name": (data.get("name") or None),
             "scene": scene,
+            "environment_dna": dna,
+            "unique_objects": uniq,
             "edges": edges,
             "mood": data.get("mood"),
             "source": "vision:" + model,
@@ -212,6 +236,8 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
         "type_confidence": colors["type_confidence"],
         "name": None,
         "scene": None,
+        "environment_dna": None,
+        "unique_objects": None,
         "edges": None,
         "mood": colors["mood"],
         "dominant_colors": colors["dominant_colors"],
@@ -226,6 +252,8 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
             result["type"] = v["type"] or result["type"]
             result["name"] = v.get("name")
             result["scene"] = v.get("scene")
+            result["environment_dna"] = v.get("environment_dna")
+            result["unique_objects"] = v.get("unique_objects")
             result["edges"] = v.get("edges")
             if v.get("mood"):
                 result["mood"] = v["mood"]
@@ -235,6 +263,8 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
                 log(f"  Erkannte Szene: {v['scene'].get('setting')}")
             else:
                 log("  Hinweis: Vision lieferte keine Szene -> Typ-Fallback")
+            if v.get("unique_objects"):
+                log(f"  Verbotsliste (nicht duplizieren): {v['unique_objects']}")
             if v.get("edges"):
                 n = sum(len(x) for x in v["edges"].values() if isinstance(x, list))
                 log(f"  Edge-Map: {n} kantenkreuzende Struktur(en) erfasst")
@@ -263,19 +293,28 @@ SEAM_SYSTEM = (
     "konkrete Struktur benennen und wie sie versetzt ist. Kannst du keine "
     "konkrete versetzte Struktur benennen, ist die Kante ok. Sei nicht "
     "uebermaessig streng - im Zweifel ok.\n"
+    "ZUSAETZLICH pruefst du auf DUPLIKATE: Dir wird eine Liste einzigartiger "
+    "Objekte der Karte gegeben (z.B. 'a house with a red roof', 'a large tree "
+    "trunk'). Erscheint eines davon im AUSSENbereich als eigene, zweite "
+    "Instanz (zusaetzliches Haus/Dach, zweiter grosser Stamm usw.)? Jedes "
+    "gefundene Duplikat ist ein Fehler.\n"
     "bad_edges enthaelt AUSSCHLIESSLICH die Schluessel \"left\"/\"right\"/"
-    "\"top\"/\"bottom\" der wirklich gebrochenen Kanten. \"ok\" muss genau "
-    "dann true sein, wenn bad_edges leer ist.\n"
+    "\"top\"/\"bottom\" der wirklich gebrochenen Kanten. \"duplicates\" listet "
+    "die duplizierten Objekte (aus der Liste) als englische Strings. \"ok\" "
+    "muss genau dann true sein, wenn bad_edges UND duplicates leer sind.\n"
     "Antworte NUR als JSON: {\"ok\": true|false, \"bad_edges\": [...], "
-    "\"notes\": \"pro schlechter Kante: Struktur + Art des Versatzes\"}."
+    "\"duplicates\": [...], \"notes\": \"kurz\"}."
 )
 
 
-def seam_check(image, api_key=None, model="gpt-4o-mini", max_edge=768):
-    """Prueft ein Composite (Karte in der Mitte) auf saubere Kanten-Anschluesse.
+def seam_check(image, unique_objects=None, api_key=None, model="gpt-4o-mini",
+               max_edge=768):
+    """Prueft ein Composite (Karte in der Mitte) auf saubere Kanten-Anschluesse
+    UND auf duplizierte einzigartige Objekte im Aussenbereich.
 
-    image: Pfad oder PIL.Image. Gibt dict(ok, bad_edges, notes) zurueck oder
-    None, wenn kein Key/Fehler (dann wird die Pruefung uebersprungen).
+    image: Pfad oder PIL.Image. unique_objects: Verbotsliste (aus der Analyse).
+    Gibt dict(ok, bad_edges, duplicates, notes) zurueck oder None, wenn kein
+    Key/Fehler (dann wird die Pruefung uebersprungen).
     """
     api_key = api_key or os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -291,27 +330,34 @@ def seam_check(image, api_key=None, model="gpt-4o-mini", max_edge=768):
         im.thumbnail((max_edge, max_edge))
         buf = BytesIO(); im.save(buf, format="JPEG", quality=85)
         b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        objs = unique_objects or []
+        obj_text = ("Einzigartige Objekte der Karte (Verbotsliste fuer aussen): "
+                    + "; ".join(objs)) if objs else "Keine Objektliste uebergeben."
         client = OpenAI(api_key=api_key)
         resp = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": SEAM_SYSTEM},
                 {"role": "user", "content": [
-                    {"type": "text", "text": "Schliessen alle kantenkreuzenden "
-                     "Strukturen sauber an?"},
+                    {"type": "text", "text": obj_text + " Schliessen alle "
+                     "kantenkreuzenden Strukturen sauber an, und taucht ein "
+                     "einzigartiges Objekt aussen doppelt auf?"},
                     {"type": "image_url",
                      "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
                 ]},
             ],
             response_format={"type": "json_object"},
-            max_tokens=200,
+            max_tokens=250,
             temperature=0,
         )
         data = json.loads(resp.choices[0].message.content)
         bad = data.get("bad_edges") or []
         bad = [e for e in bad if e in ("left", "right", "top", "bottom")]
-        return {"ok": bool(data.get("ok")) and not bad,
+        dups = data.get("duplicates") or []
+        dups = [str(d).strip() for d in dups if str(d).strip()]
+        return {"ok": bool(data.get("ok")) and not bad and not dups,
                 "bad_edges": bad,
+                "duplicates": dups,
                 "notes": data.get("notes", "")}
     except Exception as exc:
         return {"error": str(exc)}

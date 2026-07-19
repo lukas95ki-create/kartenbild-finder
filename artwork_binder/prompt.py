@@ -101,7 +101,12 @@ _EDGE_AXIS = {"left": "height", "right": "height", "top": "width", "bottom": "wi
 
 
 def _edge_instructions(edges):
-    """Baut pro Kante eine explizite Fortsetzungs-Anweisung aus der Edge-Map."""
+    """Baut pro Kante eine explizite Fortsetzungs-Anweisung aus der Edge-Map.
+
+    Nur was eine Kante nachweislich verlaesst, wird dort fortgesetzt - am
+    Austrittspunkt, gern hinter einem natuerlichen Verdecker (Busch/Laub)
+    kaschiert, damit kleine Ungenauigkeiten nicht auffallen.
+    """
     lines = []
     if not isinstance(edges, dict):
         return lines
@@ -125,72 +130,102 @@ def _edge_instructions(edges):
                 det.append(_clean(it["color"]))
             tail = (" (" + ", ".join(det) + ")") if det else ""
             lines.append(
-                f"At the {side} card edge, continue the {desc}{tail} straight "
-                f"beyond the edge at exactly the same position, scale, angle "
-                f"and color, perfectly aligned where it meets the card.")
+                f"At the {side} card edge the {desc}{tail} exits the crop - "
+                f"continue ONLY that one element straight beyond the edge at "
+                f"the same position, scale, angle and color; you may softly "
+                f"hide the transition behind natural foliage or bushes.")
     return lines
 
 
-def build_outpaint_prompt(analysis, extra_style=None, focus_edges=None):
+def _dna_clause(analysis):
+    """Umgebungs-DNA (wiederholbare Art der Umgebung) fuer den Aussenbereich."""
+    scene = analysis.get("scene") if isinstance(analysis.get("scene"), dict) else {}
+    dna = analysis.get("environment_dna") if isinstance(analysis.get("environment_dna"), dict) else {}
+    bits = []
+    palette = dna.get("palette") or scene.get("palette")
+    light = dna.get("light") or scene.get("lighting")
+    if palette:
+        bits.append("the same color palette (" + _clean(palette) + ")")
+    if light:
+        bits.append("the same light direction and time of day (" + _clean(light) + ")")
+    if dna.get("style"):
+        bits.append("the same brushwork and painting style (" + _clean(dna["style"]) + ")")
+    if dna.get("vegetation"):
+        bits.append("the same kind of vegetation (" + _clean(dna["vegetation"]) + ")")
+    if dna.get("ground"):
+        bits.append("the same kind of ground (" + _clean(dna["ground"]) + ")")
+    if dna.get("sky"):
+        bits.append("the same kind of sky (" + _clean(dna["sky"]) + ")")
+    horizon = dna.get("horizon") or scene.get("viewpoint")
+    if horizon:
+        bits.append("one consistent horizon height and perspective (" + _clean(horizon) + ")")
+    if not bits:
+        bits = ["the same palette, light, brushwork and perspective"]
+    return "Use " + ", ".join(bits) + " everywhere, at one consistent scale."
+
+
+def _forbid_clause(analysis, escalate=None):
+    """Dynamische Verbotsliste aus den einzigartigen Objekten der Karte."""
+    objs = analysis.get("unique_objects") or []
+    objs = [_clean(o) for o in objs if str(o).strip()]
+    if escalate:
+        objs = list(dict.fromkeys(objs + [_clean(o) for o in escalate]))
+    if not objs:
+        return ("Do NOT duplicate any recognizable landmark from the card. No "
+                "second house, rooftop, building or large tree trunk anywhere "
+                "in the outer area.")
+    listed = "; ".join(objs)
+    return ("The card already contains these unique objects: " + listed + ". Do "
+            "NOT paint any additional or second instance of them anywhere in "
+            "the outer area (no extra house/rooftop/building, no second large "
+            "tree trunk). The only trunk or branch allowed outside the card is "
+            "the direct continuation of the one that exits a card edge.")
+
+
+def build_outpaint_prompt(analysis, extra_style=None, focus_edges=None,
+                          escalate_forbid=None):
     """Prompt fuer das masken-basierte Card-Outpainting (images.edit).
 
-    Das Modell sieht die echten Kartenpixel in der Mitte und soll die
-    Illustration ueber die Kartenkanten hinaus NAHTLOS fortsetzen - gleiche
-    Palette, gleiche Lichtrichtung, gleicher Malstil, durchgehende
-    Perspektive und Horizont. Szene UND kantenkreuzende Strukturen (Edge-Map)
-    kommen aus der Vision-Analyse.
+    Konzept: Die Karte ist ein DETAIL-AUSSCHNITT eines groesseren Gemaeldes.
+    Das Modell malt den REST dieses Gemaeldes drumherum - die weitere
+    Umgebung (mehr Himmel, Laub, Wiese, Weg), NICHT eine Wiederholung der
+    Karten-Motive. Umgebungs-DNA wird uebernommen, einzigartige Objekte
+    (Haus, grosser Stamm ...) sind im Aussenbereich verboten. Nur echte
+    kantenkreuzende Strukturen (Edge-Map) werden fortgesetzt.
 
-    focus_edges: optionale Liste ("left"/"right"/"top"/"bottom") - bei einem
-    Retry wird die Anweisung fuer genau diese Kanten zusaetzlich verschaerft.
+    focus_edges:     Retry - Kanten, deren Struktur nachgebessert werden muss.
+    escalate_forbid: Retry - Objekte, die aussen faelschlich dupliziert wurden.
     """
-    scene = analysis.get("scene") if isinstance(analysis.get("scene"), dict) else {}
     edges = analysis.get("edges")
     mood = analysis.get("mood") or ""
+    scene = analysis.get("scene") if isinstance(analysis.get("scene"), dict) else {}
 
     parts = [
-        "Continue this exact illustration seamlessly outward in every "
-        "direction, beyond the edges of the card in the center, as one single "
-        "continuous painting. Extend ONLY the natural landscape and scenery "
-        "around the card; any creature or character stays only on the central "
-        "card and must not reappear in the surrounding painted area."
+        "The center of this canvas shows a DETAIL CROP of a larger painting. "
+        "Paint the REST of that larger painting all around it: the wider "
+        "surrounding environment, NOT a repetition of what the detail already "
+        "shows. Any creature or character stays only on the central card and "
+        "must never reappear outside it."
     ]
     if scene.get("setting"):
-        parts.append("The scene is " + _clean(scene["setting"]) + ".")
-    elements = scene.get("elements")
-    if isinstance(elements, (list, tuple)) and elements:
-        parts.append("Extend these same elements naturally outward: "
-                     + ", ".join(_clean(e) for e in elements) + ".")
-    elif isinstance(elements, str) and elements.strip():
-        parts.append("Extend these same elements naturally outward: "
-                     + _clean(elements) + ".")
+        parts.append("The larger scene is " + _clean(scene["setting"]) + ".")
 
-    # Der Kern der Anforderung: exakte Fortsetzung, nicht nur aehnlich.
-    style_bits = []
-    if scene.get("palette"):
-        style_bits.append("the identical color palette (" + _clean(scene["palette"]) + ")")
-    else:
-        style_bits.append("the identical color palette")
-    if scene.get("lighting"):
-        style_bits.append("the identical light direction (" + _clean(scene["lighting"]) + ")")
-    else:
-        style_bits.append("the identical light direction")
-    style_bits.append("the identical painterly brushwork and texture")
-    if scene.get("viewpoint"):
-        style_bits.append("a continuous horizon and perspective (" + _clean(scene["viewpoint"]) + ")")
-    else:
-        style_bits.append("a continuous horizon and perspective")
-    parts.append("Match " + ", ".join(style_bits) + " so there is no visible "
-                 "seam at the card edges.")
+    # Umgebungs-DNA (wiederholbar) einsetzen.
+    parts.append(_dna_clause(analysis))
 
-    # Kantenweise Struktur-Fortsetzung aus der Edge-Map.
+    # Kantenweise Struktur-Fortsetzung (nur echte Austritte).
     edge_lines = _edge_instructions(edges)
     if edge_lines:
         parts.extend(edge_lines)
+
+    # Verbot: keine duplizierten Landmarken.
+    parts.append(_forbid_clause(analysis, escalate=escalate_forbid))
     parts.append(
-        "Every structural element touching the card boundary must continue at "
-        "exactly the same position, scale, angle and color where it meets the "
-        "edge. Maintain one consistent horizon line and perspective across the "
-        "entire image.")
+        "No duplicated landmarks. The outer area should mostly show MORE of "
+        "the environment - more sky, more foliage, open ground, a path "
+        "continuing - not new focal objects. Keep one consistent scale, "
+        "horizon line and perspective across the entire image, so it reads as "
+        "one single painting with the card as a crop inside it.")
 
     # Retry: gezielte Verschaerfung fuer problematische Kanten.
     if focus_edges:
@@ -198,9 +233,14 @@ def build_outpaint_prompt(analysis, extra_style=None, focus_edges=None):
         if sides:
             parts.append(
                 f"CRITICAL: the {sides} edge(s) previously did not line up. "
-                f"Make every structure crossing the {sides} edge(s) continue "
-                f"perfectly aligned - same position along the edge, same angle, "
-                f"same thickness and color - with no visible offset or break.")
+                f"Make the structure crossing the {sides} edge(s) continue "
+                f"perfectly aligned - same position along the edge, same angle "
+                f"and thickness - with no visible offset or break.")
+    if escalate_forbid:
+        parts.append(
+            "CRITICAL: previously a duplicated object appeared outside. Remove "
+            "any second copy of: " + "; ".join(_clean(o) for o in escalate_forbid)
+            + ". Replace that area with plain surrounding environment.")
 
     if mood:
         parts.append(f"Overall mood: {mood}.")

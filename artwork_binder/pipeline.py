@@ -47,16 +47,19 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
     size = f"{geo['edit_size'][0]}x{geo['edit_size'][1]}"
     max_attempts = 1 + max(0, seam_retries)
 
+    unique_objects = analysis.get("unique_objects") or []
     best = None            # (score, result, prompt, check)
     focus = None           # problematische Kanten fuer den naechsten Versuch
+    forbid = None          # aussen duplizierte Objekte fuer den naechsten Versuch
     attempts_meta = []
 
     for attempt in range(1, max_attempts + 1):
-        gen_prompt, negative = P.build_outpaint_prompt(analysis, focus_edges=focus)
+        gen_prompt, negative = P.build_outpaint_prompt(
+            analysis, focus_edges=focus, escalate_forbid=forbid)
         if attempt == 1:
             log(f"  Outpaint-Prompt: {gen_prompt}")
         else:
-            log(f"  Retry {attempt-1}: verschaerfte Kanten {focus}")
+            log(f"  Retry {attempt-1}: Kanten={focus or []}, Duplikate={forbid or []}")
         log(f"  Outpainting (Versuch {attempt}/{max_attempts}): "
             f"{edit_model} images.edit @ {size} ...")
         try:
@@ -71,7 +74,8 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
 
         # Seam-Check auf dem Composite (Karte in der Mitte).
         composite = OP.composite_card(result, card_tile, geo)
-        check = A.seam_check(composite, api_key=api_key, model=seam_model)
+        check = A.seam_check(composite, unique_objects=unique_objects,
+                             api_key=api_key, model=seam_model)
         if check is None:
             log("  Seam-Check uebersprungen (kein Key) - nehme dieses Ergebnis")
             best = (0, result, gen_prompt, {"skipped": True})
@@ -82,17 +86,22 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
             break
 
         bad = check.get("bad_edges", [])
-        score = 0 if check.get("ok") else len(bad) or 1
+        dups = check.get("duplicates", [])
+        score = 0 if check.get("ok") else (len(bad) + len(dups)) or 1
         attempts_meta.append({"attempt": attempt, "ok": check.get("ok"),
-                              "bad_edges": bad, "notes": check.get("notes", "")})
-        log(f"  Seam-Check: {'OK' if check.get('ok') else 'Versatz an ' + str(bad)}"
+                              "bad_edges": bad, "duplicates": dups,
+                              "notes": check.get("notes", "")})
+        status = "OK" if check.get("ok") else \
+            f"Versatz={bad or []}, Duplikate={dups or []}"
+        log(f"  Seam-Check: {status}"
             + (f" ({check.get('notes')})" if check.get('notes') else ""))
 
         if best is None or score < best[0]:
             best = (score, result, gen_prompt, check)
         if check.get("ok"):
             break
-        focus = bad or ["left", "right", "top", "bottom"]
+        focus = bad or None
+        forbid = dups or None
 
     score, result, gen_prompt, check = best
     negative = P.OUTPAINT_NEGATIVE
