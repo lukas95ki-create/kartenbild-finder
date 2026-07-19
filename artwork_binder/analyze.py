@@ -139,12 +139,15 @@ VISION_SYSTEM = (
     '"style" (Maltechnik/Strichfuehrung, z.B. "soft watercolor with fine ink '
     'outlines"), "horizon" (Perspektivhoehe/Horizontlinie, z.B. "low '
     'viewpoint, high horizon, looking slightly up");\n'
-    '"unique_objects": englische Liste der KONKRETEN, WIEDERERKENNBAREN '
-    'Einzel-Objekte/Landmarken in der Illustration, die es je nur EINMAL gibt '
-    '(z.B. ["a house with a red tiled roof","a large brown tree trunk","a '
-    'thick horizontal tree branch"]). Diese Liste ist eine VERBOTSLISTE fuer '
-    'den Aussenbereich. Diffuse Flaechen (Gras, Himmel, Laub allgemein) '
-    'gehoeren NICHT hierher;\n'
+    '"unique_objects": englische Liste NUR der wirklich EINZIGARTIGEN, '
+    'markanten Landmarken, die in einer groesseren Szene je nur EINMAL '
+    'vorkommen sollten - v.a. Gebaeude und einzelne dominante Strukturen '
+    '(z.B. ["a house with a red tiled roof","a single large dominant tree '
+    'trunk"]). NICHT aufnehmen: verstreute Natur-Elemente, die sich in einer '
+    'Landschaft natuerlich wiederholen (Blumen, Blumenbeete, Buesche, Gras, '
+    'kleine Pflanzen, Steine, Felsen, Baeume allgemein, Wolken, Eis-/'
+    'Schneeflecken) - die gehoeren zur Umgebung und duerfen ueberall '
+    'auftauchen. Im Zweifel weglassen;\n'
     '"edges": Objekt mit den vier Schluesseln "left","right","top","bottom". '
     'Pruefe JEDE der vier Kanten einzeln und sorgfaeltig. Jeder Wert ist eine '
     'Liste der STRUKTUR-Elemente (Baumstamm, Ast, Zweig, Dach, Gebaeude, Wand, '
@@ -356,36 +359,29 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
 
 
 SEAM_SYSTEM = (
-    "Du pruefst ein Binder-Mockup. In der MITTE liegt eine ECHTE Sammelkarte "
-    "mit ihrem eigenen silbernen Rahmen, Namen, KP und Textfeld; rundherum "
-    "wurde per KI die Illustration ueber die Kartenkanten hinaus fortgesetzt.\n"
-    "WICHTIG - was du IGNORIEREN musst (das ist KEIN Fehler): der silberne "
-    "Kartenrahmen, der Textkasten, Schrift/Zahlen auf der Karte, ein leichter "
-    "Helligkeits-, Glanz- oder Saettigungsunterschied zwischen Karte und "
-    "Umgebung, sowie diffuse Flaechen (Himmel, Laub, Gras, Wasser, Schnee), "
-    "die nur farblich grob passen muessen.\n"
+    "Du pruefst ein Binder-Mockup. In der MITTE ist ein GRAUES RECHTECK - ein "
+    "Platzhalter, wo spaeter die echte Sammelkarte liegt. Rundherum wurde per "
+    "KI die Szene gemalt (die Fortsetzung der Karten-Illustration). Du "
+    "bewertest AUSSCHLIESSLICH den gemalten Bereich rund um das graue Rechteck. "
+    "Das graue Rechteck selbst ist KEIN Fehler und wird ignoriert.\n"
+    "IGNORIEREN (kein Fehler): das graue Mittel-Rechteck, sowie diffuse "
+    "Flaechen (Himmel, Laub, Gras, Wasser, Schnee), die nur farblich grob "
+    "passen muessen.\n"
     "Eine Kante ist NUR DANN schlecht, wenn eine KONKRETE lineare Struktur "
-    "(Baumstamm, Ast, Dachkante, Wand, Weg, Horizont, Felskante), die an der "
-    "Kartenkante klar sichtbar ist, ausserhalb FEHLT oder deutlich versetzt / "
-    "im falschen Winkel / falscher Dicke weiterlaeuft (klar sichtbarer "
-    "Bruch/Sprung). Du MUSST fuer jede als schlecht gemeldete Kante die "
-    "konkrete Struktur benennen und wie sie versetzt ist. Kannst du keine "
-    "konkrete versetzte Struktur benennen, ist die Kante ok. Sei nicht "
-    "uebermaessig streng - im Zweifel ok.\n"
-    "ZUSAETZLICH pruefst du auf DUPLIKATE: Dir wird eine Liste einzigartiger "
-    "Objekte der Karte gegeben (z.B. 'a house with a red roof', 'a large tree "
-    "trunk'). Diese Objekte SIND auf der Karte selbst zu sehen - dieses eine "
-    "Vorkommen INNERHALB des Kartenrahmens ist ERWARTET und zaehlt NIE als "
-    "Duplikat. Suche gezielt im Bereich OBERHALB, LINKS, RECHTS und UNTERHALB "
-    "der Karte: erscheint dort - klar getrennt vom Kartenrahmen - eine ZWEITE "
-    "Kopie desselben Objekts (z.B. ein zweites Haus mit Dach ueber/neben der "
-    "Karte, ein zweiter grosser Baumstamm)? Dann ist DAS ein Duplikat und ein "
-    "Fehler. Eine blosse Fortsetzung derselben durchgehenden Struktur ueber "
-    "die Kante (ein Stamm/Ast, der weiterlaeuft) ist KEIN Duplikat.\n"
-    "HARTES K.O. - KREATUR IM AUSSENBEREICH: Die Kreatur/das Pokemon gehoert "
-    "NUR auf die Karte in der Mitte. Erscheint im generierten Aussenbereich "
-    "ein Tier/Pokemon/Fantasiewesen ODER ein Fragment davon (Pfote, Schwanz, "
-    "Ohr, Auge, Fell, Gesicht), setze creature=true. Das ist immer ein Fehler.\n"
+    "(Baumstamm, Ast, Dachkante, Wand, Weg, Horizont, Felskante), die am Rand "
+    "des grauen Rechtecks klar auslaeuft, ringsum FEHLT oder deutlich versetzt "
+    "weiterlaeuft. Kannst du keine konkrete versetzte Struktur benennen, ist "
+    "die Kante ok. Im Zweifel ok.\n"
+    "DUPLIKATE: Dir wird eine Liste einzigartiger Objekte der Karte gegeben "
+    "(z.B. 'a house with a red roof', 'a large tree trunk'). Erscheint eines "
+    "davon im gemalten Aussenbereich (rund um das graue Rechteck)? Da die "
+    "Karte selbst ausgeblendet ist, ist JEDES Vorkommen im Aussenbereich ein "
+    "Duplikat und ein Fehler. Eine durchgehende Struktur, die nur am grauen "
+    "Rand plausibel auslaeuft, ist kein Duplikat.\n"
+    "HARTES K.O. - KREATUR: Erscheint im gemalten Aussenbereich (rund um das "
+    "graue Rechteck) ein Tier/Pokemon/Fantasiewesen ODER ein Fragment davon "
+    "(Pfote, Schwanz, Ohr, Auge, Fell, Gesicht), setze creature=true. Das "
+    "graue Rechteck enthaelt keine Kreatur - schau nur aussen herum.\n"
     "bad_edges enthaelt AUSSCHLIESSLICH die Schluessel \"left\"/\"right\"/"
     "\"top\"/\"bottom\" der wirklich gebrochenen Kanten. \"duplicates\" listet "
     "die duplizierten Objekte (aus der Liste) als englische Strings. "

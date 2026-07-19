@@ -156,6 +156,21 @@ def stability_plan(card_img, bbox=None, tile_w=STABILITY_TILE_W):
     return feed_tile, card_tile_full, expand, geo
 
 
+def blank_center(edit_result, geo, color=(128, 128, 128)):
+    """Fuellt die Mittelkachel (Kartenposition) mit neutralem Grau.
+
+    Fuer den Seam-Judge: so sieht er NUR den generierten Aussenbereich und
+    kann Karten-Inhalt (Kreatur, Haus) nicht faelschlich als Aussen-Fund
+    werten. Ein kleiner Ueberstand blendet auch den Rahmen-Ring mit aus.
+    """
+    out = edit_result.convert("RGB").copy()
+    cx, cy, tw, th = geo["card_box"]
+    pad = max(2, int(round(min(tw, th) * 0.02)))
+    ImageDraw.Draw(out).rectangle(
+        [cx - pad, cy - pad, cx + tw + pad, cy + th + pad], fill=color)
+    return out
+
+
 def composite_card(edit_result, card_tile, geo, feather=2):
     """Legt die Original-Karte exakt in die Mitte des Edit-Ergebnisses.
 

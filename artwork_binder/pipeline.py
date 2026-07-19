@@ -117,9 +117,11 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
             log(f"  Outpaint-Fehler ({exc}) -> behalte bisher bestes Ergebnis")
             break
 
-        # Seam-Check auf dem Composite (Karte in der Mitte).
-        composite = OP.composite_card(result, card_tile, geo)
-        check = A.seam_check(composite, unique_objects=unique_objects,
+        # Seam-Check auf der Szene mit AUSGEBLENDETER Mitte (grauer Platzhalter),
+        # damit der Judge nur den generierten Aussenbereich bewertet und
+        # Karten-Inhalt nicht faelschlich als Aussen-Fund wertet.
+        judge_img = OP.blank_center(result, geo)
+        check = A.seam_check(judge_img, unique_objects=unique_objects,
                              api_key=openai_key, model=seam_model)
         if check is None:
             log("  Seam-Check uebersprungen (kein Key) - nehme dieses Ergebnis")
