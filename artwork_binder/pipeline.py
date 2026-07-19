@@ -26,7 +26,7 @@ from . import types as T
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 
-def _outpaint_grid(image_path, analysis, dpi, edit_model, vision_model,
+def _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
                    offline, api_key, base, outputs, seam_retries, log):
     """Kern-Weg: masken-basiertes Card-Outpainting (Karte bleibt in der Mitte).
 
@@ -71,7 +71,7 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, vision_model,
 
         # Seam-Check auf dem Composite (Karte in der Mitte).
         composite = OP.composite_card(result, card_tile, geo)
-        check = A.seam_check(composite, api_key=api_key, model=vision_model)
+        check = A.seam_check(composite, api_key=api_key, model=seam_model)
         if check is None:
             log("  Seam-Check uebersprungen (kein Key) - nehme dieses Ergebnis")
             best = (0, result, gen_prompt, {"skipped": True})
@@ -117,9 +117,10 @@ def _outpaint_grid(image_path, analysis, dpi, edit_model, vision_model,
 def process_card(image_path, out_dir, name=None, mode="empty", dpi=300,
                  cut_icons=False, crop_marks=False, provider="openai",
                  model="gpt-image-1", edit_model="gpt-image-2",
-                 vision_model="gpt-4o-mini", use_vision=True, offline=False,
-                 no_outpaint=False, seam_retries=2, type_override=None,
-                 prompt_override=None, formats=None, log=print):
+                 vision_model="gpt-4o-mini", seam_model="gpt-4o",
+                 use_vision=True, offline=False, no_outpaint=False,
+                 seam_retries=2, type_override=None, prompt_override=None,
+                 formats=None, log=print):
     """Fuehrt die komplette Pipeline fuer eine Karte aus. Gibt ein Ergebnis-
     Dict mit allen erzeugten Pfaden zurueck.
 
@@ -150,7 +151,7 @@ def process_card(image_path, out_dir, name=None, mode="empty", dpi=300,
     # 2-4) Kern: Card-Outpainting
     op = None
     if not no_outpaint and not prompt_override:
-        op = _outpaint_grid(image_path, analysis, dpi, edit_model, vision_model,
+        op = _outpaint_grid(image_path, analysis, dpi, edit_model, seam_model,
                             offline, None, base, outputs, seam_retries, log)
 
     if op is not None:

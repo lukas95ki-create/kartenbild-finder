@@ -61,6 +61,9 @@ def build_parser():
                         "(Seam-Check); 0 = aus. Standard: 2 (=max 3 Generierungen).")
     p.add_argument("--vision-model", default="gpt-4o-mini",
                    help="Vision-Modell fuer Szenen/Typ/Name-Erkennung (Standard: gpt-4o-mini).")
+    p.add_argument("--seam-model", default="gpt-4o",
+                   help="Modell fuer den Kanten-Anschluss-Check (Standard: gpt-4o; "
+                        "gpt-4o-mini ist als Judge zu unzuverlaessig).")
     p.add_argument("--no-vision", action="store_true",
                    help="Vision-Analyse abschalten, nur Farb-Heuristik nutzen.")
     p.add_argument("--offline", action="store_true",
@@ -93,7 +96,7 @@ def main(argv=None):
         mode=args.mode, dpi=args.dpi, cut_icons=args.cut_icons,
         crop_marks=args.crop_marks, provider=args.provider, model=args.model,
         edit_model=args.edit_model, no_outpaint=args.no_outpaint,
-        seam_retries=args.seam_retries,
+        seam_retries=args.seam_retries, seam_model=args.seam_model,
         vision_model=args.vision_model, use_vision=not args.no_vision,
         offline=args.offline, type_override=args.type_override,
         prompt_override=args.prompt_override, formats=formats,

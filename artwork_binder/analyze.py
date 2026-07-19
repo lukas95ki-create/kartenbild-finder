@@ -247,17 +247,27 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
 
 
 SEAM_SYSTEM = (
-    "Du pruefst ein Binder-Mockup. In der MITTE liegt eine echte Sammelkarte; "
-    "der Bereich rundherum wurde per KI generiert, um die Illustration der "
-    "Karte ueber ihre Kanten hinaus fortzusetzen. Beurteile NUR, ob die "
-    "STRUKTUR-Elemente (Baumstamm, Ast, Dach, Wand, Weg, Horizont, Felskante), "
-    "die eine Kartenkante kreuzen, auf der anderen Seite an gleicher Position, "
-    "im gleichen Winkel, in gleicher Dicke und Farbe weiterlaufen - also ein "
-    "nahtloses Gesamtbild ergeben. Rein diffuse Flaechen (Himmel, Gras, "
-    "Wasser, Schnee, Laub), die nur farblich passen muessen, gelten als ok. "
-    "Ein sichtbarer Versatz einer kantenkreuzenden Struktur ist NICHT ok. "
-    "Antworte NUR als JSON: {\"ok\": true|false, \"bad_edges\": [\"left\","
-    "\"right\",\"top\",\"bottom\"], \"notes\": \"kurz\"}."
+    "Du pruefst ein Binder-Mockup. In der MITTE liegt eine ECHTE Sammelkarte "
+    "mit ihrem eigenen silbernen Rahmen, Namen, KP und Textfeld; rundherum "
+    "wurde per KI die Illustration ueber die Kartenkanten hinaus fortgesetzt.\n"
+    "WICHTIG - was du IGNORIEREN musst (das ist KEIN Fehler): der silberne "
+    "Kartenrahmen, der Textkasten, Schrift/Zahlen auf der Karte, ein leichter "
+    "Helligkeits-, Glanz- oder Saettigungsunterschied zwischen Karte und "
+    "Umgebung, sowie diffuse Flaechen (Himmel, Laub, Gras, Wasser, Schnee), "
+    "die nur farblich grob passen muessen.\n"
+    "Eine Kante ist NUR DANN schlecht, wenn eine KONKRETE lineare Struktur "
+    "(Baumstamm, Ast, Dachkante, Wand, Weg, Horizont, Felskante), die an der "
+    "Kartenkante klar sichtbar ist, ausserhalb FEHLT oder deutlich versetzt / "
+    "im falschen Winkel / falscher Dicke weiterlaeuft (klar sichtbarer "
+    "Bruch/Sprung). Du MUSST fuer jede als schlecht gemeldete Kante die "
+    "konkrete Struktur benennen und wie sie versetzt ist. Kannst du keine "
+    "konkrete versetzte Struktur benennen, ist die Kante ok. Sei nicht "
+    "uebermaessig streng - im Zweifel ok.\n"
+    "bad_edges enthaelt AUSSCHLIESSLICH die Schluessel \"left\"/\"right\"/"
+    "\"top\"/\"bottom\" der wirklich gebrochenen Kanten. \"ok\" muss genau "
+    "dann true sein, wenn bad_edges leer ist.\n"
+    "Antworte NUR als JSON: {\"ok\": true|false, \"bad_edges\": [...], "
+    "\"notes\": \"pro schlechter Kante: Struktur + Art des Versatzes\"}."
 )
 
 
