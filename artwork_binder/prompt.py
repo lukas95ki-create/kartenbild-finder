@@ -198,7 +198,6 @@ def build_outpaint_prompt(analysis, extra_style=None, focus_edges=None,
     """
     edges = analysis.get("edges")
     mood = analysis.get("mood") or ""
-    scene = analysis.get("scene") if isinstance(analysis.get("scene"), dict) else {}
 
     parts = [
         "The center of this canvas shows a DETAIL CROP of a larger painting. "
@@ -207,8 +206,9 @@ def build_outpaint_prompt(analysis, extra_style=None, focus_edges=None,
         "shows. Any creature or character stays only on the central card and "
         "must never reappear outside it."
     ]
-    if scene.get("setting"):
-        parts.append("The larger scene is " + _clean(scene["setting"]) + ".")
+    # Hinweis: Das Setting wird bewusst NICHT woertlich uebernommen - es nennt
+    # oft die einzigartige Landmarke ("garden with a house"), was das Modell
+    # zum Duplizieren verleitet. Die Umgebung kommt stattdessen aus der DNA.
 
     # Umgebungs-DNA (wiederholbar) einsetzen.
     parts.append(_dna_clause(analysis))
