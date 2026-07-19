@@ -111,12 +111,27 @@ def _encode_image(image_path, max_edge=768):
 
 
 VISION_SYSTEM = (
-    "Du bist ein Bild-Analyst. Du bekommst das Foto einer Pokemon-Sammelkarte. "
-    "Antworte NUR mit kompaktem JSON, keine Erklaerungen. Felder: "
-    '"type" (einer von: wasser, feuer, pflanze, elektro, psycho, fee, '
-    'finsternis, metall, kampf, normal), '
-    '"name" (Pokemon-Name falls lesbar, sonst null), '
-    '"mood" (kurze englische Farbstimmungs-Beschreibung).'
+    "Du bist ein Kunst-Analyst fuer Sammelkarten-Illustrationen. Du bekommst "
+    "das Foto einer Pokemon-Karte. Beschreibe AUSSCHLIESSLICH die "
+    "Hintergrund-Landschaft/Umgebung der Illustration (die Szene, in der das "
+    "Pokemon steht). Ignoriere dabei komplett: das Pokemon/die Kreatur selbst, "
+    "den Kartenrahmen, jede Schrift, Zahlen, KP, Energie-Symbole, Holo-Muster "
+    "und Logos. Wenn der Hintergrund knapp ist, leite den passenden Lebensraum "
+    "aus dem Gesamtbild ab.\n"
+    "Antworte NUR mit kompaktem JSON, keine Erklaerungen. Felder:\n"
+    '"type": einer von wasser, feuer, pflanze, elektro, psycho, fee, '
+    'finsternis, metall, kampf, normal;\n'
+    '"name": Pokemon-Name falls lesbar, sonst null;\n'
+    '"scene": Objekt mit\n'
+    '   "setting" (ein praeziser englischer Satz, der das konkrete Biotop/die '
+    'Umgebung benennt, z.B. "a snowy mountain coastline with an ice cave"),\n'
+    '   "elements" (englische Liste konkreter Landschaftselemente, die '
+    'tatsaechlich im Hintergrund zu sehen sind, z.B. ["snow","ice cave",'
+    '"pine trees","frozen sea","mountains"]),\n'
+    '   "lighting" (englische Beschreibung von Tageszeit/Wetter/Lichtstimmung),\n'
+    '   "palette" (englische Beschreibung der dominanten Hintergrundfarben),\n'
+    '   "viewpoint" (englische Beschreibung von Bildausschnitt/Blickrichtung/Tiefe);\n'
+    '"mood": kurze englische Farbstimmungs-Beschreibung.'
 )
 
 
@@ -149,9 +164,13 @@ def vision_analysis(image_path, model="gpt-4o-mini", api_key=None):
             raw = raw.split("\n", 1)[1] if "\n" in raw else raw
         data = json.loads(raw)
         norm = T.normalize_type(data.get("type"))
+        scene = data.get("scene")
+        if not isinstance(scene, dict) or not scene.get("setting"):
+            scene = None
         return {
             "type": norm or T.DEFAULT_TYPE,
             "name": (data.get("name") or None),
+            "scene": scene,
             "mood": data.get("mood"),
             "source": "vision:" + model,
         }
@@ -170,6 +189,7 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
         "type": colors["type"],
         "type_confidence": colors["type_confidence"],
         "name": None,
+        "scene": None,
         "mood": colors["mood"],
         "dominant_colors": colors["dominant_colors"],
         "analysis_source": colors["source"],
@@ -182,10 +202,15 @@ def analyze_card(image_path, use_vision=True, vision_model="gpt-4o-mini",
         if v and "error" not in v:
             result["type"] = v["type"] or result["type"]
             result["name"] = v.get("name")
+            result["scene"] = v.get("scene")
             if v.get("mood"):
                 result["mood"] = v["mood"]
             result["analysis_source"] = v["source"]
             log(f"  Vision-Analyse: Typ={v['type']}, Name={v.get('name')!r}")
+            if v.get("scene"):
+                log(f"  Erkannte Szene: {v['scene'].get('setting')}")
+            else:
+                log("  Hinweis: Vision lieferte keine Szene -> Typ-Fallback")
         elif v and "error" in v:
             log(f"  Vision-Analyse uebersprungen ({v['error']})")
         else:
