@@ -86,9 +86,13 @@ def build_prompt(analysis, extra_style=None):
 # (Die Karte in der Mitte darf/soll Kreatur, Rahmen und Text enthalten -
 #  nur der neu gemalte Rand muss frei davon sein.)
 OUTPAINT_NEGATIVE = (
-    "In the newly painted outer areas: no creatures, no animals, no monsters, "
-    "no pokemon-like beings, no characters, no people, no text, no letters, "
-    "no numbers, no logos, no watermark, no card frame, no border, no panels"
+    "Extremely important: the outer painted areas must contain ONLY empty "
+    "natural landscape (snow, ice, water, rock, plants, sky). Do NOT repeat, "
+    "mirror, duplicate or extend the creature/character that sits on the card "
+    "- it must appear nowhere outside the card. No creatures, no animals, no "
+    "monsters, no pokemon-like beings, no characters, no people, no eyes, no "
+    "faces, no text, no letters, no numbers, no logos, no watermark, no card "
+    "frame, no borders, no panels in the generated areas"
 )
 
 
@@ -107,7 +111,9 @@ def build_outpaint_prompt(analysis, extra_style=None):
     parts = [
         "Continue this exact illustration seamlessly outward in every "
         "direction, beyond the edges of the card in the center, as one single "
-        "continuous painting."
+        "continuous painting. Extend ONLY the natural landscape and scenery "
+        "around the card; any creature or character stays only on the central "
+        "card and must not reappear in the surrounding painted area."
     ]
     if scene.get("setting"):
         parts.append("The scene is " + _clean(scene["setting"]) + ".")
