@@ -1,0 +1,47 @@
+# Deutsche Sets ohne Bildergalerie auf pokezentrum.de
+# Stand: 2026-11-16, Quelle: https://pokezentrum.de/pokemon-kartengalerien/ (Rubrik "deutsche und englische Erweiterungen", 67 Eintraege)
+#
+# Ergebnis fuer den angefragten Zeitraum (Schwert & Schild 2020 bis Mega-Entwicklung 2026):
+# Jedes deutsche Set dieses Zeitraums hat eine Galerie und ist in sets-data.js eingebaut.
+# Ohne Bilder sind dort nur Teil-Sammlungen, die auf der jeweiligen Galerieseite fehlen.
+
+## A) Teil-Sammlungen 2020-2026 ohne Einzelbilder in der Galerie
+Glaenzendes Schicksal - Schillernde Schatzkammer (SV001-SV122)	nur Hauptset 001-073 in der Galerie
+Strahlende Sterne - Trainer-Galerie (TG01-TG30)	nicht in der Galerie
+Astralglanz - Trainer-Galerie (TG01-TG30)	nicht in der Galerie
+Silberne Sturmwinde - Trainer-Galerie (TG01-TG30)	nicht in der Galerie
+Zenit der Koenige - Galar-Galerie (GG01-GG70)	nur ein Sammelbild, keine Einzelkarten
+Paldeas Schicksale - Schillernde Karten Nr. 092-245	nur 11 Einzelbilder gefunden (siehe fehlende-bilder.txt)
+Karmesin & Purpur 151 - Nr. 182-197	nicht gefunden (siehe fehlende-bilder.txt)
+
+## B) Sets MIT Galerie, aber ausserhalb des angefragten Zeitraums - in diesem Durchlauf NICHT eingebaut
+# (Galerie vorhanden, koennen in einem weiteren Durchlauf ergaenzt werden)
+Welten im Wandel (Sonne & Mond, 2019)	https://pokezentrum.de/welten-im-wandel-kartenliste-und-kartengalerie/
+Verborgenes Schicksal (2019)	https://pokezentrum.de/blog/verborgenes-schicksal-kartenliste-alle-pokemon-karten/
+Meisterdetektiv Pikachu (2019)	https://pokezentrum.de/blog/meisterdetektiv-pikachu-der-ultimative-guide/
+XY Evolution (2016)	https://pokezentrum.de/blog/alles-was-du-ueber-pokemon-xy-evolution-wissen-musst/
+Generationen (2016)	https://pokezentrum.de/blog/ein-rueckblick-auf-das-pokemon-jubilaeums-set-generationen/
+XY TURBOstart (2015)	https://pokezentrum.de/blog/pokemon-xy-turbostart-kartenliste-und-kartengalerie/
+XY Drachenleuchten (2015)	https://pokezentrum.de/blog/pokemon-xy-drachenleuchten-kartenliste-und-guide-fuer-sammler/
+Ruf der Legenden (2011)	https://pokezentrum.de/blog/pokemon-ruf-der-legenden-kartenliste-und-kartengalerie/
+Neo Destiny	https://pokezentrum.de/blog/pokemon-neo-destiny-kartenliste-und-kartengalerie/
+Neo Revelation	https://pokezentrum.de/blog/pokemon-neo-revelation-kartenliste-und-kartengalerie/
+Neo Entdeckung	https://pokezentrum.de/blog/pokemon-neo-entdeckung-discovery-kartenliste-und-kartengalerie/
+Neo Genesis	https://pokezentrum.de/blog/pokemon-neo-genesis-kartenliste-und-kartengalerie/
+Team Rocket	https://pokezentrum.de/blog/team-rocket-kartenliste-alle-pokemon-karten-in-der-uebersicht/
+Fossil	https://pokezentrum.de/blog/pokemon-fossil-kartenliste-und-kartengalerie/
+Dschungel	https://pokezentrum.de/blog/alles-was-du-ueber-pokemon-dschungel-wissen-musst/
+Basis-Set	https://pokezentrum.de/blog/pokemon-basis-set-kartenliste-und-kartengalerie/
+
+## C) Sonderseiten der Rubrik - nicht eingebaut (Promos bzw. nur englische Karten)
+Mega-Promokarten (MEP)	https://pokezentrum.de/blog/alle-pokemon-mega-promokarten-in-der-uebersicht/
+McDonald's Happy Meal 2025	https://pokezentrum.de/pokemon-karten-news/neue-pokemon-karten-mcdonalds-happy-meal-kartenliste/
+Trick or Trade 2023 / 2024 (englisch)	https://pokezentrum.de/pokemon-karten-news/pokemon-trick-or-trade-2024-kartenliste-alle-halloween-karten/
+Trading Card Game Classic	https://pokezentrum.de/pokemon-karten-news/pokemon-trading-card-game-classic-kartenliste-deckliste/
+Base Set 2, Gym Heroes, Legendary Collection, Southern Islands, Pokemon Rumble	nur englische Karten in der Galerie
+
+## D) Deutsche Sets ganz ohne Galerie-Eintrag in der Uebersicht
+# (aus der Uebersichtsseite abgeleitet: kein Link vorhanden; Set-Liste nach bestem Wissen, bitte gegenpruefen)
+Sonne & Mond-Serie: Sonne & Mond, Stunde der Waechter, Nacht in Flammen, Schimmernde Legenden, Aufziehen der Sturmroete, Ultra-Prisma, Grauen der Lichtfinsternis, Sturm am Firmament, Majestaet der Drachen, Echo des Donners, Teams sind Trumpf, Kraefte im Einklang, Ungebrochene Bande, Bund der Gleichgesinnten
+XY-Serie: XY, Flammenmeer, Fliegende Faeuste, Phantomkraefte, Protoschock, Doppelkrise, Ewiger Anfang, TURBOfieber, Schicksalsschmiede, Dampfkessel
+Aeltere Serien (Schwarz & Weiss, HeartGold & SoulSilver ausser Ruf der Legenden, Platin, Diamant & Perl, EX-Serie, e-Card, Gym Challenge): keine Galerie

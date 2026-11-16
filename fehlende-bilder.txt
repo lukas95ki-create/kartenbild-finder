@@ -225,3 +225,218 @@ Deutsch	MEG	Mega-Entwicklung	Nr.049	kein Bild in Galerie/SR-Artikel gefunden
 Deutsch	MEG	Mega-Entwicklung	Nr.060	kein Bild in Galerie/SR-Artikel gefunden
 Deutsch	MEG	Mega-Entwicklung	Nr.077	kein Bild in Galerie/SR-Artikel gefunden
 Deutsch	MEG	Mega-Entwicklung	Nr.124	kein Bild in Galerie/SR-Artikel gefunden
+# --- Ergaenzung 2026-11-16: Abgleich aller deutschen Sets (Galerie + Secret-Rare-Artikel) ---
+Deutsch	KP01	Karmesin & Purpur	Nr.019 (Spidops-Spinsidias-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Spidops_Spinsidias-ex_019_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.020 (Olini)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Olini_020_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.022 (Olivinio)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Olivinio_022_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.154 (Ferkuli)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Ferkuli_154_SV1EN_Karmesin-Purpur_Pokemon-Karte-1.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.180 (Nemila)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Nemila_180_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.205 (Scampisto)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Scampisto_205_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.213 (Hefel)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Hefel_213_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP01	Karmesin & Purpur	Nr.236 (Jim)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Jim_236_SV1EN_Karmesin-Purpur_Pokemon-Karte.jpg
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.182	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.183	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.184	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.185	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.186	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.187	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.188	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.189	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.190	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.191	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.192	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.193	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.194	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.195	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.196	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP03.5	Karmesin & Purpur 151	Nr.197	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.092	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.093	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.094	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.095	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.096	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.097	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.098	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.099	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.100	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.101	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.102	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.103	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.104	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.105	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.106	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.107	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.108	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.109	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.110	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.111	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.112	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.113	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.114	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.115	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.116	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.117	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.118	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.119	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.120	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.121	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.122	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.123	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.124	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.125	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.126	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.127	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.128	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.129	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.130	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.131	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.132	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.133	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.134	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.135	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.136	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.137	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.138	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.139	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.140	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.141	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.142	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.143	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.144	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.145	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.146	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.147	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.148	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.149	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.150	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.151	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.152	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.153	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.154	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.155	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.156	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.157	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.158	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.159	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.160	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.161	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.162	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.163	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.164	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.165	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.166	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.167	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.168	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.169	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.170	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.171	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.172	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.173	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.174	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.175	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.176	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.177	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.178	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.179	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.180	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.181	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.182	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.183	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.184	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.185	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.186	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.187	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.188	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.189	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.190	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.191	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.192	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.193	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.194	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.195	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.196	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.197	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.198	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.199	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.200	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.201	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.202	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.203	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.204	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.205	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.206	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.207	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.208	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.209	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.210	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.211	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.212	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.213	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.214	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.215	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.216	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.217	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.218	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.219	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.220	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.221	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.222	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.223	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.227	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.228	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.229	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.230	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.231	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	KP04.5	Paldeas Schicksale	Nr.017 (Frigibax-Frospino)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Frigibax_Frospino_017-091_Paldean-Fates_Paldeas-Schicksale_Pokemon-Karte_Englisch.jpg
+Deutsch	KP04.5	Paldeas Schicksale	Nr.025 (Natu)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Pokemon-Karte_Natu_025-091_Paldean-Fates_Paldeas-Schicksale_Englisch.jpg
+Deutsch	KP04.5	Paldeas Schicksale	Nr.234 (Shiny-Charizard-Glurak-ex-PAF-EN)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Shiny-Charizard-Glurak-ex-PAF-EN-234-091-Paldean-Fates-Paldeas-Schicksale-Special-Ilustration-Rare-Pokemon-Karten-Englisch.jpg
+Deutsch	KP08.5	Fatale Flammen	Nr.130 (Mega-Charizard-Glurak-X-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Charizard-Glurak-X-ex-130-094-Gold-Mega-Hyper-Rare-Pokemon-Karte-Phantasmal-Flames-Fatale-Flammen-Englisch.jpg
+Deutsch	KP09	Reisegefaehrten	Nr.170 (Hop´s-Wooloo-Hops-Wolly)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Hop´s-Wooloo-Hops-Wolly-170-159-Journey-Together-Reisegefaehrten-Illustration-Rare-Pokemon-Karte-Englisch.jpg
+Deutsch	KP10	Erhabene Helden	Nr.183 (Boss´s-Orders-Befehl-vom-Boss)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Boss´s-Orders-Befehl-vom-Boss-183-217-Ascended-Heroes-Erhabene-Helden-Pokemon-Karte-Englisch.jpg
+Deutsch	SWSH01	Schwert & Schild	Nr.121	kein Bild in Galerie/SR-Artikel gefunden
+Deutsch	SWSH03	Flammende Finsternis	Nr.124	kein Bild in Galerie/SR-Artikel gefunden
+Deutsch	SWSH03	Flammende Finsternis	Nr.169	kein Bild in Galerie/SR-Artikel gefunden
+Deutsch	SWSH09	Strahlende Sterne	Nr.068	kein Bild in Galerie/SR-Artikel gefunden
+Deutsch	SWSH12	Silberne Sturmwinde	Nr.174	kein Bild in Galerie/SR-Artikel gefunden
+Deutsch	POR	Optimale Ordnung	Nr.110	kein Bild in Galerie/SR-Artikel gefunden (Secret Rare)
+Deutsch	30C	30 Jahre	Nr.067 (Marill)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Marill-067-128-30C-30-Jahre-30th-Celebration-Pokemon-Karte-Englisch.jpg
+Deutsch	30C	30 Jahre	Nr.143 (Kommo-o-Grandiras)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Kommo-o-Grandiras-143-128-30C-30-Jahre-30th-Celebration-Illustration-Rare-Pokemon-Karte-Englisch-neu.jpg
+Deutsch	30C	30 Jahre	Nr.151 (Mewtwo-Mewtu-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mewtwo-Mewtu-ex-151-128-30C-30-Jahre-30th-Celebration-Special-Illustration-Rare-Pokemon-Karte-Englisch-neu.jpg
+Deutsch	30C	30 Jahre	Nr.152 (Mew-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mew-ex-152-128-30C-30-Jahre-30th-Celebration-Special-Illustration-Rare-Pokemon-Karte-Englisch-neu.jpg
+Deutsch	30C	30 Jahre	Nr.154 (Gengar-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Gengar-ex-154-128-30C-30-Jahre-30th-Celebration-Special-Illustration-Rare-Pokemon-Karte-Englisch-neu.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.104 (Masquerain-Maskeregen)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Masquerain-Maskeregen-104-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.105 (Sprigatito)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Sprigatito-105-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.106 (Growlithe)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Growlithe-106-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.107 (Magmortar-Magbrant)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Magmortar-Magbrant-107-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.108 (Electivire)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Electivire-108-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.109 (Pincurchin-Britzigel)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Pincurchin-Britzigel-109-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.111 (Groudon)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Groudon-111-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.113 (Inkay)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Inkay-113-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.114 (Eevee)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Eevee-114-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.115 (Azurill)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Azurill-115-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.116 (Altaria)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Altaria-116-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.117 (Kecleon)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Kecleon-117-103-DLR-Delta-Reign-Herrschaft-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.118 (Mega-Golispod-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Golispod-ex-118-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.119 (Heat-Rotom-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Heat-Rotom-ex-119-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.120 (Wishiwashi-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Wishiwashi-ex-120-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.121 (Raikou-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Raikou-ex-121-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.122 (Mega-Golurk-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Golurk-ex-122-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.123 (Mega-Malamar-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Malamar-ex-123-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.124 (Talonflame-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Talonflame-ex-124-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.125 (Aarune)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Aarune-125-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.126 (Adventure-Lantern)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Adventure-Lantern-126-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.127 (Custom-Vest)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Custom-Vest-127-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.128 (Emcees-Hype)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Emcees-Hype-128-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.129 (Pokemon-Catcher)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Pokemon-Catcher-129-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.130 (Tates-Lizas-Training)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Tates-Lizas-Training-130-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.131 (Zinnias-Trust)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Zinnias-Trust-131-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.132 (Bubbly-Water-Energy)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Bubbly-Water-Energy-132-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.133 (Growing-Grass-Energy)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Growing-Grass-Energy-133-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.134 (Nitro-Fire-Energy)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Nitro-Fire-Energy-134-103-DLR-Delta-Reign-Herrschaft-Full-Art-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.135 (Mega-Golispod-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Golispod-ex-135-103-DLR-Delta-Reign-Herrschaft-SIR-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.136 (Raikou-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Raikou-ex-136-103-DLR-Delta-Reign-Herrschaft-Special-Illustration-Rare-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.137 (Mega-Golurk-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Golurk-ex-137-103-DLR-Delta-Reign-Herrschaft-SIR-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.138 (Mega-Rayquaza-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Rayquaza-ex-138-103-DLR-Delta-Reign-Herrschaft-SIR-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.140 (Zinnias-Trust)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Zinnias-Trust-140-103-DLR-Delta-Reign-Herrschaft-SIR-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	DLR	Delta-Herrschaft	Nr.141 (Mega-Rayquaza-ex)	nur englisches Bild in der Galerie: https://pokezentrum.de/wp-content/uploads/Mega-Rayquaza-ex-141-103-DLR-Delta-Reign-Herrschaft-MUR-Pokemon-Karte-Englisch-2026.jpg
+Deutsch	KP08.5	Fatale Flammen	Nr.130 (Mega-Charizard-Glurak-X-ex)	HTTP 404: https://pokezentrum.de/wp-content/uploads/Mega-Charizard-Glurak-X-ex-130-094-Gold-Mega-Hyper-Rare-Pokemon-Karte-Phantasmal-Flames-Fatale-Flammen-Englisch.jpg
