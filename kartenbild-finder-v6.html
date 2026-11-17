@@ -984,6 +984,26 @@ const RAR_SPEC  = { ex:"Double Rare", SR:"Ultra Rare", AR:"Illustration Rare", S
 const COND_LONG = { NM:"Near Mint", LP:"Lightly Played", MP:"Moderately Played", HP:"Heavily Played" };   // Titel-Füllwort
 const LANG_ADJ  = { Deutsch:"deutsche", Japanisch:"japanische", Chinesisch:"chinesische", Englisch:"englische" };
 
+/* „Normale“ ex-Karte (Double Rare): Seltenheits-Tag „ex“. Sets ohne Seltenheits-Tags (z. B. SV8a, M3–M5)
+   enthalten nur das Hauptset – dort zählt der Name „… ex“ (Classic Collection / Trainer Gallery ausgenommen).
+   SR/AR/SAR/UR-ex-Karten sind KEINE normalen ex-Karten. */
+function isStdEx(o){
+  if (o.rarity) return o.rarity==="ex";
+  const s=o.set; if (!s) return false;
+  if (s._tagged==null) s._tagged = s.cards.some(c=>c[3]);
+  if (s._tagged || /-(CC|TG)$/i.test(s.code)) return false;
+  return /(^|\s)ex$/i.test(o.cardName) && o.num <= s.total;
+}
+function rarOf(o){ return o.rarity || (isStdEx(o) ? "ex" : ""); }
+/* Preisregel-Bedingung „Kartenname/Seltenheit enthält“ für EINEN Begriff */
+function condNameHit(o, t){
+  const q=String(t).toLowerCase().trim();
+  if (q==="ex") return isStdEx(o);
+  if (/^(ar|sar|sr|ur)$/.test(q)) return String(o.rarity||"").toLowerCase()===q;
+  if (/^(v|gx|vmax|vstar)$/.test(q)) return new RegExp("(^|\\s)"+q+"$","i").test(o.cardName);
+  return (o.cardName+" "+(o.rarity||"")).toLowerCase().includes(q);
+}
+
 /* Kartentyp grob aus dem Namen (Trainer lassen sich aus den Kartendaten nicht sicher erkennen) */
 function cardKind(o){ return /energie/i.test(o.cardName) ? "Energie" : "Pokémon"; }
 /* Charakter = Pokémon-Name ohne Zusätze („Mega Zeraora ex“ → „Zeraora“, „Alola Kokowei“ → „Kokowei“) */
@@ -1002,7 +1022,7 @@ function specialOf(o){
 /* Alle Artikelmerkmale einer Karte (Schlüssel = normalisierte Spaltennamen der eBay-Vorlage).
    Was die Kartendaten nicht hergeben (KP, Typ, Zeichner, Jahr …), bleibt leer statt geraten. */
 function specsFor(o){
-  const rare = !!RAR_SPEC[o.rarity];
+  const rar = rarOf(o), rare = !!RAR_SPEC[rar];
   const x = {
     "c:spiel":"Pokémon TCG", "c:kartentyp":cardKind(o), "c:hersteller":"Nintendo",
     "c:kartenname":o.cardName, "c:edition":o.setName, "c:sprache":o.lang,
@@ -1011,7 +1031,7 @@ function specsFor(o){
     "c:vintage":"Nein", "c:mitautogramm":"Nein", "c:maßgefertigt":"Nein"
   };
   if (x["c:kartentyp"]==="Pokémon") x["c:charakter"] = charName(o);
-  if (rare) x["c:seltenheit"] = RAR_SPEC[o.rarity];
+  if (rare) x["c:seltenheit"] = RAR_SPEC[rar];
   if (o.ball) x["c:oberflächeneffekt"] = "Reverse Holo";
   else if (rare) x["c:oberflächeneffekt"] = "Holo";
   if (["SR","AR","SAR","UR"].includes(o.rarity)) x["c:besonderheiten"] = "Full Art";
@@ -1029,8 +1049,8 @@ function fillTitle(t, words){
   return t;
 }
 function titleWords(o){
-  const rare = !!RAR_SPEC[o.rarity];
-  return [ RAR_SPEC[o.rarity], o.setCode, o.ball ? "Reverse Holo" : (rare ? "Holo" : ""),
+  const rar = rarOf(o), rare = !!RAR_SPEC[rar];
+  return [ RAR_SPEC[rar], o.setCode, o.ball ? "Reverse Holo" : (rare ? "Holo" : ""),
            COND_LONG[o.cond], "Karte", o.lang==="Japanisch" ? "Japan" : "", "TCG", "Original" ];
 }
 
@@ -1392,10 +1412,10 @@ function description(headline, o, isVariant, g){
   let facts = "", seo = "", lead = "";
   if (o){
     facts = table([["Karte",o.cardName],["Nummer",nrVoll(o)||o.num3],["Set",o.setName+" ("+o.setCode+")"],
-                   ["Seltenheit",RAR_SPEC[o.rarity]||""],["Sprache",o.lang],["Zustand",condOf(o.cond).de]]);
+                   ["Seltenheit",RAR_SPEC[rarOf(o)]||""],["Sprache",o.lang],["Zustand",condOf(o.cond).de]]);
     seo = "Pokémon Sammelkarte „"+o.cardName+"“ aus dem Pokémon-TCG-Set „"+o.setName+"“ ("+o.setCode+"), Kartennummer "+(nrVoll(o)||o.num3)+
           ", "+(LANG_ADJ[o.lang] ? LANG_ADJ[o.lang]+" Ausgabe" : "Sprache "+o.lang)+
-          (RAR_SPEC[o.rarity] ? ", Seltenheit "+RAR_SPEC[o.rarity] : "")+", Zustand "+condOf(o.cond).de+". Ideal für Sammler und Spieler.";
+          (RAR_SPEC[rarOf(o)] ? ", Seltenheit "+RAR_SPEC[rarOf(o)] : "")+", Zustand "+condOf(o.cond).de+". Ideal für Sammler und Spieler.";
   } else if (g){
     lead = "<p style='font-weight:bold'>Einzelkarten zum Aussuchen – bitte die gewünschte Karte im Auswahlfeld wählen.</p>";
     facts = table([["Set",g.set.name+" ("+g.set.code+")"],["Sprache",g.lang],["Zustand",condOf(g.cond).de],["Auswahl",g.list.length+" Karten"]]);
@@ -1432,7 +1452,7 @@ function defaultRuleset(){
     markupPct: 10,          // Aufschlag auf eingegebenen Ø-Verkaufspreis
     rounding: "off",        // "off" | "49" | "99" (nur für Verkaufsdaten-Preise)
     rules: [
-      { condLang:"Deutsch", condSet:"", condName:"ex", condNote:"", basis:3.99, min:3.99, isDefault:false }, { condLang:"Japanisch", condSet:"", condName:"ex", condNote:"", basis:2.99, min:2.99, isDefault:false }, { condLang:"Chinesisch", condSet:"", condName:"ex", condNote:"", basis:1.99, min:1.99, isDefault:false }, { condLang:"Koreanisch", condSet:"", condName:"ex", condNote:"", basis:1.99, min:1.99, isDefault:false },
+      { condLang:"", condSet:"", condName:"SR, AR, SAR, UR", condNote:"", basis:null, min:null, isDefault:false }, { condLang:"Deutsch", condSet:"", condName:"ex", condNote:"", basis:3.99, min:3.99, isDefault:false }, { condLang:"Japanisch", condSet:"", condName:"ex", condNote:"", basis:2.99, min:2.99, isDefault:false }, { condLang:"Chinesisch", condSet:"", condName:"ex", condNote:"", basis:1.99, min:1.99, isDefault:false }, { condLang:"Koreanisch", condSet:"", condName:"ex", condNote:"", basis:1.99, min:1.99, isDefault:false },
       { condLang:"", condSet:"", condName:"", condNote:"", basis:1.00, min:1.00, isDefault:true }
     ]
   };
@@ -1456,8 +1476,8 @@ function matchRule(o){
       if (!toks.includes(o.setCode.toLowerCase())) continue;
     }
     if (r.condName){
-      const hay = (o.cardName + " " + (o.rarity||"")).toLowerCase();
-      const q = r.condName.toLowerCase().trim();   /* Seltenheits-Kürzel (ex, AR …) nur als ganzes Wort – sonst träfe „ex“ auch „Alexis“ */ if (/^(ex|ar|sar|sr|ur|v|gx|vmax|vstar)$/.test(q) ? !new RegExp("(^|\\s)"+q+"(\\s|$)").test(hay) : !hay.includes(q)) continue;
+      const toks = String(r.condName).split(/[,;]+/).map(s=>s.trim()).filter(Boolean);   // mehrere Begriffe: „SR, SAR, UR“ = einer davon
+      if (toks.length && !toks.some(t=>condNameHit(o,t))) continue;                        // „ex“ = nur normale ex (Double Rare), s. condNameHit
     }
     if (r.condNote && !String(o.note||"").toLowerCase().includes(r.condNote.toLowerCase())) continue;
     return r;
@@ -1518,7 +1538,7 @@ function renderRules(){
             ${EX_LANGS.map(l=>`<option${r.condLang===l?" selected":""}>${l}</option>`).join("")}
           </select></div>
           <div><span class="rl">Set-Code (Komma-Liste)</span><input data-f="condSet" type="text" value="${esc(r.condSet)}" placeholder="z. B. SV8a, SV9"></div>
-          <div><span class="rl">Kartenname/Seltenheit enthält</span><input data-f="condName" type="text" value="${esc(r.condName)}" placeholder="z. B. ex"></div>
+          <div><span class="rl">Kartenname/Seltenheit enthält</span><input data-f="condName" type="text" value="${esc(r.condName)}" placeholder="z. B. ex  oder  SR, SAR, UR" title="ex = nur normale ex-Karten (Double Rare). SR/AR/SAR/UR = Seltenheit. Mehrere Begriffe mit Komma trennen. Basispreis leer = Preis von Hand eintragen."></div>
           <div><span class="rl">Notiz enthält</span><input data-f="condNote" type="text" value="${esc(r.condNote)}" placeholder="z. B. masterball"></div>
         </div>
         <div class="rulegrid2">
@@ -1931,9 +1951,9 @@ function groupTitleDefault(g){
   let t = `Pokemon ${g.set.name} ${g.lang} Einzelkarten zum Aussuchen` + tail;
   if (t.length>80) t = `Pokemon ${g.set.name} ${g.lang} Karten Auswahl` + tail;
   if (S().titleFill!=="no"){
-    const rars = [...new Set(g.list.map(o=>o.rarity))];
+    const rars = [...new Set(g.list.map(rarOf))];
     const allEx = rars.length===1 && rars[0]==="ex";
-    const anyEx = rars.includes("ex"), anyRare = g.list.some(o=>RAR_SPEC[o.rarity]);
+    const anyEx = rars.includes("ex"), anyRare = g.list.some(o=>RAR_SPEC[rarOf(o)]);
     t = fillTitle(t, [ g.set.code, anyEx ? "ex" : "", allEx ? "Double Rare" : (anyRare ? "Holo" : ""),
                        COND_LONG[g.cond], g.lang==="Japanisch" ? "Japan" : "", "TCG", "Original" ]);
   }
