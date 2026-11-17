@@ -372,6 +372,8 @@
   .expbtn.off{opacity:.45;}
   .nextbox{display:none; margin-top:14px; border:1px solid var(--tera); border-radius:14px; padding:14px; background:rgba(94,234,212,.06); font-size:13px; line-height:1.6;}
   .nextbox.show{display:block;}
+  .testmode{display:flex; gap:10px; align-items:flex-start; margin:4px 0 12px; padding:10px 12px; border:1px dashed var(--line, #334); border-radius:12px; font-size:13px; line-height:1.5; cursor:pointer;}
+  .testmode input{margin-top:3px; width:18px; height:18px; flex:0 0 auto; accent-color:#5eead4;}
   .nextbox ol{margin:6px 0 10px 20px;}
   .nextbox a.lnk, .linkbtn{
     display:inline-block; color:#0b0f13; background:linear-gradient(135deg,var(--tera),var(--tera2));
@@ -637,6 +639,9 @@
     <div class="xcard" id="exportCard" style="display:none">
       <h2><span class="step">3</span> Prüfen &amp; eBay-Datei erzeugen</h2>
       <ul class="checks" id="checkList"></ul>
+      <label class="testmode"><input type="checkbox" id="expVerify">
+        <span>🧪 <b>Nur prüfen (Testlauf)</b> – eBay kontrolliert fertige Angebote und Varianten vollständig
+        und meldet Fehler im Ergebnisbericht, stellt aber <b>nichts</b> online.</span></label>
       <div class="expgrid">
         <button class="expbtn primary" id="expDraft">📝 Alle Karten als <b>eBay-Entwürfe</b>
           <small id="expDraftSub"></small></button>
@@ -957,7 +962,8 @@ const CONDS = [
 ];
 function condOf(k){ return CONDS.find(c=>c.k===k) || CONDS[0]; }
 const RAR_SHORT = { AR:"AR", SAR:"SAR", UR:"UR" };                       // Titel-Kürzel
-const RAR_SPEC  = { AR:"Illustration Rare", SAR:"Special Illustration Rare" }; // Artikelmerkmal
+/* Artikelmerkmal „Seltenheit“ – Werte aus eBays Auswahlliste (Kategorie TCG Einzelkarten) */
+const RAR_SPEC  = { ex:"Double Rare", SR:"Ultra Rare", AR:"Illustration Rare", SAR:"Special Illustration Rare", UR:"Hyper Rare" };
 
 /* Kennzeilen über der Spaltenzeile – daran erkennt eBay die Vorlage.
    Wörtlich aus den Original-Vorlagen von ebay.de (Berichte → Uploads → Vorlage herunterladen, Stand 11/2026).
@@ -1994,7 +2000,7 @@ function objDraft(o){
 function commonAdd(cond){
   const s=S();
   const x = { "action":"Add", "category":CATEGORY_ID, "conditionid":"4000", "cd40001":condOf(cond).id,
-              "c:spiel":"Pokémon TCG", "format":"FixedPrice", "duration":"GTC", "location":s.location };
+              "c:spiel":"Pokémon TCG", "c:kartentyp":"Pokémon", "c:hersteller":"Nintendo", "format":"FixedPrice", "duration":"GTC", "location":s.location };
   if (s.shipProfile && s.returnProfile && s.payProfile){
     x["shippingprofilename"]=s.shipProfile; x["returnprofilename"]=s.returnProfile; x["paymentprofilename"]=s.payProfile;
   } else {
@@ -2011,10 +2017,11 @@ function objSingle(o){
   const title=buildTitle(o);
   const x=commonAdd(o.cond);
   Object.assign(x, { "customlabel":sku(o), "title":title, "c:kartenname":o.cardName,
-    "c:kartennummer":nrVoll(o)||o.num3, "c:sprache":o.lang, "c:set":o.setName,
+    "c:kartennummer":nrVoll(o)||o.num3, "c:sprache":o.lang, "c:edition":o.setName,
     "picurl":exportUrl(o), "description":description(title,o,false),
     "startprice":priceOut(o.price), "quantity":String(o.qty) });
   if (RAR_SPEC[o.rarity]) x["c:seltenheit"]=RAR_SPEC[o.rarity];
+  if (o.rarity==="ex") x["c:spezialkarte"]="EX";
   return x;
 }
 function objsVariant(g){
@@ -2024,7 +2031,7 @@ function objsVariant(g){
   const pics=g.list.slice().sort((a,b)=>(b.price||0)-(a.price||0)).map(exportUrl).filter(Boolean);
   const parent=commonAdd(g.cond);
   Object.assign(parent, { "title":title, "relationship":"", "relationshipdetails": vName+"="+g.list.map(o=>vals.get(o)).join(";"),
-    "c:sprache":g.lang, "c:set":g.set.name, "picurl":[...new Set(pics)].slice(0,PIC_MAX).join("|"),
+    "c:sprache":g.lang, "c:edition":g.set.name, "picurl":[...new Set(pics)].slice(0,PIC_MAX).join("|"),
     "description":description(title,null,true), "startprice":"", "quantity":"" });
   const out=[parent], skus={};
   g.list.forEach(o=>{
@@ -2054,13 +2061,21 @@ function doExport(kind){
     if (!objs.length){ toastX(kind==="variant" ? "Keine Karte mit Preis auf „Variante“." : "Keine Karte mit Preis im Korb.", true); return; }
     base = kind==="single" ? "ebay-einzelangebote" : kind==="variant" ? "ebay-varianten" : "ebay-angebote";
   }
+  // Testlauf: eBay prüft die Zeilen (VerifyAdd), stellt aber nichts ein
+  const verify = kind!=="draft" && !!(byId("expVerify") && byId("expVerify").checked);
+  if (verify){ objs.forEach(x=>{ if (x.action==="Add") x.action="VerifyAdd"; }); base+="-pruefung"; }
   const file = saveAoa(base+"-"+stamp(), buildAoa(type, objs));
-  used.forEach(o=>o.exported=true);
+  if (!verify) used.forEach(o=>o.exported=true);
   rowsChanged();
-  showNext(kind, file, nList, used.length);
-  toastX("Datei gespeichert: "+file);
+  showNext(kind, file, nList, used.length, verify);
+  toastX((verify?"Prüfdatei gespeichert: ":"Datei gespeichert: ")+file);
 }
-function nextHtml(kind, file, nList, nCards){
+function nextHtml(kind, file, nList, nCards, verify){
+  if (verify) return `<b>🧪 ${esc(file)}</b> gespeichert – Testlauf für ${nList} Angebot(e) mit ${nCards} Karte(n). <b>Es wird nichts eingestellt.</b>`+
+    `<ol><li>Bei eBay öffnen: <i>Verkäufer-Cockpit Pro → Mehr → Berichte → Uploads</i>.</li>`+
+    `<li>Auf <b>„Vorlage hochladen“</b> klicken, dann <b>„Datei auswählen“</b> und diese Datei wählen.</li>`+
+    `<li>Wenn der Status „Beendet“ zeigt, den Ergebnisbericht herunterladen und unten bei „eBay-Ergebnisbericht prüfen“ laden. Ohne Fehler: Häkchen „Nur prüfen“ entfernen und echt exportieren.</li>`+
+    `</ol><a class="lnk" href="${EBAY_UPLOAD_URL}" target="_blank" rel="noopener">eBay-Upload öffnen ↗</a>`;
   return `<b>✓ ${esc(file)}</b> gespeichert – ${nList} ${kind==="draft"?"Entwurf/Entwürfe":"Angebot(e)"} mit ${nCards} Karte(n).`+
     `<ol><li>Bei eBay öffnen: <i>Verkäufer-Cockpit Pro → Mehr → Berichte → Uploads</i>.</li>`+
     `<li>Auf <b>„Vorlage hochladen“</b> klicken, dann <b>„Datei auswählen“</b> und diese Datei wählen – eBay erkennt die Art der Vorlage selbst.</li>`+
@@ -2071,8 +2086,8 @@ function nextHtml(kind, file, nList, nCards){
     (kind==="draft" ? `<a class="lnk" href="${EBAY_DRAFTS_URL}" target="_blank" rel="noopener">eBay-Entwürfe öffnen ↗</a>` : "")+
     `<div class="hintline" style="margin-top:10px">Tipp: Beim ersten Mal nur 1–2 Karten hochladen und das Ergebnis ansehen, bevor du den ganzen Korb einreichst.</div>`;
 }
-function showNext(kind, file, nList, nCards){
-  const nb=byId("nextBox"); nb.innerHTML=nextHtml(kind, file, nList, nCards); nb.classList.add("show");
+function showNext(kind, file, nList, nCards, verify){
+  const nb=byId("nextBox"); nb.innerHTML=nextHtml(kind, file, nList, nCards, verify); nb.classList.add("show");
   nb.scrollIntoView({behavior:"smooth", block:"nearest"});
 }
 
