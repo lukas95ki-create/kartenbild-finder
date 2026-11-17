@@ -1915,9 +1915,11 @@ function renderChecks(){
 
   const drafts=exRows.filter(o=>o.price!=null).length;
   byId("expDraftSub").textContent  = drafts ? `${drafts} Entwürfe (jede Karte einzeln) · Versand & Zustand danach in eBay ergänzen` : "keine Karte mit Preis im Korb";
-  byId("expSingleSub").textContent = singles.length ? `${singles.length} Angebote · gehen sofort online` : "keine Karte auf „Einzel“";
-  byId("expVariantSub").textContent= groups.length ? `${groups.length} Angebot(e) mit ${varCards} Karten · gehen sofort online` : "keine Karte auf „Variante“";
-  byId("expAllSub").textContent    = `${singles.length} Einzel + ${groups.length} Varianten-Angebot(e) · sofort online`;
+  const vf = byId("expVerify") && byId("expVerify").checked;
+  const onl = vf ? "🧪 nur Prüfung, nichts geht online" : "gehen sofort online";
+  byId("expSingleSub").textContent = singles.length ? `${singles.length} Angebote · ${onl}` : "keine Karte auf „Einzel“";
+  byId("expVariantSub").textContent= groups.length ? `${groups.length} Angebot(e) mit ${varCards} Karten · ${onl}` : "keine Karte auf „Variante“";
+  byId("expAllSub").textContent    = `${singles.length} Einzel + ${groups.length} Varianten-Angebot(e) · ${vf ? "🧪 nur Prüfung" : "sofort online"}`;
   byId("expDraft").classList.toggle("off", !drafts);
   byId("expSingle").classList.toggle("off", !singles.length || live.length>0);
   byId("expVariant").classList.toggle("off", !groups.length || live.length>0);
@@ -2259,7 +2261,11 @@ async function handleReportFile(file){
   const isId  = h=>/^\*?action|title|titel|customlabel|sku|itemid|artikelnummer|line|zeile/i.test(h.replace(/\s+/g,""));
   let cols=head.map((h,i)=>i).filter(i=>isMsg(head[i])||isId(head[i]));
   if (!cols.some(i=>isMsg(head[i]))) cols=head.map((h,i)=>i).slice(0,14);
-  const bad=/error|fehler|failed|fehlgeschlagen|ungültig|invalid/i, good=/success|erfolg/i;
+  const bad=/error|fehler|fail|fehlgeschlagen|ungültig|invalid/i, good=/success|erfolg/i;
+  const isErrCol = h=>/^(error|fehler)/i.test(String(h).replace(/\s+/g,""));   // ErrorCode / ErrorMessage: jeder Inhalt = Fehler
+  const feeCol = head.findIndex(h=>/^(ListingFee|InsertionFee)$/i.test(String(h).trim()));
+  let fees=0;
+  data.forEach(r=>{ const f=parseFloat(String(r[feeCol]||"").replace(",",".")); if (feeCol>=0 && isFinite(f)) fees+=f; });
   let nBad=0; repLines=[];
   body.innerHTML="";
   const trh=document.createElement("tr");
@@ -2269,7 +2275,7 @@ async function handleReportFile(file){
     const tr=document.createElement("tr"); let rowBad=false;
     cols.forEach(i=>{
       const td=document.createElement("td"); const v=r[i]||""; td.textContent=v;
-      if (isMsg(head[i]) && bad.test(v)){ td.className="hit"; rowBad=true; }
+      if ((isErrCol(head[i]) && v.trim()) || (isMsg(head[i]) && bad.test(v))){ td.className="hit"; rowBad=true; }
       else if (good.test(v)) td.className="good";
       tr.appendChild(td);
     });
@@ -2280,6 +2286,7 @@ async function handleReportFile(file){
   byId("repCopy").style.display = repLines.length ? "" : "none";
   st.innerHTML = `<b style="color:${nBad?"var(--err)":"var(--ok)"}">${nBad ? nBad+" Zeile(n) mit Fehlermeldung" : "Keine Fehlermeldung erkannt"}</b> · ${data.length} Zeile(n) im Bericht` +
     (data.length>400 ? " (erste 400 angezeigt)" : "") +
+    (feeCol>=0 && fees>0 ? ` · Angebotsgebühren laut eBay: ${fees.toFixed(2).replace(".",",")} €` : "") +
     (nBad ? " · Häufigste Ursachen: Standort/Versand fehlt, Name einer Rahmenbedingung stimmt nicht, Preis unter 1 €, Titel doppelt/zu lang." : "");
 }
 /* =====================================================================
@@ -2534,6 +2541,7 @@ function initEbayExport(){
 
   // Export
   byId("expDraft").addEventListener("click", ()=>doExport("draft"));
+  byId("expVerify").addEventListener("change", renderChecks);
   byId("expSingle").addEventListener("click", ()=>doExport("single"));
   byId("expVariant").addEventListener("click", ()=>doExport("variant"));
   byId("expAll").addEventListener("click", ()=>doExport("all"));
