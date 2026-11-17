@@ -538,10 +538,17 @@
               <option value="DE_SonstigeDomestic">Sonstige (Inland)</option>
             </datalist></div>
           <div><label>Versandkosten (€)</label>
-            <input type="text" id="setShipCost" inputmode="decimal" placeholder="z. B. 1,80"></div>
+            <input type="text" id="setShipCost" inputmode="decimal" placeholder="z. B. 1,50"></div>
           <div><label>Bearbeitungszeit (Werktage)</label>
             <input type="number" id="setDispatch" min="0" step="1" placeholder="z. B. 2"></div>
+          <div><label>+ je weiterer Karte im selben Angebot (€)</label>
+            <input type="text" id="setShipAdd" inputmode="decimal" placeholder="z. B. 0,05"></div>
+          <div><label>Werbung „Basis“ (Anzeigengebühr %)</label>
+            <input type="text" id="setAdRate" inputmode="decimal" placeholder="z. B. 2"></div>
         </div>
+        <p class="hintline">„+ je weiterer Karte“ gilt, wenn jemand mehrere Karten aus <b>einem</b> Angebot kauft (z. B. Varianten).
+          Die Werbung lässt sich nicht über die Angebotsdatei einstellen – dafür erzeugt die App nach dem Hochladen
+          unten beim Ergebnisbericht eine Werbe-Datei für eBays Werbe-Bereich.</p>
 
         <div class="subhead">… oder eBay-Rahmenbedingungen <small>– empfohlen, wenn du sie bei eBay angelegt hast</small></div>
         <div class="grid3x">
@@ -558,14 +565,20 @@
         <div class="subhead">Titel &amp; Beschreibung</div>
         <div class="grid2x">
           <div><label>Titel-Muster (max. 80 Zeichen je Titel)</label>
-            <input type="text" id="setTitlePattern"></div>
+            <input type="text" id="setTitlePattern">
+            <label style="margin-top:8px">Freie Zeichen bis 80 auffüllen</label>
+            <select id="setTitleFill">
+              <option value="yes">Ja – mit Suchbegriffen (Seltenheit, Set-Kürzel, Holo, Near Mint, Karte, TCG)</option>
+              <option value="no">Nein – nur das Muster</option>
+            </select></div>
           <div><label>Bausteine</label>
             <p class="hintline" style="margin-top:8px"><code>{name}</code> <code>{nrvoll}</code> <code>{nr}</code> <code>{total}</code>
               <code>{set}</code> <code>{code}</code> <code>{rar}</code> <code>{sprache}</code> <code>{zustand}</code></p></div>
         </div>
         <div style="margin-top:10px"><label>Zusatztext für jede Beschreibung (optional, z. B. Versandhinweis)</label>
           <textarea id="setDescExtra" placeholder="z. B. Versand im Toploader und Luftpolsterumschlag. Privatverkauf, keine Gewährleistung."></textarea></div>
-        <p class="hintline">Einzel-<b>Entwürfe</b> brauchen nur Titel, Preis und Bild – Versand und Zustand ergänzt du dann in eBay.
+        <p class="hintline"><b>Entwürfe</b> bekommen Titel, Preis, Bild, Beschreibung und alle Artikelmerkmale – nur Zustand und Versand
+          übernimmt eBay bei Entwürfen nicht, die wählst du beim Fertigstellen.
           <b>Fertige Angebote</b> und <b>Varianten-Angebote</b> brauchen Standort und Versand.</p>
       </div>
     </details>
@@ -680,7 +693,11 @@
         <label class="chip" for="repFile">📑 Ergebnisbericht auswählen …
           <input type="file" id="repFile" accept=".csv,.xlsx,.xls,.txt" style="display:none"></label>
         <button class="chip" id="repCopy" style="display:none">📋 Fehlermeldungen kopieren</button>
+        <button class="chip" id="repAds" style="display:none">📣 Werbe-Datei erstellen</button>
         <div class="tplstate" id="repState"></div>
+        <div class="hintline" id="repAdsHint" style="display:none; margin-top:6px">Die Werbe-Datei enthält die Artikelnummern der neu
+          eingestellten Angebote (Spalten „Item ID“ und „Ad Rate“) mit deiner Anzeigengebühr aus den Einstellungen. Bei eBay im
+          Werbe-Bereich (Verkäufer-Cockpit Pro → Marketing/Werbung) eine Basis-Kampagne anlegen und die Angebote dort per Datei hinzufügen.</div>
         <div class="tablewrap" id="repWrap" style="display:none; margin-top:10px"><table class="reptable"><tbody id="repBody"></tbody></table></div>
       </div>
     </details>
@@ -964,6 +981,58 @@ function condOf(k){ return CONDS.find(c=>c.k===k) || CONDS[0]; }
 const RAR_SHORT = { AR:"AR", SAR:"SAR", UR:"UR" };                       // Titel-Kürzel
 /* Artikelmerkmal „Seltenheit“ – Werte aus eBays Auswahlliste (Kategorie TCG Einzelkarten) */
 const RAR_SPEC  = { ex:"Double Rare", SR:"Ultra Rare", AR:"Illustration Rare", SAR:"Special Illustration Rare", UR:"Hyper Rare" };
+const COND_LONG = { NM:"Near Mint", LP:"Lightly Played", MP:"Moderately Played", HP:"Heavily Played" };   // Titel-Füllwort
+const LANG_ADJ  = { Deutsch:"deutsche", Japanisch:"japanische", Chinesisch:"chinesische", Englisch:"englische" };
+
+/* Kartentyp grob aus dem Namen (Trainer lassen sich aus den Kartendaten nicht sicher erkennen) */
+function cardKind(o){ return /energie/i.test(o.cardName) ? "Energie" : "Pokémon"; }
+/* Charakter = Pokémon-Name ohne Zusätze („Mega Zeraora ex“ → „Zeraora“, „Alola Kokowei“ → „Kokowei“) */
+function charName(o){
+  let n = String(o.cardName||"").replace(/\s+/g," ").trim();
+  n = n.replace(/\s+(ex|EX|GX|V|VMAX|VSTAR|V-UNION|LV\.?X|BREAK|Prism Star)$/i,"");
+  n = n.replace(/^(Mega|Alola|Galar|Hisui|Paldea|Ur|Crypto|Schillerndes?|Strahlendes?|Glanz|Dunkles?)\s+/i,"");
+  return n.trim();
+}
+/* Spezialkarte aus dem Namen */
+function specialOf(o){
+  const n = String(o.cardName||"");
+  if (/\sex$/i.test(n) || o.rarity==="ex") return "EX";
+  const m = n.match(/\s(GX|VMAX|VSTAR|V)$/); return m ? m[1] : "";
+}
+/* Alle Artikelmerkmale einer Karte (Schlüssel = normalisierte Spaltennamen der eBay-Vorlage).
+   Was die Kartendaten nicht hergeben (KP, Typ, Zeichner, Jahr …), bleibt leer statt geraten. */
+function specsFor(o){
+  const rare = !!RAR_SPEC[o.rarity];
+  const x = {
+    "c:spiel":"Pokémon TCG", "c:kartentyp":cardKind(o), "c:hersteller":"Nintendo",
+    "c:kartenname":o.cardName, "c:edition":o.setName, "c:sprache":o.lang,
+    "c:kartennummer":nrVoll(o)||o.num3, "c:altersempfehlung":"6+",
+    "c:kartengröße":"Standard", "c:material":"Karton",
+    "c:vintage":"Nein", "c:mitautogramm":"Nein", "c:maßgefertigt":"Nein"
+  };
+  if (x["c:kartentyp"]==="Pokémon") x["c:charakter"] = charName(o);
+  if (rare) x["c:seltenheit"] = RAR_SPEC[o.rarity];
+  if (o.ball) x["c:oberflächeneffekt"] = "Reverse Holo";
+  else if (rare) x["c:oberflächeneffekt"] = "Holo";
+  if (["SR","AR","SAR","UR"].includes(o.rarity)) x["c:besonderheiten"] = "Full Art";
+  const sp = specialOf(o); if (sp) x["c:spezialkarte"] = sp;
+  return x;
+}
+/* Titel bis 80 Zeichen mit Suchbegriffen auffüllen – nur Wörter, die noch nicht drinstehen */
+function fillTitle(t, words){
+  t = String(t||"").replace(/\s+/g," ").trim();
+  const has = w => new RegExp("(^|\\s)"+w.replace(/[.*+?^${}()|[\]\\\/]/g,"\\$&")+"(\\s|$)","i").test(t);
+  words.forEach(w=>{
+    w = String(w||"").trim(); if (!w || has(w)) return;
+    if ((t+" "+w).length <= 80) t += " "+w;
+  });
+  return t;
+}
+function titleWords(o){
+  const rare = !!RAR_SPEC[o.rarity];
+  return [ RAR_SPEC[o.rarity], o.setCode, o.ball ? "Reverse Holo" : (rare ? "Holo" : ""),
+           COND_LONG[o.cond], "Karte", o.lang==="Japanisch" ? "Japan" : "", "TCG", "Original" ];
+}
 
 /* Kennzeilen über der Spaltenzeile – daran erkennt eBay die Vorlage.
    Wörtlich aus den Original-Vorlagen von ebay.de (Berichte → Uploads → Vorlage herunterladen, Stand 11/2026).
@@ -987,8 +1056,13 @@ const HEADER_B =
 const COLS_B = HEADER_B.split(";");
 /* Spalten, die bei Bedarf hinten angefügt werden (Anzeigename je Schlüssel) */
 const EXTRA_COLS = {
-  "c:set":"C:Set", "c:spiel":"*C:Spiel", "c:kartenname":"C:Kartenname", "c:kartennummer":"C:Kartennummer",
+  "c:set":"C:Set", "c:spiel":"C:Spiel", "c:kartenname":"C:Kartenname", "c:kartennummer":"C:Kartennummer",
   "c:sprache":"C:Sprache", "c:seltenheit":"C:Seltenheit",
+  "c:kartentyp":"C:Kartentyp", "c:edition":"C:Edition", "c:charakter":"C:Charakter", "c:hersteller":"C:Hersteller",
+  "c:altersempfehlung":"C:Altersempfehlung", "c:oberflächeneffekt":"C:Oberflächeneffekt", "c:besonderheiten":"C:Besonderheiten",
+  "c:spezialkarte":"C:Spezialkarte", "c:kartengröße":"C:Kartengröße", "c:material":"C:Material", "c:vintage":"C:Vintage",
+  "c:mitautogramm":"C:Mit Autogramm", "c:maßgefertigt":"C:Maßgefertigt",
+  "shippingservice-1:additionalcost":"ShippingService-1:AdditionalCost",
   "shippingprofilename":"ShippingProfileName", "returnprofilename":"ReturnProfileName", "paymentprofilename":"PaymentProfileName",
   "customlabel":"CustomLabel", "category":"*Category", "title":"*Title", "relationship":"Relationship",
   "relationshipdetails":"RelationshipDetails", "conditionid":"*ConditionID", "cd40001":"CD:Kartenzustand - (ID: 40001)",
@@ -1099,13 +1173,14 @@ function exportUrl(o){ return encodeURI(o.resolvedUrl || (o.urls && o.urls[0]) |
 /* ---------- Einstellungen (localStorage) ---------- */
 const SETTING_IDS = {
   location:"setLocation", dispatch:"setDispatch", shipService:"setShipService", shipCost:"setShipCost",
+  shipAdd:"setShipAdd", adRate:"setAdRate", titleFill:"setTitleFill",
   returns:"setReturns", threshold:"priceThreshold",
   shipProfile:"setShipProfile", returnProfile:"setReturnProfile", payProfile:"setPayProfile",
   cond:"setCond", titlePattern:"setTitlePattern", descExtra:"setDescExtra",
   fileFormat:"fmtFile", delim:"fmtDelim", decimal:"fmtDecimal", varName:"fmtVarName", varPic:"fmtVarPic"
 };
 const SETTING_DEFAULTS = {
-  returns:"no", threshold:"4,00", cond:"NM",
+  returns:"no", threshold:"4,00", cond:"NM", shipCost:"1,50", shipAdd:"0,05", adRate:"2", titleFill:"yes",
   titlePattern:"Pokemon {name} {nrvoll} {set} {rar} {sprache}",
   fileFormat:"csv", delim:";", decimal:".", varName:"Karte", varPic:"valueurl"
 };
@@ -1281,6 +1356,7 @@ function autoTitle(o){
   };
   let t = fill(o.setName);
   if (t.length>80) t = fill("");            // Set-Name weglassen, bevor abgeschnitten wird
+  if (S().titleFill!=="no") t = fillTitle(t, titleWords(o));   // freie Zeichen mit Suchbegriffen nutzen
   return capTitle(t);
 }
 function buildTitle(o){ return o.titleManual ? capTitle(o.titleManual) : autoTitle(o); }
@@ -1288,25 +1364,54 @@ function draftTitle(o){ return buildTitle(o); }
 function sku(o){ return `${o.setCode.toUpperCase()}-${o.num3}` + (o.cond!=="NM" ? "-"+o.cond : "") + (o.ball ? "-"+o.ball.replace(/\s+/g,"").toUpperCase() : ""); }
 
 /* HTML-Beschreibung ohne Zeilenumbrüche (eBay-Vorgabe für Upload-Dateien) */
-function description(headline, o, isVariant){
+/* Versand-/Service-Punkte aus den Einstellungen (Beträge nur, wenn ohne Rahmenbedingungen gearbeitet wird) */
+function serviceLines(isVariant){
+  const s=S(), out=["Sicherer Versand im Luftpolsterumschlag"];
+  const pol = s.shipProfile && s.returnProfile && s.payProfile;
+  const cost = parsePrice(s.shipCost), add = parsePrice(s.shipAdd);
+  if (!pol && cost!=null){
+    let t = "Versand innerhalb Deutschlands: " + (cost===0 ? "kostenlos" : priceComma(cost)+" €");
+    if (isVariant && cost>0 && add!=null) t += " – jede weitere Karte aus diesem Angebot nur +" + priceComma(add) + " €";
+    out.push(t);
+  }
+  out.push(isVariant
+    ? "Mehrere Karten kaufen und sparen: einfach mehrere Karten aus der Auswahl in den Warenkorb legen"
+    : "Mehrere Karten gekauft? Gerne mit Rabatt und Kombiversand – schreiben Sie mich vor dem Bezahlen einfach an");
+  out.push("Originalfotos der Karte gerne auf Anfrage");
+  const d = parseInt(s.dispatch,10);
+  if (!pol && d>0) out.push("Versand innerhalb von " + d + " Werktag" + (d>1?"en":"") + " nach Zahlungseingang");
+  return out;
+}
+/* HTML-Beschreibung ohne Zeilenumbrüche (eBay-Vorgabe für Upload-Dateien).
+   o = Einzelkarte, g = Varianten-Gruppe (eins von beiden). */
+function description(headline, o, isVariant, g){
   const extra = S().descExtra;
   const cell = "padding:4px 14px 4px 0;vertical-align:top";
-  let facts = "";
+  const table = rows => "<table style='border-collapse:collapse;margin:8px 0 12px'>" +
+    rows.filter(r=>r[1]).map(r=>"<tr><td style='"+cell+";color:#666'>"+esc(r[0])+"</td><td style='"+cell+"'><b>"+esc(r[1])+"</b></td></tr>").join("") + "</table>";
+  let facts = "", seo = "", lead = "";
   if (o){
-    const rows = [["Karte",o.cardName],["Nummer",nrVoll(o)||o.num3],["Set",o.setName],["Sprache",o.lang],["Zustand",condOf(o.cond).de]];
-    facts = "<table style='border-collapse:collapse;margin:8px 0 12px'>" +
-      rows.map(r=>"<tr><td style='"+cell+";color:#666'>"+esc(r[0])+"</td><td style='"+cell+"'><b>"+esc(r[1])+"</b></td></tr>").join("") + "</table>";
+    facts = table([["Karte",o.cardName],["Nummer",nrVoll(o)||o.num3],["Set",o.setName+" ("+o.setCode+")"],
+                   ["Seltenheit",RAR_SPEC[o.rarity]||""],["Sprache",o.lang],["Zustand",condOf(o.cond).de]]);
+    seo = "Pokémon Sammelkarte „"+o.cardName+"“ aus dem Pokémon-TCG-Set „"+o.setName+"“ ("+o.setCode+"), Kartennummer "+(nrVoll(o)||o.num3)+
+          ", "+(LANG_ADJ[o.lang] ? LANG_ADJ[o.lang]+" Ausgabe" : "Sprache "+o.lang)+
+          (RAR_SPEC[o.rarity] ? ", Seltenheit "+RAR_SPEC[o.rarity] : "")+", Zustand "+condOf(o.cond).de+". Ideal für Sammler und Spieler.";
+  } else if (g){
+    lead = "<p style='font-weight:bold'>Einzelkarten zum Aussuchen – bitte die gewünschte Karte im Auswahlfeld wählen.</p>";
+    facts = table([["Set",g.set.name+" ("+g.set.code+")"],["Sprache",g.lang],["Zustand",condOf(g.cond).de],["Auswahl",g.list.length+" Karten"]]);
+    seo = "Pokémon-TCG-Einzelkarten aus dem Set „"+g.set.name+"“ ("+g.set.code+"), "+(LANG_ADJ[g.lang] ? LANG_ADJ[g.lang]+" Ausgabe" : "Sprache "+g.lang)+
+          ", Zustand "+condOf(g.cond).de+". Enthaltene Karten: "+g.list.map(x=>x.cardName+" "+(nrVoll(x)||x.num3)).join(", ")+".";
   }
-  const bundle = isVariant
-    ? "<p style='font-weight:bold'>Mehrere Karten kaufen und Versand sparen – nur 1x Versandkosten.</p>"+
-      "<p>Bitte die gewünschte Karte im Auswahlfeld wählen.</p>" : "";
+  const service = "<h3 style='font-size:16px;margin:14px 0 6px'>Versand &amp; Service</h3><ul style='margin:0 0 12px;padding-left:20px'>" +
+    serviceLines(isVariant).map(t=>"<li>"+esc(t)+"</li>").join("") + "</ul>";
   const stock = "Hinweis: Beim Produktbild handelt es sich um ein Beispielbild (Stockfoto). "+
     "Sie erhalten die im Titel genannte Karte" + (isVariant ? " in der gewählten Variante. " : ". ") +
     "Gerne sende ich auf Anfrage Fotos der tatsächlichen Karte – schreiben Sie mich einfach an.";
   return "<div style='font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#222'>"+
-         "<h2 style='font-size:18px;margin:0 0 10px'>"+esc(headline)+"</h2>"+ bundle + facts +
+         "<h2 style='font-size:18px;margin:0 0 10px'>"+esc(headline)+"</h2>"+ lead + facts + service +
          "<p>"+stock+"</p>"+
-         (extra ? "<p>"+esc(extra).replace(/\r?\n/g,"<br>")+"</p>" : "") + "</div>";
+         (extra ? "<p>"+esc(extra).replace(/\r?\n/g,"<br>")+"</p>" : "") +
+         (seo ? "<p style='font-size:13px;color:#666'>"+esc(seo)+"</p>" : "") + "</div>";
 }
 
 /* eBay.de-Suche „Verkaufte Angebote“ – reiner Link, KEIN fetch (CORS). */
@@ -1825,6 +1930,13 @@ function groupTitleDefault(g){
   const tail = (g.cond!=="NM" ? " "+condOf(g.cond).short : "") + (g.part ? " Teil "+g.part : "");
   let t = `Pokemon ${g.set.name} ${g.lang} Einzelkarten zum Aussuchen` + tail;
   if (t.length>80) t = `Pokemon ${g.set.name} ${g.lang} Karten Auswahl` + tail;
+  if (S().titleFill!=="no"){
+    const rars = [...new Set(g.list.map(o=>o.rarity))];
+    const allEx = rars.length===1 && rars[0]==="ex";
+    const anyEx = rars.includes("ex"), anyRare = g.list.some(o=>RAR_SPEC[o.rarity]);
+    t = fillTitle(t, [ g.set.code, anyEx ? "ex" : "", allEx ? "Double Rare" : (anyRare ? "Holo" : ""),
+                       COND_LONG[g.cond], g.lang==="Japanisch" ? "Japan" : "", "TCG", "Original" ]);
+  }
   return capTitle(t);
 }
 function groupTitle(g){ return capTitle(GTITLES[g.key] || groupTitleDefault(g)); }
@@ -1993,11 +2105,13 @@ function saveAoa(basename, aoa){
 }
 
 /* ---- Zeilen-Objekte (Schlüssel = normalisierte Spaltennamen) ---- */
+/* Entwurf: eBay übernimmt hier Titel, Preis, Bild, Beschreibung und Artikelmerkmale (C:-Spalten).
+   Zustand und Versand ignoriert der Entwurfs-Upload bei Sammelkarten (getestet 11/2026) – die wählt man beim Fertigstellen. */
 function objDraft(o){
   const title=buildTitle(o);
-  return { "action":"Draft", "customlabel(sku)":sku(o), "categoryid":CATEGORY_ID, "title":title, "upc":"",
+  return Object.assign({ "action":"Draft", "customlabel(sku)":sku(o), "categoryid":CATEGORY_ID, "title":title, "upc":"",
            "price":priceOut(o.price), "quantity":String(o.qty), "itemphotourl":exportUrl(o),
-           "conditionid":"", "description":description(title,o,false), "format":"FixedPrice" };
+           "conditionid":"", "description":description(title,o,false), "format":"FixedPrice" }, specsFor(o));
 }
 function commonAdd(cond){
   const s=S();
@@ -2009,6 +2123,8 @@ function commonAdd(cond){
     x["shippingtype"]="Flat";
     x["shippingservice-1:option"]=s.shipService;
     x["shippingservice-1:cost"]=priceOut(parsePrice(s.shipCost)||0);
+    const add=parsePrice(s.shipAdd);                     // Versand je weiterem Artikel desselben Angebots
+    if (add!=null && (parsePrice(s.shipCost)||0)>0) x["shippingservice-1:additionalcost"]=priceOut(add);
     x["dispatchtimemax"]=s.dispatch;
     x["returnsacceptedoption"]= s.returns==="yes" ? "ReturnsAccepted" : "ReturnsNotAccepted";
     if (s.returns==="yes"){ x["returnswithinoption"]="Days_30"; x["refundoption"]="MoneyBack"; x["shippingcostpaidbyoption"]="Buyer"; }
@@ -2018,13 +2134,16 @@ function commonAdd(cond){
 function objSingle(o){
   const title=buildTitle(o);
   const x=commonAdd(o.cond);
-  Object.assign(x, { "customlabel":sku(o), "title":title, "c:kartenname":o.cardName,
-    "c:kartennummer":nrVoll(o)||o.num3, "c:sprache":o.lang, "c:edition":o.setName,
+  Object.assign(x, specsFor(o), { "customlabel":sku(o), "title":title,
     "picurl":exportUrl(o), "description":description(title,o,false),
     "startprice":priceOut(o.price), "quantity":String(o.qty) });
-  if (RAR_SPEC[o.rarity]) x["c:seltenheit"]=RAR_SPEC[o.rarity];
-  if (o.rarity==="ex") x["c:spezialkarte"]="EX";
   return x;
+}
+/* Merkmale, die für ALLE Karten einer Varianten-Gruppe gleich sind (z. B. Edition, Seltenheit bei reinen ex-Gruppen) */
+function groupSpecs(g){
+  const all=g.list.map(specsFor), out={};
+  Object.keys(all[0]).forEach(k=>{ if (all.every(s=>s[k]===all[0][k])) out[k]=all[0][k]; });
+  return out;
 }
 function objsVariant(g){
   const s=S();
@@ -2032,9 +2151,9 @@ function objsVariant(g){
   const vals=varValues(g), title=groupTitle(g);
   const pics=g.list.slice().sort((a,b)=>(b.price||0)-(a.price||0)).map(exportUrl).filter(Boolean);
   const parent=commonAdd(g.cond);
-  Object.assign(parent, { "title":title, "relationship":"", "relationshipdetails": vName+"="+g.list.map(o=>vals.get(o)).join(";"),
+  Object.assign(parent, groupSpecs(g), { "title":title, "relationship":"", "relationshipdetails": vName+"="+g.list.map(o=>vals.get(o)).join(";"),
     "c:sprache":g.lang, "c:edition":g.set.name, "picurl":[...new Set(pics)].slice(0,PIC_MAX).join("|"),
-    "description":description(title,null,true), "startprice":"", "quantity":"" });
+    "description":description(title,null,true,g), "startprice":"", "quantity":"" });
   const out=[parent], skus={};
   g.list.forEach(o=>{
     let k=sku(o), i=2; while (skus[k]){ k=sku(o)+"-"+i; i++; } skus[k]=1;
@@ -2082,7 +2201,7 @@ function nextHtml(kind, file, nList, nCards, verify){
     `<ol><li>Bei eBay öffnen: <i>Verkäufer-Cockpit Pro → Mehr → Berichte → Uploads</i>.</li>`+
     `<li>Auf <b>„Vorlage hochladen“</b> klicken, dann <b>„Datei auswählen“</b> und diese Datei wählen – eBay erkennt die Art der Vorlage selbst.</li>`+
     (kind==="draft"
-      ? `<li>Danach unter <i>Angebote → Entwürfe</i> Zustand und Versand ergänzen und einstellen.</li>`
+      ? `<li>Danach unter <i>Angebote → Entwürfe</i> je Entwurf nur noch <b>Zustand</b> („Nicht bewertet“ → „Near Mint oder besser“) und <b>Versand</b> wählen und einstellen – Titel, Beschreibung und Artikelmerkmale sind schon drin.</li>`
       : `<li>eBay verarbeitet die Datei (meist unter 15 Minuten). Meldet der Ergebnisbericht Fehler, lade ihn unten bei „eBay-Ergebnisbericht prüfen“.</li>`)+
     `</ol><a class="lnk" href="${EBAY_UPLOAD_URL}" target="_blank" rel="noopener">eBay-Upload öffnen ↗</a>`+
     (kind==="draft" ? `<a class="lnk" href="${EBAY_DRAFTS_URL}" target="_blank" rel="noopener">eBay-Entwürfe öffnen ↗</a>` : "")+
@@ -2248,7 +2367,17 @@ function renderTplState(){
   });
 }
 
-let repLines=[];
+let repLines=[], repItemIds=[];
+function adRateTxt(){ const r=parsePrice(S().adRate); return (r==null||r<0 ? 2 : r).toFixed(1); }
+/* CSV für eBays Werbe-Upload: Kopfzeile „Item ID,Ad Rate“, Gebühr in Prozent (0,1er-Schritte) */
+function downloadAdsFile(){
+  if (!repItemIds.length){ toastX("Im Bericht wurden keine neu eingestellten Angebote gefunden.", true); return; }
+  const rate=adRateTxt();
+  const csv = "Item ID,Ad Rate\r\n" + repItemIds.map(id=>id+","+rate).join("\r\n") + "\r\n";
+  const name = "ebay-werbung-"+rate.replace(".",",")+"prozent-"+stamp()+".csv";
+  downloadFile(name, csv, "text/csv;charset=utf-8");
+  toastX("Werbe-Datei gespeichert: "+name);
+}
 async function handleReportFile(file){
   const st=byId("repState"), wrap=byId("repWrap"), body=byId("repBody");
   let tab;
@@ -2284,6 +2413,16 @@ async function handleReportFile(file){
   });
   wrap.style.display="block";
   byId("repCopy").style.display = repLines.length ? "" : "none";
+  // Artikelnummern erfolgreich eingestellter Angebote → Werbe-Datei (Item ID, Ad Rate)
+  const idCol = head.findIndex(h=>/^item\s*id$/i.test(String(h).trim()));
+  const stCol = head.findIndex(h=>/^status$/i.test(String(h).trim()));
+  const acCol = head.findIndex(h=>/^action$/i.test(String(h).trim()));
+  repItemIds = idCol<0 ? [] : [...new Set(data.filter(r=>/^\d{9,}$/.test(String(r[idCol]||"").trim())
+      && (stCol<0 || good.test(r[stCol]||"")) && (acCol<0 || /^add$/i.test(String(r[acCol]||"").trim())))
+    .map(r=>String(r[idCol]).trim()))];
+  byId("repAds").style.display = repItemIds.length ? "" : "none";
+  byId("repAdsHint").style.display = repItemIds.length ? "" : "none";
+  byId("repAds").textContent = `📣 Werbe-Datei für ${repItemIds.length} Angebot(e) erstellen (${adRateTxt()} %)`;
   st.innerHTML = `<b style="color:${nBad?"var(--err)":"var(--ok)"}">${nBad ? nBad+" Zeile(n) mit Fehlermeldung" : "Keine Fehlermeldung erkannt"}</b> · ${data.length} Zeile(n) im Bericht` +
     (data.length>400 ? " (erste 400 angezeigt)" : "") +
     (feeCol>=0 && fees>0 ? ` · Angebotsgebühren laut eBay: ${fees.toFixed(2).replace(".",",")} €` : "") +
@@ -2479,7 +2618,7 @@ function initEbayExport(){
     const el=byId(SETTING_IDS[k]); if (!el) return;
     el.addEventListener("change", ()=>{
       saveExSettings();
-      if (k==="titlePattern") renderPreview(); else { renderGroups(); renderChecks(); }
+      if (k==="titlePattern" || k==="titleFill" || k==="cond") renderPreview(); else { renderGroups(); renderChecks(); }
     });
   });
 
@@ -2554,6 +2693,7 @@ function initEbayExport(){
     const t=repLines.join("\n");
     navigator.clipboard.writeText(t).then(()=>toastX("Fehlermeldungen kopiert")).catch(()=>prompt("Manuell kopieren:", t));
   });
+  byId("repAds").addEventListener("click", downloadAdsFile);
   renderTplState();
 
   // Sofort-Datei-Dialog
