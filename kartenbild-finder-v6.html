@@ -623,8 +623,9 @@
             </select></div>
         </div>
         <div class="subhead">Eigene eBay-Vorlage verwenden <small>– optional</small></div>
-        <p class="hintline" style="margin:0 0 10px">Lade bei eBay unter <i>Berichte → Hochladen → Vorlage abrufen</i> die Vorlage
-          „Neue Angebotsvorlage erstellen“ (Kategorie 183454) bzw. „Entwurfsvorlage erstellen“ herunter und wähle sie hier aus.
+        <p class="hintline" style="margin:0 0 10px">Nur nötig, falls eBay die Dateien einmal nicht mehr erkennt: Lade bei eBay unter
+          <i>Berichte → Uploads → Vorlage herunterladen</i> mit Quelle „Angebote“ die Vorlage „Neue Angebote erstellen oder planen“
+          (Kategorie „TCG Einzelkarten“, CSV) bzw. „Neue Entwürfe erstellen“ herunter und wähle sie hier aus.
           Die App übernimmt dann exakt deren Kopfzeilen und Trennzeichen – so passt die Datei auch, wenn eBay das Format ändert.</p>
         <label class="chip" for="tplFile">📄 eBay-Vorlage auswählen …
           <input type="file" id="tplFile" accept=".csv,.xlsx,.xls" style="display:none"></label>
@@ -637,7 +638,7 @@
       <h2><span class="step">3</span> Prüfen &amp; eBay-Datei erzeugen</h2>
       <ul class="checks" id="checkList"></ul>
       <div class="expgrid">
-        <button class="expbtn primary" id="expDraft">📝 Einzelkarten als <b>eBay-Entwürfe</b>
+        <button class="expbtn primary" id="expDraft">📝 Alle Karten als <b>eBay-Entwürfe</b>
           <small id="expDraftSub"></small></button>
         <button class="expbtn" id="expSingle">🚀 Einzelkarten als <b>fertige Angebote</b>
           <small id="expSingleSub"></small></button>
@@ -958,6 +959,17 @@ function condOf(k){ return CONDS.find(c=>c.k===k) || CONDS[0]; }
 const RAR_SHORT = { AR:"AR", SAR:"SAR", UR:"UR" };                       // Titel-Kürzel
 const RAR_SPEC  = { AR:"Illustration Rare", SAR:"Special Illustration Rare" }; // Artikelmerkmal
 
+/* Kennzeilen über der Spaltenzeile – daran erkennt eBay die Vorlage.
+   Wörtlich aus den Original-Vorlagen von ebay.de (Berichte → Uploads → Vorlage herunterladen, Stand 11/2026).
+   Ohne sie meldet eBay: „Wir konnten Ihre Vorlage nicht identifizieren.“ */
+const INFO_A = [
+  "#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;",
+  "#INFO Action und Category ID sind erforderliche Felder. 1) Stellen Sie Action auf Draft ein. 2) Die Kategorie-ID für Ihre Angebote finden Sie hier: https://pages.ebay.com/sellerinformation/news/categorychanges.html;;;;;;;;;",
+  "#INFO Nachdem Sie Ihren Entwurf erfolgreich im Berichte-Tab Ihres Verkäufer-Cockpit Pro heruntergeladen haben; können Sie die Entwürfe hier zu aktiven Angeboten vervollständigen: https://www.ebay.de/sh/lst/drafts;;;;;;;;;",
+  "#INFO;;;;;;;;;;"
+].map(l=>l.split(";"));
+const INFO_B = [ ["Info","Version=1.0.0","Template=fx_category_template_EBAY_DE"] ];
+
 /* Entwurfs-Vorlage (Draft) – 11 feste Spalten */
 const HEADER_A =
   "Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);Custom label (SKU);Category ID;Title;UPC;Price;Quantity;Item photo URL;Condition ID;Description;Format";
@@ -965,7 +977,7 @@ const DRAFT_KEYS = ["action","customlabel(sku)","categoryid","title","upc","pric
 
 /* Angebots-Vorlage (Kategorie 183454, eBay Deutschland) */
 const HEADER_B =
-  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
+  "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Edition;C:Hersteller;C:Oberflächeneffekt;C:Besonderheiten;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Autogramm-Authentifizierung;C:Convention/Event;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
 const COLS_B = HEADER_B.split(";");
 /* Spalten, die bei Bedarf hinten angefügt werden (Anzeigename je Schlüssel) */
 const EXTRA_COLS = {
@@ -1895,11 +1907,12 @@ function renderChecks(){
   if (!noPrice && !cheap && !noImg) add("ok", "✓ Alle Karten haben Preis und Bild.");
   add("ok", `✓ Zustand wird je Karte als eBay-Zustands-ID 4000 mit Kartenzustand (NM/EX/GD/PL) übergeben.`);
 
-  byId("expDraftSub").textContent  = singles.length ? `${singles.length} Entwürfe · Versand & Zustand danach in eBay ergänzen` : "keine Karte auf „Einzel“";
+  const drafts=exRows.filter(o=>o.price!=null).length;
+  byId("expDraftSub").textContent  = drafts ? `${drafts} Entwürfe (jede Karte einzeln) · Versand & Zustand danach in eBay ergänzen` : "keine Karte mit Preis im Korb";
   byId("expSingleSub").textContent = singles.length ? `${singles.length} Angebote · gehen sofort online` : "keine Karte auf „Einzel“";
   byId("expVariantSub").textContent= groups.length ? `${groups.length} Angebot(e) mit ${varCards} Karten · gehen sofort online` : "keine Karte auf „Variante“";
   byId("expAllSub").textContent    = `${singles.length} Einzel + ${groups.length} Varianten-Angebot(e) · sofort online`;
-  byId("expDraft").classList.toggle("off", !singles.length);
+  byId("expDraft").classList.toggle("off", !drafts);
   byId("expSingle").classList.toggle("off", !singles.length || live.length>0);
   byId("expVariant").classList.toggle("off", !groups.length || live.length>0);
   byId("expAll").classList.toggle("off", (!singles.length && !groups.length) || live.length>0);
@@ -1924,7 +1937,8 @@ try{ TPLS = JSON.parse(localStorage.getItem(EX_TPL_KEY)) || {}; }catch(e){ TPLS 
 function tplFor(type){            // "draft" | "cat"
   const c = TPLS[type];
   if (c && Array.isArray(c.header) && c.header.length) return { info:(c.info||[]).map(r=>r.slice()), header:c.header.slice(), custom:true };
-  return { info:[], header:(type==="draft" ? HEADER_A.split(";") : COLS_B.slice()), custom:false };
+  return { info:(type==="draft" ? INFO_A : INFO_B).map(r=>r.slice()),
+           header:(type==="draft" ? HEADER_A.split(";") : COLS_B.slice()), custom:false };
 }
 /* Spaltenname → Schlüssel („*StartPrice“→startprice, „CD:Kartenzustand - (ID: 40001)“→cd40001) */
 function normCol(h){
@@ -1980,7 +1994,7 @@ function objDraft(o){
 function commonAdd(cond){
   const s=S();
   const x = { "action":"Add", "category":CATEGORY_ID, "conditionid":"4000", "cd40001":condOf(cond).id,
-              "c:spiel":"Pokémon Sammelkartenspiel", "format":"FixedPrice", "duration":"GTC", "location":s.location };
+              "c:spiel":"Pokémon TCG", "format":"FixedPrice", "duration":"GTC", "location":s.location };
   if (s.shipProfile && s.returnProfile && s.payProfile){
     x["shippingprofilename"]=s.shipProfile; x["returnprofilename"]=s.returnProfile; x["paymentprofilename"]=s.payProfile;
   } else {
@@ -2030,8 +2044,10 @@ function doExport(kind){
   if (kind!=="draft" && live.length){ toastX("Einstellungen unvollständig: "+live[0], true); openSettings(); return; }
   let objs=[], used=[], type="cat", base="", nList=0;
   if (kind==="draft"){
-    if (!singles.length){ toastX("Keine Karte mit Preis auf „Einzel“ – in der Tabelle umstellen.", true); return; }
-    objs=singles.map(objDraft); used=singles; type="draft"; base="ebay-entwuerfe"; nList=singles.length;
+    // Entwürfe: jede Karte im Korb wird ein eigener Entwurf – egal ob „Einzel“ oder „Variante“
+    const drafts=exRows.filter(o=>o.price!=null);
+    if (!drafts.length){ toastX("Keine Karte mit Preis im Korb.", true); return; }
+    objs=drafts.map(objDraft); used=drafts; type="draft"; base="ebay-entwuerfe"; nList=drafts.length;
   } else {
     if (kind==="single" || kind==="all"){ singles.forEach(o=>{ objs.push(objSingle(o)); used.push(o); }); nList+=singles.length; }
     if (kind==="variant" || kind==="all"){ groups.forEach(g=>{ objs.push(...objsVariant(g)); used.push(...g.list); }); nList+=groups.length; }
@@ -2045,11 +2061,9 @@ function doExport(kind){
   toastX("Datei gespeichert: "+file);
 }
 function nextHtml(kind, file, nList, nCards){
-  const typ = kind==="draft" ? "Entwurfsvorlage erstellen" : "Neue Angebotsvorlage erstellen";
-  const ft  = /\.xlsx$/.test(file) ? ".xlsx" : ".csv";
   return `<b>✓ ${esc(file)}</b> gespeichert – ${nList} ${kind==="draft"?"Entwurf/Entwürfe":"Angebot(e)"} mit ${nCards} Karte(n).`+
-    `<ol><li>Bei eBay öffnen: <i>Verkäufer-Cockpit Pro → Berichte → Hochladen</i>.</li>`+
-    `<li>„Vorlage hochladen“ wählen, Dateityp <b>${ft}</b>, Typ <b>„${typ}“</b>, die Datei auswählen und hochladen.</li>`+
+    `<ol><li>Bei eBay öffnen: <i>Verkäufer-Cockpit Pro → Mehr → Berichte → Uploads</i>.</li>`+
+    `<li>Auf <b>„Vorlage hochladen“</b> klicken, dann <b>„Datei auswählen“</b> und diese Datei wählen – eBay erkennt die Art der Vorlage selbst.</li>`+
     (kind==="draft"
       ? `<li>Danach unter <i>Angebote → Entwürfe</i> Zustand und Versand ergänzen und einstellen.</li>`
       : `<li>eBay verarbeitet die Datei (meist unter 15 Minuten). Meldet der Ergebnisbericht Fehler, lade ihn unten bei „eBay-Ergebnisbericht prüfen“.</li>`)+
