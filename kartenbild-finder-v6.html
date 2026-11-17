@@ -1432,7 +1432,7 @@ function defaultRuleset(){
     markupPct: 10,          // Aufschlag auf eingegebenen Ø-Verkaufspreis
     rounding: "off",        // "off" | "49" | "99" (nur für Verkaufsdaten-Preise)
     rules: [
-      { condLang:"Japanisch", condSet:"", condName:"ex", condNote:"", basis:1.50, min:1.50, isDefault:false },
+      { condLang:"Deutsch", condSet:"", condName:"ex", condNote:"", basis:3.99, min:3.99, isDefault:false }, { condLang:"Japanisch", condSet:"", condName:"ex", condNote:"", basis:1.50, min:1.50, isDefault:false },
       { condLang:"", condSet:"", condName:"", condNote:"", basis:1.00, min:1.00, isDefault:true }
     ]
   };
@@ -1457,7 +1457,7 @@ function matchRule(o){
     }
     if (r.condName){
       const hay = (o.cardName + " " + (o.rarity||"")).toLowerCase();
-      if (!hay.includes(r.condName.toLowerCase())) continue;
+      const q = r.condName.toLowerCase().trim();   /* Seltenheits-Kürzel (ex, AR …) nur als ganzes Wort – sonst träfe „ex“ auch „Alexis“ */ if (/^(ex|ar|sar|sr|ur|v|gx|vmax|vstar)$/.test(q) ? !new RegExp("(^|\\s)"+q+"(\\s|$)").test(hay) : !hay.includes(q)) continue;
     }
     if (r.condNote && !String(o.note||"").toLowerCase().includes(r.condNote.toLowerCase())) continue;
     return r;
