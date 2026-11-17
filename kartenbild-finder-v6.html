@@ -258,6 +258,130 @@
   }
   .toast2.show{opacity:1; transform:translateX(-50%) translateY(0);}
   .toast2.err{background:var(--err); color:#2a0b0b;}
+
+  /* ================= V7: eBay-Korb, Sofort-Datei, Pruefung ================= */
+  body.haskorb{padding-bottom:96px;}
+  .tabcount{
+    display:none; margin-left:6px; font-size:12px; font-weight:800; border-radius:999px;
+    padding:1px 8px; background:#0b0f13; color:var(--tera);
+  }
+  .tabcount.show{display:inline-block;}
+  .tab.active .tabcount{background:rgba(11,15,19,.85);}
+
+  /* Kartenkachel: eBay-Knoepfe */
+  .card.inkorb{border-color:var(--tera); box-shadow:0 0 0 1px var(--tera) inset;}
+  .card .ebx{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; align-items:center;}
+  .card .ebx button{padding:8px 10px; font-size:12px; border-radius:9px;}
+  .ebx .ebx-add{flex:1; background:var(--panel2); color:var(--tera); border:1px solid var(--line);}
+  .ebx .ebx-add:hover{border-color:var(--tera);}
+  .ebx .ebx-step{background:var(--panel2); color:var(--ink); border:1px solid var(--line); min-width:34px;}
+  .ebx .ebx-in{flex:1; text-align:center; font-size:12px; font-weight:800; color:var(--tera);}
+  .ebx .ebx-quick{flex-basis:100%; background:linear-gradient(135deg,var(--tera),var(--tera2)); color:#0b0f13;}
+
+  /* Korb-Leiste unten */
+  .korbbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:40; display:none;
+    background:rgba(20,26,33,.97); border-top:1px solid var(--tera);
+    padding:12px 16px; box-shadow:0 -8px 28px rgba(0,0,0,.45);
+  }
+  .korbbar.show{display:block;}
+  .korbbar .in{max-width:1100px; margin:0 auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .korbbar .txt{flex:1; min-width:180px; font-size:14px; font-weight:700;}
+  .korbbar .txt small{display:block; font-weight:500; color:var(--muted); font-size:12px; margin-top:2px;}
+
+  /* Sofort-Datei-Dialog */
+  .qm-back{
+    position:fixed; inset:0; z-index:70; background:rgba(5,8,11,.78); display:none;
+    align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto;
+  }
+  .qm-back.show{display:flex;}
+  .qm{background:var(--panel); border:1px solid var(--line); border-radius:18px; width:100%; max-width:680px;}
+  .qm-head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--line); font-size:16px;}
+  .qm-x{background:transparent; color:var(--muted); font-size:18px; padding:4px 10px;}
+  .qm-body{display:flex; gap:16px; padding:16px; flex-wrap:wrap;}
+  .qm-img{flex:0 0 170px; background:#0b0f13; border-radius:12px; padding:8px; display:flex; align-items:center; justify-content:center; min-height:200px;}
+  .qm-img img{max-width:100%; border-radius:6px;}
+  .qm-fields{flex:1; min-width:240px;}
+  .qm label{display:block; font-size:12px; color:var(--muted); margin:10px 0 4px 2px;}
+  .qm label:first-child{margin-top:0;}
+  .qm input[type="text"], .qm input[type="number"], .qm select{
+    width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:10px;
+    color:var(--ink); font-size:15px; padding:11px 12px; outline:none; appearance:none; font-family:inherit;
+  }
+  .qm input:focus, .qm select:focus{border-color:var(--tera);}
+  .qm-grid{display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:10px;}
+  @media(max-width:520px){ .qm-grid{grid-template-columns:1fr 1fr;} }
+  .qm-kind{display:flex; gap:8px; flex-wrap:wrap;}
+  .qm-kind label{
+    flex:1; min-width:200px; margin:0; cursor:pointer; background:var(--panel2); border:1px solid var(--line);
+    border-radius:12px; padding:10px 12px; font-size:13px; color:var(--ink); line-height:1.4;
+  }
+  .qm-kind label small{display:block; color:var(--muted); font-size:11px; margin-top:2px;}
+  .qm-kind input{margin-right:6px; accent-color:var(--tera);}
+  .qm-kind label.on{border-color:var(--tera); background:rgba(94,234,212,.08);}
+  .qm-note{font-size:12px; margin-top:10px; line-height:1.5; color:var(--muted);}
+  .qm-note.err{color:var(--orange); font-weight:700;}
+  .qm-foot{display:flex; gap:8px; padding:14px 16px; border-top:1px solid var(--line); flex-wrap:wrap; justify-content:flex-end;}
+
+  /* Export-Tab: neue Bausteine */
+  .howto ol{margin:4px 0 0 20px; font-size:13px; line-height:1.7; color:var(--ink);}
+  .howto ol b{color:var(--tera);}
+  #secExport textarea{
+    width:100%; min-height:74px; background:var(--panel2); border:1px solid var(--line); border-radius:10px;
+    color:var(--ink); font-size:14px; padding:11px 12px; outline:none; font-family:inherit; resize:vertical;
+  }
+  #secExport textarea:focus{border-color:var(--tera);}
+  .subhead{font-size:13px; font-weight:800; color:var(--tera); margin:16px 0 8px; display:flex; align-items:center; gap:8px;}
+  .subhead:first-child{margin-top:0;}
+  .subhead small{font-weight:500; color:var(--muted);}
+  button.chip.danger{color:var(--err);}
+  label.chip{
+    display:inline-flex !important; align-items:center; gap:6px; margin:0 !important; cursor:pointer;
+    background:var(--panel); color:var(--tera) !important; border:1px solid var(--line); border-radius:12px;
+    font-size:14px !important; font-weight:600; padding:12px 16px;
+  }
+  #secExport input.title-in{width:100%; min-width:260px; padding:7px 9px; font-size:13px; font-weight:600;}
+  #secExport input.qty-in{width:64px; padding:7px 8px; font-size:13px;}
+  #secExport select.cond-in{width:auto; min-width:92px; padding:7px 8px; font-size:12px;}
+  #secExport tr.row-done td.c-thumb{box-shadow:inset 3px 0 0 var(--ok);}
+  .tag-done{background:rgba(74,222,128,.14); color:var(--ok); border:1px solid #2f6b4a;}
+  .rmbtn{background:transparent; color:var(--muted); padding:6px 9px; font-size:15px; border:1px solid var(--line); border-radius:8px;}
+  .rmbtn:hover{color:var(--err); border-color:var(--err);}
+  a.tlreset{color:var(--tera); text-decoration:none; font-weight:700;}
+
+  .grpbox{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:8px;}
+  .grpbox .gm{font-size:12px; color:var(--muted); margin-top:6px;}
+  .grpbox .gm b{color:var(--ink);}
+
+  .checks{list-style:none; display:flex; flex-direction:column; gap:6px; padding:0; margin:0 0 14px;}
+  .checks li{border-radius:10px; padding:9px 12px; font-size:13px; line-height:1.45; border:1px solid var(--line); background:var(--panel2);}
+  .checks li.ok{border-color:#2f6b4a; color:#bbf7d0;}
+  .checks li.warn{border-color:var(--dup-line); color:#fde68a;}
+  .checks li.err{border-color:var(--err); color:#fecaca; font-weight:600;}
+  .checks li a{color:var(--tera); font-weight:700; text-decoration:none; margin-left:6px; white-space:nowrap;}
+
+  .expgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media(max-width:720px){ .expgrid{grid-template-columns:1fr;} }
+  .expbtn{
+    text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+    border-radius:14px; padding:13px 14px; font-size:14px; line-height:1.35;
+  }
+  .expbtn small{display:block; font-weight:500; color:var(--muted); font-size:12px; margin-top:3px;}
+  .expbtn.primary{border-color:var(--tera); background:rgba(94,234,212,.08);}
+  .expbtn:hover{border-color:var(--tera);}
+  .expbtn.off{opacity:.45;}
+  .nextbox{display:none; margin-top:14px; border:1px solid var(--tera); border-radius:14px; padding:14px; background:rgba(94,234,212,.06); font-size:13px; line-height:1.6;}
+  .nextbox.show{display:block;}
+  .nextbox ol{margin:6px 0 10px 20px;}
+  .nextbox a.lnk, .linkbtn{
+    display:inline-block; color:#0b0f13; background:linear-gradient(135deg,var(--tera),var(--tera2));
+    font-weight:800; text-decoration:none; border-radius:10px; padding:9px 14px; margin:4px 6px 0 0; font-size:13px;
+  }
+  .tplstate{font-size:12px; color:var(--muted); margin-top:8px; line-height:1.6;}
+  .tplstate b{color:var(--ok);}
+  .tplstate a{color:var(--err); text-decoration:none; font-weight:700; margin-left:6px;}
+  .reptable td.hit{color:#fecaca; font-weight:700; background:rgba(248,113,113,.12);}
+  .reptable td.good{color:#bbf7d0;}
 </style>
 </head>
 <body>
@@ -270,10 +394,10 @@
 
   <div class="tabs">
     <div class="tab active" id="tabSuche" onclick="switchMainTab('suche')">Kartensuche</div>
-    <div class="tab" id="tabExport" onclick="switchMainTab('export')">eBay-Export</div>
+    <div class="tab" id="tabExport" onclick="switchMainTab('export')">eBay-Export<span class="tabcount" id="tabCount"></span></div>
   </div>
 
-  <!-- ================= TAB 1: KARTENSUCHE (unveraendert) ================= -->
+  <!-- ================= TAB 1: KARTENSUCHE ================= -->
   <section id="secSuche" class="tabsec active">
 
   <div class="banner">
@@ -296,6 +420,7 @@
 
   <div class="toolbar" id="toolbar">
     <span class="count" id="count"></span>
+    <button class="chip" onclick="korbAddShown()">＋ Alle angezeigten in den eBay-Korb</button>
     <button class="chip" onclick="copyLinks()">🔗 Alle Bild-Links kopieren</button>
   </div>
 
@@ -306,27 +431,140 @@
   <!-- ================= TAB 2: EBAY-EXPORT ================= -->
   <section id="secExport" class="tabsec">
 
+    <div class="xcard howto">
+      <h2>So kommen deine Karten zu eBay</h2>
+      <ol>
+        <li><b>Karten sammeln:</b> in der Kartensuche „＋ eBay-Korb“ antippen, eine Excel-Liste importieren oder die Erfassung übernehmen.</li>
+        <li><b>Preis, Zustand und Angebotsart</b> im Korb prüfen (Einzelangebot oder Variante in einem Sammelangebot).</li>
+        <li><b>eBay-Datei erzeugen</b> und bei eBay unter <i>Verkäufer-Cockpit Pro → Berichte → Hochladen</i> einreichen. Die Bilder stecken als Link in der Datei.</li>
+      </ol>
+    </div>
+
+    <!-- 1 · Korb -->
+    <div class="xcard">
+      <h2><span class="step">1</span> eBay-Korb füllen</h2>
+      <div class="xtoolbar">
+        <button class="chip" id="gotoSearch">🔎 Karten suchen</button>
+        <label class="chip" for="xlsxFile">📥 Excel importieren
+          <input type="file" id="xlsxFile" accept=".xlsx,.xls" style="display:none"></label>
+        <button class="chip" id="invImport">📦 Aus Erfassung übernehmen</button>
+        <button class="chip danger" id="korbClear">🗑 Korb leeren</button>
+      </div>
+      <div class="grid3x" style="margin-top:4px">
+        <div><label>Sprache beim Excel-Import</label>
+          <select id="globalLang">
+            <option>Deutsch</option><option>Englisch</option><option>Japanisch</option>
+            <option>Koreanisch</option><option>Chinesisch</option>
+          </select></div>
+        <div><label>Einzelangebot ab Preis (€) – darunter Variante</label>
+          <input type="text" id="priceThreshold" inputmode="decimal" value="4,00"></div>
+        <div style="align-self:end">
+          <button class="chip" id="applyThreshold" style="width:100%">Einzel/Variante nach Preisgrenze setzen</button>
+        </div>
+      </div>
+      <p class="hintline">Excel-Pflichtspalten: <code>Set-Code</code> · <code>Kartennummer</code> · <code>Anzahl</code>.
+        Optional: <code>Sprache</code>, <code>Name</code>, <code>Notiz</code> (masterball/pokeball), <code>Preis</code>.
+        Der Korb bleibt im Browser gespeichert, auch wenn du die Seite schließt.</p>
+      <div class="impstatus" id="importStatus"></div>
+    </div>
+
+    <!-- Fehlerliste -->
+    <div class="xcard" id="errorCard" style="display:none">
+      <h2>🔴 Nicht auflösbare Zeilen</h2>
+      <p class="hintline" style="margin:0 0 8px">Diese Zeilen konnten <b>nicht</b> gegen die Kartendaten aufgelöst werden
+        und sind <b>nicht</b> im Korb. Bitte Set-Code/Nummer prüfen.</p>
+      <ul class="errlist" id="errorList"></ul>
+    </div>
+
+    <!-- Korb-Tabelle -->
+    <div class="xcard" id="previewCard" style="display:none">
+      <h2><span class="step">2</span> Karten im Korb</h2>
+      <div class="stats" id="stats"></div>
+      <div class="xtoolbar">
+        <span class="xcount" id="rowCount"></span>
+        <button class="chip" id="allSingle">Alle → Einzelangebot</button>
+        <button class="chip" id="allVariant">Alle → Variante</button>
+        <button class="chip" id="dropDone" style="display:none">✓ Exportierte entfernen</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr>
+            <th></th><th>Titel (bearbeitbar)</th><th>Zustand</th><th>Anzahl</th><th>Preis (€)</th><th>Verkäufe prüfen</th><th>Angebotsart</th><th></th>
+          </tr></thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+      <p class="hintline">„Verkäufe prüfen“ öffnet die eBay-Suche (verkaufte Angebote) in einem neuen Tab.
+        Den Durchschnitt ins Feld „Ø €“ eintragen – der Preis wird dann als max(Mindestpreis, Ø × Aufschlag) berechnet.
+        Preis und Titel sind direkt editierbar.</p>
+    </div>
+
+    <!-- Varianten-Angebote -->
+    <div class="xcard" id="groupCard" style="display:none">
+      <h2>🧩 Varianten-Angebote (Sammelangebote)</h2>
+      <p class="hintline" style="margin:0 0 10px">Alle Karten mit Angebotsart „Variante“ werden je Set, Sprache und Zustand
+        zu <b>einem</b> eBay-Angebot gebündelt. Käufer wählen die Karte im Auswahlfeld; jede Karte hat eigenen Preis,
+        eigene Stückzahl und eigenes Bild.</p>
+      <div id="groupList"></div>
+    </div>
+
     <!-- Einstellungen -->
     <details class="xcard" id="settingsCard">
       <summary>⚙️ Angebots-Einstellungen (einmalig, werden gemerkt)</summary>
       <div style="margin-top:12px">
+        <div class="subhead">Standort &amp; Zustand</div>
         <div class="grid3x">
-          <div><label>Standort (Location)</label>
+          <div><label>Artikelstandort (Ort, Pflicht für fertige Angebote)</label>
             <input type="text" id="setLocation" placeholder="z. B. 12345 Musterstadt"></div>
-          <div><label>Bearbeitungszeit (DispatchTimeMax, Werktage)</label>
-            <input type="number" id="setDispatch" min="0" step="1" placeholder="z. B. 2"></div>
-          <div><label>Versandart (ShippingService-1:Option)</label>
-            <input type="text" id="setShipService" placeholder="z. B. DE_DeutschePostBriefNational"></div>
-          <div><label>Versandkosten (ShippingService-1:Cost, €)</label>
-            <input type="text" id="setShipCost" inputmode="decimal" placeholder="z. B. 1,80"></div>
+          <div><label>Standard-Zustand neuer Karten</label>
+            <select id="setCond"></select></div>
           <div><label>Rücknahme</label>
             <select id="setReturns">
               <option value="no">Keine Rücknahme</option>
               <option value="yes">Rücknahme akzeptiert (30 Tage)</option>
             </select></div>
         </div>
-        <p class="hintline">Diese Werte gelten für die <b>Varianten-Angebote</b> (Export B). Einzel-Entwürfe (Export A)
-          sind reine Drafts – dort ergänzt du Versand/Standort später direkt in eBay.</p>
+
+        <div class="subhead">Versand <small>– entweder diese Felder …</small></div>
+        <div class="grid3x">
+          <div><label>Versandart (eBay-Code)</label>
+            <input type="text" id="setShipService" list="shipCodes" placeholder="z. B. DE_DeutschePostBrief">
+            <datalist id="shipCodes">
+              <option value="DE_DeutschePostBrief">Deutsche Post Brief</option>
+              <option value="DE_DHLPaket">DHL Paket</option>
+              <option value="DE_HermesPaket">Hermes Paket</option>
+              <option value="DE_SonstigeDomestic">Sonstige (Inland)</option>
+            </datalist></div>
+          <div><label>Versandkosten (€)</label>
+            <input type="text" id="setShipCost" inputmode="decimal" placeholder="z. B. 1,80"></div>
+          <div><label>Bearbeitungszeit (Werktage)</label>
+            <input type="number" id="setDispatch" min="0" step="1" placeholder="z. B. 2"></div>
+        </div>
+
+        <div class="subhead">… oder eBay-Rahmenbedingungen <small>– empfohlen, wenn du sie bei eBay angelegt hast</small></div>
+        <div class="grid3x">
+          <div><label>Name der Versand-Bedingung</label>
+            <input type="text" id="setShipProfile" placeholder="exakt wie bei eBay benannt"></div>
+          <div><label>Name der Rücknahme-Bedingung</label>
+            <input type="text" id="setReturnProfile" placeholder="exakt wie bei eBay benannt"></div>
+          <div><label>Name der Zahlungs-Bedingung</label>
+            <input type="text" id="setPayProfile" placeholder="exakt wie bei eBay benannt"></div>
+        </div>
+        <p class="hintline">Sind alle drei Namen eingetragen, nutzt die Datei deine Rahmenbedingungen und die Versandfelder
+          darüber werden ignoriert. Die Namen findest du bei eBay unter <i>Konto → Rahmenbedingungen</i>.</p>
+
+        <div class="subhead">Titel &amp; Beschreibung</div>
+        <div class="grid2x">
+          <div><label>Titel-Muster (max. 80 Zeichen je Titel)</label>
+            <input type="text" id="setTitlePattern"></div>
+          <div><label>Bausteine</label>
+            <p class="hintline" style="margin-top:8px"><code>{name}</code> <code>{nrvoll}</code> <code>{nr}</code> <code>{total}</code>
+              <code>{set}</code> <code>{code}</code> <code>{rar}</code> <code>{sprache}</code> <code>{zustand}</code></p></div>
+        </div>
+        <div style="margin-top:10px"><label>Zusatztext für jede Beschreibung (optional, z. B. Versandhinweis)</label>
+          <textarea id="setDescExtra" placeholder="z. B. Versand im Toploader und Luftpolsterumschlag. Privatverkauf, keine Gewährleistung."></textarea></div>
+        <p class="hintline">Einzel-<b>Entwürfe</b> brauchen nur Titel, Preis und Bild – Versand und Zustand ergänzt du dann in eBay.
+          <b>Fertige Angebote</b> und <b>Varianten-Angebote</b> brauchen Standort und Versand.</p>
       </div>
     </details>
 
@@ -355,76 +593,68 @@
       </div>
     </details>
 
-    <!-- Import -->
-    <div class="xcard">
-      <h2><span class="step">1</span> Excel importieren</h2>
-      <label class="filebtn" for="xlsxFile">📥 Excel-Datei auswählen …
-        <input type="file" id="xlsxFile" accept=".xlsx,.xls" style="display:none"></label>
-      <div class="grid3x" style="margin-top:12px">
-        <div><label>Sprache (gilt für den ganzen Import)</label>
-          <select id="globalLang">
-            <option>Deutsch</option><option>Englisch</option><option>Japanisch</option>
-            <option>Koreanisch</option><option>Chinesisch</option>
-          </select></div>
-        <div><label>Preisgrenze Einzelangebot ab (€)</label>
-          <input type="text" id="priceThreshold" inputmode="decimal" value="4,00"></div>
-        <div style="align-self:end">
-          <button class="chip" id="applyThreshold" style="width:100%">Einzel/Variante nach Preisgrenze vorbelegen</button>
+    <!-- Dateiformat -->
+    <details class="xcard" id="formatCard">
+      <summary>🧰 Dateiformat &amp; eigene eBay-Vorlage (nur falls eBay die Datei ablehnt)</summary>
+      <div style="margin-top:12px">
+        <div class="grid3x">
+          <div><label>Dateityp</label>
+            <select id="fmtFile">
+              <option value="csv">CSV (Standard)</option>
+              <option value="xlsx">Excel .xlsx</option>
+            </select></div>
+          <div><label>CSV-Trennzeichen</label>
+            <select id="fmtDelim">
+              <option value=";">Semikolon ; (eBay Deutschland)</option>
+              <option value=",">Komma ,</option>
+            </select></div>
+          <div><label>Dezimaltrennzeichen bei Preisen</label>
+            <select id="fmtDecimal">
+              <option value=".">Punkt (1.50)</option>
+              <option value=",">Komma (1,50)</option>
+            </select></div>
+          <div><label>Name des Auswahlfelds bei Varianten</label>
+            <input type="text" id="fmtVarName" placeholder="Karte"></div>
+          <div><label>Bild je Variante</label>
+            <select id="fmtVarPic">
+              <option value="valueurl">Wert=Bild-Link (Standard)</option>
+              <option value="url">nur Bild-Link</option>
+              <option value="none">keine Bilder je Variante</option>
+            </select></div>
         </div>
+        <div class="subhead">Eigene eBay-Vorlage verwenden <small>– optional</small></div>
+        <p class="hintline" style="margin:0 0 10px">Lade bei eBay unter <i>Berichte → Hochladen → Vorlage abrufen</i> die Vorlage
+          „Neue Angebotsvorlage erstellen“ (Kategorie 183454) bzw. „Entwurfsvorlage erstellen“ herunter und wähle sie hier aus.
+          Die App übernimmt dann exakt deren Kopfzeilen und Trennzeichen – so passt die Datei auch, wenn eBay das Format ändert.</p>
+        <label class="chip" for="tplFile">📄 eBay-Vorlage auswählen …
+          <input type="file" id="tplFile" accept=".csv,.xlsx,.xls" style="display:none"></label>
+        <div class="tplstate" id="tplState"></div>
       </div>
-      <p class="hintline">Pflichtspalten: <code>Set-Code</code> · <code>Kartennummer</code> · <code>Anzahl</code> —
-        die Kopfzeile wird automatisch in den ersten 10 Zeilen aller Tabellenblätter gesucht.
-        Optional: <code>Sprache</code>, <code>Name</code>, <code>Notiz</code> (masterball/pokeball),
-        <code>Preis</code> (überschreibt als manueller Preis die Regel-Preise).</p>
-      <div class="impstatus" id="importStatus"></div>
-    </div>
+    </details>
 
-    <!-- Fehlerliste -->
-    <div class="xcard" id="errorCard" style="display:none">
-      <h2>🔴 Nicht auflösbare Zeilen</h2>
-      <p class="hintline" style="margin:0 0 8px">Diese Zeilen konnten <b>nicht</b> gegen die Kartendaten aufgelöst werden
-        und sind <b>nicht</b> in den Exporten enthalten. Bitte Set-Code/Nummer prüfen.</p>
-      <ul class="errlist" id="errorList"></ul>
-    </div>
-
-    <!-- Vorschau -->
-    <div class="xcard" id="previewCard" style="display:none">
-      <h2><span class="step">2</span> Vorschau &amp; Preise</h2>
-      <div class="stats" id="stats"></div>
-      <div class="xtoolbar">
-        <span class="xcount" id="rowCount"></span>
-        <button class="chip" id="allSingle">Alle → Einzelangebot</button>
-        <button class="chip" id="allVariant">Alle → Variante</button>
-      </div>
-      <div class="tablewrap">
-        <table>
-          <thead><tr>
-            <th></th><th>Titel</th><th>Anzahl</th><th>Preis (€)</th><th>Verkäufe prüfen</th><th>Angebotsart</th>
-          </tr></thead>
-          <tbody id="previewBody"></tbody>
-        </table>
-      </div>
-      <p class="hintline">„Verkäufe prüfen“ öffnet die eBay-Suche (Verkaufte&nbsp;+&nbsp;Beendete Angebote) in einem neuen Tab.
-        Den dort abgelesenen Durchschnitt ins Feld „Ø €“ eintragen – der Preis wird dann automatisch als
-        max(Mindestpreis, Ø × Aufschlag) berechnet. Preisfeld ist direkt editierbar (→ „Manuell“).</p>
-    </div>
-
-    <!-- Export -->
+    <!-- 3 · Pruefen & Export -->
     <div class="xcard" id="exportCard" style="display:none">
-      <h2><span class="step">3</span> CSV-Export</h2>
-      <div class="xtoolbar">
-        <button class="go" id="exportA">⬇️ Export A · Einzel-Entwürfe (ebay-entwuerfe.csv)</button>
-        <button class="go" id="exportB">⬇️ Export B · Varianten-Angebote (ebay-varianten.csv)</button>
+      <h2><span class="step">3</span> Prüfen &amp; eBay-Datei erzeugen</h2>
+      <ul class="checks" id="checkList"></ul>
+      <div class="expgrid">
+        <button class="expbtn primary" id="expDraft">📝 Einzelkarten als <b>eBay-Entwürfe</b>
+          <small id="expDraftSub"></small></button>
+        <button class="expbtn" id="expSingle">🚀 Einzelkarten als <b>fertige Angebote</b>
+          <small id="expSingleSub"></small></button>
+        <button class="expbtn" id="expVariant">🧩 <b>Varianten-Angebote</b> mit Bildern
+          <small id="expVariantSub"></small></button>
+        <button class="expbtn" id="expAll">📦 <b>Alles in einer Datei</b>
+          <small id="expAllSub"></small></button>
       </div>
       <div class="exporthint" id="exportHint"></div>
-      <p class="hintline">Semikolon-getrennt · UTF-8 mit BOM · Zeilenenden CRLF. Leere Gruppen erzeugen keine Datei.</p>
+      <div class="nextbox" id="nextBox"></div>
     </div>
 
     <!-- Titelbild -->
     <div class="xcard" id="titleImgCard" style="display:none">
-      <h2><span class="step">4</span> Titelbild-Generator (für Varianten-Angebote)</h2>
+      <h2>🖼 Titelbild-Generator (für Varianten-Angebote)</h2>
       <p class="hintline" style="margin:0 0 10px">Pro Set ein einheitliches Titelbild (1600×1600 PNG).
-        <b>Nach dem CSV-Upload manuell als erstes Foto ins Angebot laden.</b></p>
+        <b>Nach dem Hochladen der Datei in eBay als erstes Foto ins Angebot laden.</b></p>
       <div class="tb-controls">
         <select id="tbSetSel"></select>
         <button class="chip" id="tbDownload">⬇️ Titelbild als PNG</button>
@@ -435,8 +665,63 @@
       <div class="tb-pick" id="tbPick"></div>
     </div>
 
+    <!-- Ergebnisbericht -->
+    <details class="xcard" id="reportCard">
+      <summary>🩺 eBay-Ergebnisbericht prüfen (wenn ein Upload Fehler meldet)</summary>
+      <div style="margin-top:12px">
+        <p class="hintline" style="margin:0 0 10px">Nach jedem Upload stellt eBay unter <i>Berichte → Hochladen</i> einen
+          Ergebnisbericht zum Herunterladen bereit. Wähle ihn hier aus – die App zeigt, welche Zeilen eBay abgelehnt hat und warum.</p>
+        <label class="chip" for="repFile">📑 Ergebnisbericht auswählen …
+          <input type="file" id="repFile" accept=".csv,.xlsx,.xls,.txt" style="display:none"></label>
+        <button class="chip" id="repCopy" style="display:none">📋 Fehlermeldungen kopieren</button>
+        <div class="tplstate" id="repState"></div>
+        <div class="tablewrap" id="repWrap" style="display:none; margin-top:10px"><table class="reptable"><tbody id="repBody"></tbody></table></div>
+      </div>
+    </details>
+
   </section><!-- /secExport -->
 </div>
+
+<!-- Korb-Leiste (Kartensuche) -->
+<div class="korbbar" id="korbBar">
+  <div class="in">
+    <div class="txt"><span id="korbTxt"></span><small id="korbSub"></small></div>
+    <button class="go" onclick="switchMainTab('export')">Zum eBay-Export →</button>
+  </div>
+</div>
+
+<!-- Sofort-Datei-Dialog -->
+<div class="qm-back" id="qmBack">
+  <div class="qm">
+    <div class="qm-head"><b>⚡ eBay-Datei für eine Karte</b><button class="qm-x" id="qmClose" title="Schließen">✕</button></div>
+    <div class="qm-body">
+      <div class="qm-img"><img id="qmImg" alt=""></div>
+      <div class="qm-fields">
+        <label>Titel <span id="qmLen"></span></label>
+        <input type="text" id="qmTitle" maxlength="80">
+        <div class="qm-grid">
+          <div><label>Preis (€)</label><input type="text" id="qmPrice" inputmode="decimal"></div>
+          <div><label>Anzahl</label><input type="number" id="qmQty" min="1" step="1" value="1"></div>
+          <div><label>Zustand</label><select id="qmCond"></select></div>
+        </div>
+        <label>Art der Datei</label>
+        <div class="qm-kind">
+          <label id="qmKindDraftL"><input type="radio" name="qmKind" value="draft" checked>Entwurf
+            <small>Landet bei eBay unter „Entwürfe“. Versand &amp; Zustand dort ergänzen, dann einstellen.</small></label>
+          <label id="qmKindLiveL"><input type="radio" name="qmKind" value="live">Fertiges Angebot
+            <small>Geht nach dem Hochladen sofort online. Braucht Standort &amp; Versand in den Einstellungen.</small></label>
+        </div>
+        <div class="qm-note" id="qmNote"></div>
+      </div>
+    </div>
+    <div class="qm-foot">
+      <a class="soldlink" id="qmSold" target="_blank" rel="noopener" style="margin-right:auto">Verkäufe prüfen ↗</a>
+      <button class="chip" id="qmKorb">＋ Nur in den Korb</button>
+      <button class="go" id="qmGo">⬇ eBay-Datei herunterladen</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">Links kopiert ✓</div>
 <div class="toast2" id="exToast"></div>
 
@@ -446,6 +731,7 @@
 
 let CUR = SETS[0];
 const foundUrls = new Map();
+let shownNums = [];
 
 function init(){
   const langSel = document.getElementById("langSel");
@@ -504,6 +790,7 @@ function clearOut(){
   document.getElementById("out").innerHTML="";
   document.getElementById("toolbar").style.display="none";
   foundUrls.clear();
+  shownNums = [];
 }
 
 function run(){
@@ -535,6 +822,7 @@ function showAll(){ render(CUR.cards.map(c=>c[0])); }
 
 function render(nums){
   clearOut();
+  shownNums = nums.slice();
   const out = document.getElementById("out");
   nums.forEach(n=>out.appendChild(cardEl(n)));
   document.getElementById("toolbar").style.display="flex";
@@ -558,26 +846,55 @@ function cardEl(n){
       <div class="num">Nr. ${pad(n)}/${CUR.total} · ${CUR.code}</div>
       <div class="status">Lade…</div>
       <a class="open" href="#" target="_blank" rel="noopener" style="display:none">In neuem Tab öffnen</a>
+      <div class="ebx"></div>
     </div>`;
   const img=el.querySelector("img"), status=el.querySelector(".status"), open=el.querySelector("a.open");
+  const set=CUR;
   let i=0;
   img.onload=()=>{
     status.textContent="✓ lange antippen zum Speichern";
     open.href=img.src; open.style.display="inline-block";
-    foundUrls.set(CUR.code+"-"+n, img.src);
+    foundUrls.set(set.code+"-"+n, img.src);
+    const r = korbFind(set, n); if (r && !r.resolvedUrl) r.resolvedUrl = img.src;
   };
   img.onerror=()=>{
     i++;
     if(i<urls.length){ img.src=urls[i]; }
     else{
       status.innerHTML='<span class="fail">Bild nicht gefunden/blockiert.</span>';
-      open.href=CUR.page; open.textContent="Galerie öffnen"; open.style.display="inline-block";
+      open.href=set.page; open.textContent="Galerie öffnen"; open.style.display="inline-block";
       el.querySelector(".imgbox").style.display="none";
     }
   };
   img.src=urls[0];
+  if (e){ el._ebx = { set, n }; paintEbx(el); }
   return el;
 }
+
+/* eBay-Knöpfe auf der Kartenkachel: Korb (mit Stückzahl) + Sofort-Datei */
+function mkBtn(txt, cls, fn, title){
+  const b=document.createElement("button"); b.type="button"; b.className=cls; b.textContent=txt;
+  if (title) b.title=title;
+  b.addEventListener("click", fn); return b;
+}
+function paintEbx(el){
+  const box = el.querySelector(".ebx"); if (!box || !el._ebx) return;
+  const { set, n } = el._ebx;
+  const r = korbFind(set, n);
+  el.classList.toggle("inkorb", !!r);
+  box.innerHTML = "";
+  if (r){
+    const lab=document.createElement("span"); lab.className="ebx-in"; lab.textContent="✓ im Korb: "+r.qty;
+    box.append(
+      mkBtn("−","ebx-step",()=>{ korbChangeQty(r,-1); }, "Eine weniger / entfernen"),
+      lab,
+      mkBtn("+","ebx-step",()=>{ korbChangeQty(r,1); }, "Eine mehr"));
+  } else {
+    box.append(mkBtn("＋ eBay-Korb","ebx-add",()=>{ korbAdd(set, n, 1); }, "Karte für den eBay-Export vormerken"));
+  }
+  box.append(mkBtn("⚡ eBay-Datei","ebx-quick",()=>openQuick(set, n), "Sofort eine eBay-Datei nur für diese Karte erzeugen"));
+}
+function repaintTiles(){ document.querySelectorAll("#out .card").forEach(el=>{ if (el._ebx) paintEbx(el); }); }
 
 function copyLinks(){
   const links=[...foundUrls.values()].join("\n");
@@ -589,17 +906,17 @@ function copyLinks(){
 }
 
 document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
-init();
 
 /* =====================================================================
-   ============ TAB "EBAY-EXPORT" ======================================
-   Integriert aus ebay-export.html. Liest ein Excel-Inventar
-   (Set-Code | Kartennummer | Anzahl, optional Sprache/Name/Notiz/Preis),
-   gleicht es gegen sets-data.js ab, belegt Preise über ein Regel-System
-   vor und erzeugt zwei eBay-File-Exchange-CSVs.
+   ============ EBAY-EXPORT (V7) =======================================
+   Karten kommen aus drei Quellen in den "eBay-Korb" (exRows):
+     • Kartensuche (Knopf auf der Kachel)   • Excel-Import   • Erfassung
+   Daraus entstehen eBay-Upload-Dateien für Verkäufer-Cockpit Pro →
+   Berichte → Hochladen:
+     • Entwürfe (Draft-Vorlage)        – nur Titel/Preis/Bild
+     • fertige Einzelangebote (Add)    – inkl. Zustand, Standort, Versand
+     • Varianten-Angebote (Add + Variation-Zeilen), Bild je Variante
    Kein Server, kein Build – SheetJS liegt lokal in vendor/.
-   Alle Funktionen/Variablen sind so benannt, dass sie den bestehenden
-   Kartensuche-Code nicht berühren.
    ===================================================================== */
 
 /* ---------- Tab-Umschaltung ---------- */
@@ -610,29 +927,65 @@ function switchMainTab(which){
   document.getElementById("secSuche").classList.toggle("active", s);
   document.getElementById("secExport").classList.toggle("active", !s);
   document.querySelector(".wrap").classList.toggle("wide", !s);
+  if (s) repaintTiles();
+  updateKorbUi();
+  window.scrollTo(0,0);
 }
 
 /* ---------- Konstanten ---------- */
 const EX_SETTINGS_KEY = "ebayExport.settings.v1";
 const EX_RULES_KEY    = "ebayExport.priceRules.v1";
+const EX_ROWS_KEY     = "ebayExport.rows.v2";
+const EX_GTITLE_KEY   = "ebayExport.groupTitles.v1";
+const EX_TPL_KEY      = "ebayExport.templates.v1";
+const INV_KEY         = "kartenErfassung.v1";      // Inventar aus erfassung.html
 const CATEGORY_ID     = "183454";      // eBay-Kategorie „Sammelkartenspiele – Einzelkarten“
 const SHEETJS_CDN     = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
-const FILE_A          = "ebay-entwuerfe.csv";
-const FILE_B          = "ebay-varianten.csv";
+const VAR_MAX         = 250;           // eBay-Obergrenze Varianten je Angebot
+const PIC_MAX         = 24;            // eBay-Obergrenze Bilder je Angebot
+const EBAY_UPLOAD_URL = "https://www.ebay.de/sh/reports/uploads";
+const EBAY_DRAFTS_URL = "https://www.ebay.de/sh/lst/drafts";
 
-/* Export A – exakter Header (Einzel-Entwürfe / Draft) */
+/* Zustand ungradeter Einzelkarten: eBay verlangt ConditionID 4000 UND den
+   Zustands-Deskriptor 40001. Werte für Kategorie 183454 laut eBay-Entwicklerdoku. */
+const CONDS = [
+  { k:"NM", id:"400010", de:"Near Mint oder besser",        short:"NM" },
+  { k:"LP", id:"400015", de:"Lightly Played (Excellent)",   short:"EX" },
+  { k:"MP", id:"400016", de:"Moderately Played (Very Good)",short:"GD" },
+  { k:"HP", id:"400017", de:"Heavily Played (Poor)",        short:"PL" }
+];
+function condOf(k){ return CONDS.find(c=>c.k===k) || CONDS[0]; }
+const RAR_SHORT = { AR:"AR", SAR:"SAR", UR:"UR" };                       // Titel-Kürzel
+const RAR_SPEC  = { AR:"Illustration Rare", SAR:"Special Illustration Rare" }; // Artikelmerkmal
+
+/* Entwurfs-Vorlage (Draft) – 11 feste Spalten */
 const HEADER_A =
   "Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);Custom label (SKU);Category ID;Title;UPC;Price;Quantity;Item photo URL;Condition ID;Description;Format";
+const DRAFT_KEYS = ["action","customlabel(sku)","categoryid","title","upc","price","quantity","itemphotourl","conditionid","description","format"];
 
-/* Export B – exakter Header (Varianten-Angebote, eBay File Exchange). */
+/* Angebots-Vorlage (Kategorie 183454, eBay Deutschland) */
 const HEADER_B =
   "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8);CustomLabel;*Category;StoreCategory;*Title;Subtitle;Relationship;RelationshipDetails;ScheduleTime;*ConditionID;VAT%;CD:Bewertungsexperte - (ID: 27501);CD:Bewertung - (ID: 27502);CDA:Zertifikationsnummer - (ID: 27503);CD:Kartenzustand - (ID: 40001);*C:Spiel;C:Kartenname;C:Charakter;C:Kartentyp;C:Altersempfehlung;C:Seltenheit;C:Hersteller;C:Edition;C:Besonderheiten;C:Oberflächeneffekt;C:Kreaturen-/Monstertyp;C:Typ/MTG: Farbe;C:Mit Autogramm;C:Kartennummer;C:Spezialkarte;C:Sprache;C:Entwicklungsstufe;C:Herstellungsjahr;C:Kartengröße;C:Ursprungsland;C:Signiert von;C:Material;C:Vintage;C:Convention/Event;C:Autogramm-Authentifizierung;C:Zeichner;C:Angriffskosten/Manakosten;C:Angriffsschaden/Stärke;C:Verteidigungs-Wert/Widerstandskraft;C:Autogrammart;C:Autogramm-Authentifizierungsnummer;C:KP;C:Maßgefertigt;PicURL;GalleryType;VideoID;*Description;*Format;*Duration;*StartPrice;BuyItNowPrice;BestOfferEnabled;BestOfferAutoAcceptPrice;MinimumBestOfferPrice;*Quantity;ImmediatePayRequired;*Location;ShippingType;ShippingService-1:Option;ShippingService-1:Cost;ShippingService-2:Option;ShippingService-2:Cost;*DispatchTimeMax;PromotionalShippingDiscount;ShippingDiscountProfileID;DomesticRateTable;*ReturnsAcceptedOption;ReturnsWithinOption;RefundOption;ShippingCostPaidByOption;AdditionalDetails;ProductCompliancePolicyID;Regional ProductCompliancePolicies;Product Safety Pictograms;Product Safety Statements;Product Safety Component;Regulatory Document Ids;Manufacturer Name;Manufacturer AddressLine1;Manufacturer AddressLine2;Manufacturer City;Manufacturer Country;Manufacturer PostalCode;Manufacturer StateOrProvince;Manufacturer Phone;Manufacturer Email;Manufacturer ContactURL;Responsible Person 1;Responsible Person 1 Type;Responsible Person 1 AddressLine1;Responsible Person 1 AddressLine2;Responsible Person 1 City;Responsible Person 1 Country;Responsible Person 1 PostalCode;Responsible Person 1 StateOrProvince;Responsible Person 1 Phone;Responsible Person 1 Email;Responsible Person 1 ContactURL";
 const COLS_B = HEADER_B.split(";");
+/* Spalten, die bei Bedarf hinten angefügt werden (Anzeigename je Schlüssel) */
+const EXTRA_COLS = {
+  "c:set":"C:Set", "c:spiel":"*C:Spiel", "c:kartenname":"C:Kartenname", "c:kartennummer":"C:Kartennummer",
+  "c:sprache":"C:Sprache", "c:seltenheit":"C:Seltenheit",
+  "shippingprofilename":"ShippingProfileName", "returnprofilename":"ReturnProfileName", "paymentprofilename":"PaymentProfileName",
+  "customlabel":"CustomLabel", "category":"*Category", "title":"*Title", "relationship":"Relationship",
+  "relationshipdetails":"RelationshipDetails", "conditionid":"*ConditionID", "cd40001":"CD:Kartenzustand - (ID: 40001)",
+  "picurl":"PicURL", "description":"*Description", "format":"*Format", "duration":"*Duration",
+  "startprice":"*StartPrice", "quantity":"*Quantity", "location":"*Location", "shippingtype":"ShippingType",
+  "shippingservice-1:option":"ShippingService-1:Option", "shippingservice-1:cost":"ShippingService-1:Cost",
+  "dispatchtimemax":"*DispatchTimeMax", "returnsacceptedoption":"*ReturnsAcceptedOption",
+  "returnswithinoption":"ReturnsWithinOption", "refundoption":"RefundOption", "shippingcostpaidbyoption":"ShippingCostPaidByOption"
+};
 
 /* ---------- Zustand ---------- */
-let exRows = [];       // aufgelöste Zeilen (Vorschau/Export)
-let exErrs = [];       // nicht auflösbare Zeilen
-let lastDet = null;    // letztes Header-Erkennungsergebnis (für Re-Match bei Sprachwechsel)
+let exRows = [];       // der eBay-Korb
+let exErrs = [];       // nicht auflösbare Excel-Zeilen
+let lastDet = null;    // letztes Excel-Erkennungsergebnis (Re-Match bei Sprachwechsel)
+let rowSeq = 1;
 
 /* ---------- Hilfsfunktionen ---------- */
 function byId(id){ return document.getElementById(id); }
@@ -641,7 +994,7 @@ function toastX(msg, isErr){
   const t = byId("exToast");
   t.textContent = msg; t.classList.toggle("err", !!isErr);
   t.classList.add("show"); clearTimeout(exToastTimer);
-  exToastTimer = setTimeout(()=>t.classList.remove("show"), 2600);
+  exToastTimer = setTimeout(()=>t.classList.remove("show"), isErr ? 4200 : 2600);
 }
 function esc(s){
   return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -654,10 +1007,14 @@ function parsePrice(v){
   return isNaN(n)?null:n;
 }
 function priceComma(n){ return n==null?"":(+n).toFixed(2).replace(".",","); }  // Anzeige
-function priceDot(n){ return n==null?"":(+n).toFixed(2); }                     // CSV
-function csvEsc(v){
+function priceOut(n){                                                           // Datei
+  if (n==null) return "";
+  const t=(+n).toFixed(2);
+  return S().decimal==="," ? t.replace(".",",") : t;
+}
+function csvEsc(v, delim){
   v = (v==null)?"":String(v);
-  if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  if (v.indexOf('"')>=0 || v.indexOf(delim)>=0 || /[\n\r]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
   return v;
 }
 function downloadFile(filename, content, mime){
@@ -667,12 +1024,16 @@ function downloadFile(filename, content, mime){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
-function capTitle(t){ t=t.replace(/\s+/g," ").trim(); return t.length>80 ? t.slice(0,80).trim() : t; }
+function capTitle(t){ t=String(t||"").replace(/\s+/g," ").trim(); return t.length>80 ? t.slice(0,80).trim() : t; }
 function ballOf(note){
   const s = String(note||"").toLowerCase();
   if (s.includes("masterball") || s.includes("master ball") || s.includes("master-ball")) return "Master Ball";
   if (s.includes("pokeball") || s.includes("poke ball") || s.includes("poké ball") || s.includes("poke-ball")) return "Poke Ball";
   return "";
+}
+function stamp(){
+  const d=new Date(), p=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
 }
 
 /* ---------- Bild-Auflösung (set-bezogen; Suchtab nutzt weiter CUR) ---------- */
@@ -699,7 +1060,7 @@ function imgCandidatesFor(set, n){
 }
 /* Set-Suche: case-insensitiv, bevorzugt gewählte Sprache; sonst erste Fundstelle. */
 function findSetByCode(code, lang){
-  const c = code.trim().toLowerCase();
+  const c = String(code).trim().toLowerCase();
   let s = SETS.find(x => x.code.toLowerCase()===c && x.lang===lang);
   if (s) return { set:s, langMismatch:false };
   s = SETS.find(x => x.code.toLowerCase()===c);
@@ -712,31 +1073,228 @@ function loadThumb(box, urls, row){
   let i=0;
   img.onload = ()=>{ row.resolvedUrl = img.src; };
   img.onerror = ()=>{ i++; if(i<urls.length) img.src=urls[i]; else box.innerHTML='<span class="ph">kein Bild</span>'; };
-  img.src=urls[0];
+  img.src = row.resolvedUrl || urls[0];
   box.appendChild(img);
 }
-function exportUrl(o){ return o.resolvedUrl || (o.urls && o.urls[0]) || ""; }
+function exportUrl(o){ return encodeURI(o.resolvedUrl || (o.urls && o.urls[0]) || "").replace(/%25/g,"%"); }
 
 /* ---------- Einstellungen (localStorage) ---------- */
+const SETTING_IDS = {
+  location:"setLocation", dispatch:"setDispatch", shipService:"setShipService", shipCost:"setShipCost",
+  returns:"setReturns", threshold:"priceThreshold",
+  shipProfile:"setShipProfile", returnProfile:"setReturnProfile", payProfile:"setPayProfile",
+  cond:"setCond", titlePattern:"setTitlePattern", descExtra:"setDescExtra",
+  fileFormat:"fmtFile", delim:"fmtDelim", decimal:"fmtDecimal", varName:"fmtVarName", varPic:"fmtVarPic"
+};
+const SETTING_DEFAULTS = {
+  returns:"no", threshold:"4,00", cond:"NM",
+  titlePattern:"Pokemon {name} {nrvoll} {set} {rar} {sprache}",
+  fileFormat:"csv", delim:";", decimal:".", varName:"Karte", varPic:"valueurl"
+};
+function S(){
+  const s={};
+  for (const k in SETTING_IDS){
+    const el=byId(SETTING_IDS[k]);
+    let v = el ? String(el.value).trim() : "";
+    if (!v && SETTING_DEFAULTS[k] && k!=="threshold") v = SETTING_DEFAULTS[k];
+    s[k]=v;
+  }
+  return s;
+}
 function loadExSettings(){
-  let s={}; try{ s=JSON.parse(localStorage.getItem(EX_SETTINGS_KEY))||{}; }catch(e){}
-  byId("setLocation").value    = s.location    || "";
-  byId("setDispatch").value    = s.dispatch    || "";
-  byId("setShipService").value = s.shipService || "";
-  byId("setShipCost").value    = s.shipCost    || "";
-  byId("setReturns").value     = s.returns     || "no";
-  if (s.threshold) byId("priceThreshold").value = s.threshold;
+  let st={}; try{ st=JSON.parse(localStorage.getItem(EX_SETTINGS_KEY))||{}; }catch(e){}
+  for (const k in SETTING_IDS){
+    const el=byId(SETTING_IDS[k]); if (!el) continue;
+    el.value = (st[k]!=null && st[k]!=="") ? st[k] : (SETTING_DEFAULTS[k]||"");
+  }
 }
 function saveExSettings(){
-  const s = {
-    location:    byId("setLocation").value.trim(),
-    dispatch:    byId("setDispatch").value.trim(),
-    shipService: byId("setShipService").value.trim(),
-    shipCost:    byId("setShipCost").value.trim(),
-    returns:     byId("setReturns").value,
-    threshold:   byId("priceThreshold").value.trim()
-  };
+  const s={}; for (const k in SETTING_IDS){ const el=byId(SETTING_IDS[k]); if (el) s[k]=String(el.value).trim(); }
   try{ localStorage.setItem(EX_SETTINGS_KEY, JSON.stringify(s)); }catch(e){}
+}
+
+/* =====================================================================
+   ZEILENMODELL + KORB
+   ===================================================================== */
+function defaultMode(o){
+  const th = parsePrice(byId("priceThreshold").value);
+  const t = th==null ? 4 : th;
+  return (o.price!=null && o.price>=t) ? "single" : "variant";
+}
+function makeRow(set, n, opt){
+  opt = opt||{};
+  const e = findCardIn(set, n);
+  const lang = opt.lang || set.lang;
+  const shown = n>1000 ? n-1000 : n;       // Alt-Schlüssel >1000 = Kollisions-Ausweichnummer
+  const row = {
+    id: rowSeq++, src: opt.src||"korb", set, setCode:set.code, setName:set.name,
+    lang, langMismatch: lang!==set.lang,
+    num:n, num3: pad(shown), qty: Math.max(1, parseInt(opt.qty,10)||1),
+    note: opt.note||"", ball: ballOf(opt.note), nameXls: opt.nameXls||"",
+    cardName: (opt.nameXls || (e&&e[1]) || ("Nr. "+pad(shown))).replace(/-/g," "),
+    rarity: (e&&e[3]) || "",
+    cond: CONDS.some(c=>c.k===opt.cond) ? opt.cond : S().cond,
+    titleManual: opt.titleManual || null,
+    priceManual: opt.priceManual!=null ? opt.priceManual : null,
+    priceMode: opt.priceMode || (opt.priceManual!=null ? "manual" : "auto"),
+    salesAvg: opt.salesAvg!=null ? opt.salesAvg : null,
+    price:null, priceSource:"rule",
+    mode: opt.mode || null, exported: !!opt.exported, xlsRow: opt.xlsRow||null,
+    urls: imgCandidatesFor(set, n), resolvedUrl: opt.resolvedUrl||null
+  };
+  computePrice(row);
+  if (row.mode!=="single" && row.mode!=="variant") row.mode = defaultMode(row);
+  return row;
+}
+function saveRows(){
+  try{
+    localStorage.setItem(EX_ROWS_KEY, JSON.stringify(exRows.map(o=>({
+      c:o.setCode, sl:o.set.lang, l:o.lang, n:o.num, q:o.qty, nt:o.note, nm:o.nameXls, cd:o.cond,
+      tm:o.titleManual, pm:o.priceManual, pmo:o.priceMode, sa:o.salesAvg, m:o.mode,
+      src:o.src, ex:o.exported?1:0, x:o.xlsRow, u:o.resolvedUrl
+    }))));
+  }catch(e){}
+}
+function loadRows(){
+  let arr=[]; try{ arr=JSON.parse(localStorage.getItem(EX_ROWS_KEY))||[]; }catch(e){}
+  exRows = [];
+  arr.forEach(r=>{
+    const set = SETS.find(s=>s.code===r.c && s.lang===r.sl) || SETS.find(s=>s.code===r.c);
+    if (!set || !findCardIn(set, r.n)) return;
+    exRows.push(makeRow(set, r.n, { lang:r.l, qty:r.q, note:r.nt, nameXls:r.nm, cond:r.cd, titleManual:r.tm,
+      priceManual:r.pm, priceMode:r.pmo, salesAvg:r.sa, mode:r.m, src:r.src, exported:!!r.ex, xlsRow:r.x, resolvedUrl:r.u }));
+  });
+}
+function markDups(){
+  const seen={};
+  exRows.forEach(o=>{ o.dup=false; const k=o.setCode+"|"+o.lang+"|"+o.num+"|"+o.ball+"|"+o.cond; (seen[k]=seen[k]||[]).push(o); });
+  Object.values(seen).forEach(g=>{ if(g.length>1) g.forEach(o=>o.dup=true); });
+}
+/* Nach jeder Änderung am Korb-Inhalt (Zeilen dazu/weg): alles neu zeichnen. */
+function rowsChanged(){
+  markDups(); saveRows(); renderPreview(); scheduleTitleImages(); repaintTiles();
+}
+/* Nach einer Änderung INNERHALB einer Zeile: Tabelle stehen lassen (Fokus!), Rest aktualisieren. */
+function rowEdited(){
+  markDups(); saveRows(); renderStats(); renderGroups(); renderChecks(); updateKorbUi(); scheduleTitleImages();
+}
+let tbTimer=null;
+function scheduleTitleImages(){ clearTimeout(tbTimer); tbTimer=setTimeout(buildTitleImageSets, 500); }
+
+function korbFind(set, n){ return exRows.find(o=>o.set===set && o.num===n && !o.ball); }
+function korbAdd(set, n, qty, extra){
+  let r = korbFind(set, n);
+  if (r){ r.qty += (qty||1); }
+  else {
+    r = makeRow(set, n, Object.assign({ qty:qty||1, resolvedUrl:foundUrls.get(set.code+"-"+n)||null }, extra||{}));
+    exRows.push(r);
+  }
+  rowsChanged();
+  toastX(`${r.cardName} im eBay-Korb (${r.qty}×)`);
+  return r;
+}
+function korbChangeQty(r, d){
+  r.qty += d;
+  if (r.qty<1) exRows.splice(exRows.indexOf(r),1);
+  rowsChanged();
+}
+function korbAddShown(){
+  let added=0;
+  shownNums.forEach(n=>{
+    if (!findCardIn(CUR,n) || korbFind(CUR,n)) return;
+    exRows.push(makeRow(CUR, n, { resolvedUrl:foundUrls.get(CUR.code+"-"+n)||null })); added++;
+  });
+  rowsChanged();
+  toastX(added ? `${added} Karte(n) in den eBay-Korb gelegt` : "Alle angezeigten Karten sind schon im Korb");
+}
+function updateKorbUi(){
+  const n = exRows.length, qty = exRows.reduce((a,o)=>a+o.qty,0);
+  const sum = exRows.reduce((a,o)=>a+(o.price||0)*o.qty,0);
+  const tc = byId("tabCount"); tc.textContent = n; tc.classList.toggle("show", n>0);
+  const onSearch = byId("secSuche").classList.contains("active");
+  const show = n>0 && onSearch;
+  byId("korbBar").classList.toggle("show", show);
+  document.body.classList.toggle("haskorb", show);
+  byId("korbTxt").textContent = `🛒 ${n} Karte(n) im eBay-Korb`;
+  byId("korbSub").textContent = `${qty} Stück · Angebotswert ${priceComma(sum)} €`;
+}
+
+/* Inventar aus erfassung.html übernehmen (gleicher Browser, Status „Im Bestand“) */
+function importInventory(){
+  let inv=[]; try{ inv=JSON.parse(localStorage.getItem(INV_KEY))||[]; }catch(e){}
+  const open = inv.filter(e=>e && (!e.status || e.status==="Im Bestand"));
+  if (!open.length){ toastX("In der Erfassung sind keine Karten mit Status „Im Bestand“ gespeichert (gleicher Browser nötig).", true); return; }
+  exRows = exRows.filter(o=>o.src!=="inv");
+  let ok=0, miss=0;
+  open.forEach(e=>{
+    const set = SETS.find(s=>s.code===e.setCode && s.lang===e.lang) || SETS.find(s=>s.code===e.setCode);
+    const n = parseInt(e.num,10);
+    if (!set || !findCardIn(set,n)){ miss++; return; }
+    const have = exRows.find(o=>o.set===set && o.num===n && o.note===(e.note||""));
+    if (have){ return; }
+    exRows.push(makeRow(set, n, { src:"inv", lang:e.lang||set.lang, qty:e.qty, note:e.note||"",
+      priceManual: e.price!=null && e.price!=="" ? parsePrice(e.price) : null }));
+    ok++;
+  });
+  rowsChanged();
+  toastX(`${ok} Karte(n) aus der Erfassung übernommen` + (miss?` · ${miss} nicht in den Kartendaten`:""), !ok);
+}
+
+/* =====================================================================
+   TITEL / SKU / BESCHREIBUNG
+   ===================================================================== */
+/* „125/197“ – nur wenn die Nummer eine echte Kartennummer ist */
+function nrVoll(o){
+  const code=o.set.code;
+  if (/-CC$/.test(code) || o.set.lang==="Chinesisch") return "";      // laufend nummerierte Sammlungen
+  if (/-TG$/.test(code)) return "TG"+String(o.num).padStart(2,"0")+"/TG"+o.set.total;
+  return o.num3 + "/" + pad(o.set.total);
+}
+function autoTitle(o){
+  const pat = S().titlePattern || SETTING_DEFAULTS.titlePattern;
+  const hasBall = /\{ball\}/.test(pat);
+  const fill = (setTxt)=>{
+    let t = pat.replace(/\{name\}/g,o.cardName).replace(/\{nrvoll\}/g,nrVoll(o)).replace(/\{nr\}/g,o.num3)
+      .replace(/\{total\}/g,pad(o.set.total)).replace(/\{set\}/g,setTxt).replace(/\{code\}/g,o.setCode)
+      .replace(/\{rar\}/g,RAR_SHORT[o.rarity]||"").replace(/\{sprache\}/g,o.lang)
+      .replace(/\{zustand\}/g,condOf(o.cond).short).replace(/\{ball\}/g,o.ball||"");
+    if (o.ball && !hasBall) t += " " + o.ball;
+    return t.replace(/\s+/g," ").trim();
+  };
+  let t = fill(o.setName);
+  if (t.length>80) t = fill("");            // Set-Name weglassen, bevor abgeschnitten wird
+  return capTitle(t);
+}
+function buildTitle(o){ return o.titleManual ? capTitle(o.titleManual) : autoTitle(o); }
+function draftTitle(o){ return buildTitle(o); }
+function sku(o){ return `${o.setCode.toUpperCase()}-${o.num3}` + (o.cond!=="NM" ? "-"+o.cond : "") + (o.ball ? "-"+o.ball.replace(/\s+/g,"").toUpperCase() : ""); }
+
+/* HTML-Beschreibung ohne Zeilenumbrüche (eBay-Vorgabe für Upload-Dateien) */
+function description(headline, o, isVariant){
+  const extra = S().descExtra;
+  const cell = "padding:4px 14px 4px 0;vertical-align:top";
+  let facts = "";
+  if (o){
+    const rows = [["Karte",o.cardName],["Nummer",nrVoll(o)||o.num3],["Set",o.setName],["Sprache",o.lang],["Zustand",condOf(o.cond).de]];
+    facts = "<table style='border-collapse:collapse;margin:8px 0 12px'>" +
+      rows.map(r=>"<tr><td style='"+cell+";color:#666'>"+esc(r[0])+"</td><td style='"+cell+"'><b>"+esc(r[1])+"</b></td></tr>").join("") + "</table>";
+  }
+  const bundle = isVariant
+    ? "<p style='font-weight:bold'>Mehrere Karten kaufen und Versand sparen – nur 1x Versandkosten.</p>"+
+      "<p>Bitte die gewünschte Karte im Auswahlfeld wählen.</p>" : "";
+  const stock = "Hinweis: Beim Produktbild handelt es sich um ein Beispielbild (Stockfoto). "+
+    "Sie erhalten die im Titel genannte Karte" + (isVariant ? " in der gewählten Variante. " : ". ") +
+    "Gerne sende ich auf Anfrage Fotos der tatsächlichen Karte – schreiben Sie mich einfach an.";
+  return "<div style='font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#222'>"+
+         "<h2 style='font-size:18px;margin:0 0 10px'>"+esc(headline)+"</h2>"+ bundle + facts +
+         "<p>"+stock+"</p>"+
+         (extra ? "<p>"+esc(extra).replace(/\r?\n/g,"<br>")+"</p>" : "") + "</div>";
+}
+
+/* eBay.de-Suche „Verkaufte Angebote“ – reiner Link, KEIN fetch (CORS). */
+function ebaySoldLink(o){
+  const q = `Pokemon ${o.cardName} ${nrVoll(o) || o.num3}` + (o.lang!=="Deutsch" ? " "+o.lang : "");
+  return "https://www.ebay.de/sch/i.html?_nkw=" + encodeURIComponent(q) + "&LH_Sold=1&LH_Complete=1";
 }
 
 /* =====================================================================
@@ -874,13 +1432,6 @@ function rulesChanged(){
   renderPreview();
 }
 
-/* eBay.de-Suche „Verkaufte + Beendete Angebote“ – reiner Link, KEIN fetch
-   (eBay per fetch abzufragen scheitert an CORS und ist unerwünscht). */
-function ebaySoldLink(o){
-  const q = `Pokemon ${o.cardName} ${o.num3} ${o.setCode} ${o.lang}`;
-  return "https://www.ebay.de/sch/i.html?_nkw=" + encodeURIComponent(q) + "&LH_Sold=1&LH_Complete=1";
-}
-
 /* =====================================================================
    EXCEL-IMPORT
    ===================================================================== */
@@ -1015,43 +1566,17 @@ function parseExcelRows(det){
     const qty    = parseInt(qtyRaw.replace(/\D+/g,""),10);
     if (!numRaw || isNaN(numInt) || !qtyRaw || isNaN(qty) || qty<1){ skippedIncomplete++; continue; }
 
-    const num3 = pad(numInt);
-    const rowObj = {
-      xlsRow:i+1, setCodeRaw:setCode, num:numInt, num3, qty, lang,
-      note:noteRaw, nameXls, ball:ballOf(noteRaw),
-      priceManual:priceXls, priceMode: priceXls!=null ? "manual" : "auto",
-      salesAvg:null, price:null, priceSource:"rule",
-      mode:"variant", resolvedUrl:null
-    };
-
+    const base = { xlsRow:i+1, setCodeRaw:setCode, num3:pad(numInt), qty };
     const hit = findSetByCode(setCode, lang);
-    if (!hit){ errs.push({ ...rowObj, reason:`Set-Code „${setCode}“ unbekannt` }); continue; }
-    const set = hit.set;
-    const cardEntry = findCardIn(set, numInt);
-    if (!cardEntry){ errs.push({ ...rowObj, reason:`Nr. ${num3} in Set „${set.code}“ nicht hinterlegt` }); continue; }
-
-    rowObj.set = set;
-    rowObj.setCode = set.code;                       // kanonische Schreibweise
-    rowObj.setName = set.name;
-    rowObj.langMismatch = hit.langMismatch;
-    rowObj.cardName = (nameXls || cardEntry[1] || ("Nr. "+num3)).replace(/-/g," ");
-    rowObj.rarity = cardEntry[3] || "";
-    rowObj.urls = imgCandidatesFor(set, numInt);
-    out.push(rowObj);
+    if (!hit){ errs.push({ ...base, reason:`Set-Code „${setCode}“ unbekannt` }); continue; }
+    if (!findCardIn(hit.set, numInt)){ errs.push({ ...base, reason:`Nr. ${pad(numInt)} in Set „${hit.set.code}“ nicht hinterlegt` }); continue; }
+    out.push(makeRow(hit.set, numInt, { src:"xls", lang, qty, note:noteRaw, nameXls, priceManual:priceXls, xlsRow:i+1 }));
   }
 
-  // Duplikate markieren (gleicher kanonischer Set-Code + Nummer) – NICHT zusammenfassen
-  const seen={};
-  out.forEach(o=>{ const k=o.setCode+"|"+o.num; (seen[k]=seen[k]||[]).push(o); });
-  Object.values(seen).forEach(g=>{ if(g.length>1) g.forEach(o=>o.dup=true); });
-
-  exRows = out;
+  exRows = exRows.filter(o=>o.src!=="xls").concat(out);   // Excel-Zeilen ersetzen, Rest des Korbs bleibt
   exErrs = errs;
-  applyPrices();
-  applyThresholdPrefill();
   renderErrors();
-  renderPreview();
-  buildTitleImageSets();
+  rowsChanged();
 
   const totalQty = out.reduce((a,o)=>a+o.qty,0);
   const manualCount = out.filter(o=>o.priceMode==="manual").length;
@@ -1081,12 +1606,8 @@ function parseExcelRows(det){
   toastX(out.length + " Karte(n) eingelesen");
 }
 
-/* Vorbelegung Einzel/Variante nach Preisgrenze (auf Basis der aktuellen Preise) */
-function applyThresholdPrefill(){
-  const th = parsePrice(byId("priceThreshold").value);
-  const t = th==null ? 4 : th;
-  exRows.forEach(o=>{ o.mode = (o.price!=null && o.price>=t) ? "single" : "variant"; });
-}
+/* Einzel/Variante nach Preisgrenze setzen */
+function applyThresholdPrefill(){ exRows.forEach(o=>{ o.mode = defaultMode(o); }); }
 
 /* =====================================================================
    RENDERN
@@ -1104,37 +1625,30 @@ function renderErrors(){
   });
 }
 function renderPreview(){
-  const card=byId("previewCard");
-  if (!exRows.length){ card.style.display="none"; byId("exportCard").style.display="none"; return; }
-  card.style.display="block";
-  byId("exportCard").style.display="block";
+  const has = exRows.length>0;
+  byId("previewCard").style.display = has ? "block" : "none";
+  byId("exportCard").style.display  = has ? "block" : "none";
   const tb=byId("previewBody"); tb.innerHTML="";
   exRows.forEach(o=>tb.appendChild(exRowEl(o)));
-  renderStats();
-  updateExportHint();
   byId("rowCount").textContent = exRows.length + " Karte(n)";
+  byId("dropDone").style.display = exRows.some(o=>o.exported) ? "" : "none";
+  renderStats(); renderGroups(); renderChecks(); updateKorbUi();
 }
 function renderStats(){
   const single=exRows.filter(o=>o.mode==="single").length;
   const variant=exRows.length-single;
   const dup=exRows.filter(o=>o.dup).length;
-  const ball=exRows.filter(o=>o.ball).length;
-  const sets=new Set(exRows.filter(o=>o.mode==="variant").map(o=>o.setCode)).size;
+  const groups=variantGroups().length;
   const src={rule:0,sales:0,manual:0,none:0};
   exRows.forEach(o=>{ if(o.price==null) src.none++; else src[o.priceSource]++; });
+  const sum=exRows.reduce((a,o)=>a+(o.price||0)*o.qty,0);
   byId("stats").innerHTML =
     `<div class="stat">Einzel: <b>${single}</b></div>`+
-    `<div class="stat">Variante: <b>${variant}</b> (${sets} Set-Angebote)</div>`+
+    `<div class="stat">Variante: <b>${variant}</b> (${groups} Angebot${groups===1?"":"e"})</div>`+
+    `<div class="stat">Angebotswert: <b>${priceComma(sum)} €</b></div>`+
     `<div class="stat">Preise: <b>${src.rule}</b> per Regel · <b>${src.sales}</b> per Verkaufsdaten · <b>${src.manual}</b> manuell</div>`+
     (src.none?`<div class="stat" style="border-color:var(--orange);color:var(--orange)">Ohne Preis: <b style="color:var(--orange)">${src.none}</b></div>`:"")+
-    (dup?`<div class="stat">Doppelt: <b>${dup}</b></div>`:"")+
-    (ball?`<div class="stat">Ball-Variante: <b>${ball}</b></div>`:"");
-}
-function updateExportHint(){
-  const n = exRows.filter(o=>o.price==null).length;
-  const el = byId("exportHint");
-  el.classList.toggle("show", n>0);
-  el.textContent = n>0 ? `⚠ ${n} Zeile(n) ohne Preis — orange markiert, werden vom Export ausgeschlossen.` : "";
+    (dup?`<div class="stat">Doppelt: <b>${dup}</b></div>`:"");
 }
 function setBadge(el, o){
   if (o.price==null){
@@ -1143,18 +1657,24 @@ function setBadge(el, o){
     return;
   }
   el.style.color=""; el.style.borderColor="";
-  if (o.priceSource==="manual"){ el.textContent="Manuell"; el.className="badge-src src-manual"; el.title="Manueller Preis (Excel-Preisspalte oder editiert)"; }
+  if (o.priceSource==="manual"){ el.textContent="Manuell"; el.className="badge-src src-manual"; el.title="Manueller Preis (eingegeben oder aus Excel/Erfassung)"; }
   else if (o.priceSource==="sales"){
     el.textContent="Verkäufe +"+(+RULESET.markupPct||0)+" %"; el.className="badge-src src-sales";
     el.title="max(Mindestpreis "+priceComma(o.rule&&o.rule.min)+" €, Ø "+priceComma(o.salesAvg)+" € × Aufschlag)";
   }
   else { el.textContent="Regel"; el.className="badge-src src-rule"; el.title="Basispreis der ersten passenden Preisregel"; }
 }
+function condSelect(cur, cls){
+  const sel=document.createElement("select"); if (cls) sel.className=cls;
+  CONDS.forEach(c=>{ const op=document.createElement("option"); op.value=c.k; op.textContent=c.short+" · "+c.de; sel.appendChild(op); });
+  sel.value=cur; return sel;
+}
 function exRowEl(o){
   const tr=document.createElement("tr");
-  if (o.dup) tr.classList.add("row-dup");
-  if (o.ball) tr.classList.add("row-ball");
-  if (o.price==null) tr.classList.add("row-orange");
+  const paintRow=()=>{
+    tr.className = (o.dup?"row-dup ":"") + (o.ball?"row-ball ":"") + (o.price==null?"row-orange ":"") + (o.exported?"row-done":"");
+  };
+  paintRow();
 
   // Thumbnail
   const tdT=document.createElement("td"); tdT.className="c-thumb";
@@ -1162,18 +1682,42 @@ function exRowEl(o){
   loadThumb(box, o.urls, o);
   tdT.appendChild(box);
 
-  // Titel
+  // Titel (editierbar) + Metazeile
   const tdTitle=document.createElement("td"); tdTitle.className="title-cell";
-  let tags="";
-  if (o.dup)  tags+=`<span class="tag tag-dup" title="Doppelt erfasst – bitte prüfen (möglicher Zählfehler)">doppelt</span>`;
-  if (o.ball) tags+=`<span class="tag tag-ball">${esc(o.ball)}</span>`;
-  if (o.langMismatch) tags+=`<span class="tag tag-dup" title="Kein Set in dieser Sprache hinterlegt – Bild evtl. andere Sprache">Bildsprache?</span>`;
-  tdTitle.innerHTML =
-    `<div class="t">${esc(draftTitle(o))}${tags}</div>`+
-    `<div class="m">${esc(o.setCode)} · Nr. ${esc(o.num3)} · ${esc(o.lang)}</div>`;
+  const tin=document.createElement("input"); tin.type="text"; tin.className="title-in"; tin.maxLength=80;
+  tin.value=buildTitle(o);
+  const meta=document.createElement("div"); meta.className="m";
+  const paintMeta=()=>{
+    let tags="";
+    if (o.exported) tags+=`<span class="tag tag-done" title="Diese Karte war schon in einer erzeugten eBay-Datei">exportiert</span>`;
+    if (o.dup)  tags+=`<span class="tag tag-dup" title="Doppelt im Korb – bitte prüfen">doppelt</span>`;
+    if (o.ball) tags+=`<span class="tag tag-ball">${esc(o.ball)}</span>`;
+    if (o.langMismatch) tags+=`<span class="tag tag-dup" title="Kein Set in dieser Sprache hinterlegt – Bild evtl. andere Sprache">Bildsprache?</span>`;
+    meta.innerHTML = `${esc(o.setCode)} · Nr. ${esc(o.num3)} · ${esc(o.lang)} · ${tin.value.length}/80 Zeichen` + tags +
+      (o.titleManual ? ` · <a href="#" class="tlreset">Titel zurücksetzen</a>` : "");
+    const a=meta.querySelector(".tlreset");
+    if (a) a.onclick=(ev)=>{ ev.preventDefault(); o.titleManual=null; tin.value=buildTitle(o); paintMeta(); rowEdited(); };
+  };
+  tin.addEventListener("input", paintMeta);
+  tin.addEventListener("change", ()=>{
+    const v=capTitle(tin.value);
+    o.titleManual = (!v || v===autoTitle(o)) ? null : v;
+    tin.value=buildTitle(o); paintMeta(); rowEdited();
+  });
+  paintMeta();
+  tdTitle.append(tin, meta);
+
+  // Zustand
+  const tdC=document.createElement("td");
+  const csel=condSelect(o.cond, "cond-in");
+  csel.addEventListener("change", ()=>{ o.cond=csel.value; if(!o.titleManual) tin.value=buildTitle(o); paintMeta(); rowEdited(); });
+  tdC.appendChild(csel);
 
   // Anzahl
-  const tdQ=document.createElement("td"); tdQ.textContent=o.qty;
+  const tdQ=document.createElement("td");
+  const qin=document.createElement("input"); qin.type="number"; qin.min="1"; qin.step="1"; qin.className="qty-in"; qin.value=o.qty;
+  qin.addEventListener("change", ()=>{ o.qty=Math.max(1, parseInt(qin.value,10)||1); qin.value=o.qty; rowEdited(); });
+  tdQ.appendChild(qin);
 
   // Preis (editierbar) + Quellen-Badge
   const tdP=document.createElement("td"); tdP.className="c-price";
@@ -1183,12 +1727,13 @@ function exRowEl(o){
   const badge=document.createElement("div"); setBadge(badge,o);
   pin.addEventListener("change", ()=>{
     const v=parsePrice(pin.value);
-    if (v==null){ pin.value = o.price!=null?priceComma(o.price):""; return; }
+    if (v==null){
+      if (String(pin.value).trim()===""){ o.priceManual=null; o.priceMode = o.salesAvg!=null ? "sales" : "auto"; computePrice(o); }
+      pin.value = o.price!=null?priceComma(o.price):""; setBadge(badge,o); paintRow(); rowEdited(); return;
+    }
     o.priceManual=v; o.priceMode="manual";
     computePrice(o);
-    pin.value=priceComma(o.price); setBadge(badge,o);
-    tr.classList.toggle("row-orange", o.price==null);
-    renderStats(); updateExportHint(); buildTitleImageSets();
+    pin.value=priceComma(o.price); setBadge(badge,o); paintRow(); rowEdited();
   });
   tdP.appendChild(pin); tdP.appendChild(badge);
 
@@ -1197,7 +1742,7 @@ function exRowEl(o){
   const a=document.createElement("a");
   a.className="soldlink"; a.target="_blank"; a.rel="noopener";
   a.href=ebaySoldLink(o); a.textContent="Verkäufe prüfen ↗";
-  a.title="Öffnet eBay.de: Verkaufte + Beendete Angebote für diese Karte";
+  a.title="Öffnet eBay.de: verkaufte Angebote für diese Karte";
   const sin=document.createElement("input");
   sin.className="sales-in"; sin.type="text"; sin.inputMode="decimal"; sin.placeholder="Ø €";
   sin.title="Durchschnitt der letzten Verkäufe eintragen → Preis = max(Mindestpreis, Ø × Aufschlag)";
@@ -1213,9 +1758,7 @@ function exRowEl(o){
     }
     computePrice(o);
     pin.value = o.price!=null?priceComma(o.price):"";
-    setBadge(badge,o);
-    tr.classList.toggle("row-orange", o.price==null);
-    renderStats(); updateExportHint(); buildTitleImageSets();
+    setBadge(badge,o); paintRow(); rowEdited();
   });
   tdS.appendChild(a);
   const sWrap=document.createElement("div"); sWrap.appendChild(sin);
@@ -1224,178 +1767,492 @@ function exRowEl(o){
   // Angebotsart-Umschalter
   const tdMode=document.createElement("td");
   const tg=document.createElement("div");
-  tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant");
+  const paintTg=()=>{ tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant"); };
+  paintTg();
   tg.innerHTML=`<span class="s-single">Einzel</span><span class="s-variant">Variante</span>`;
-  tg.onclick=()=>{
-    o.mode = o.mode==="single" ? "variant" : "single";
-    tg.className="toggle "+(o.mode==="single"?"mode-single":"mode-variant");
-    renderStats(); buildTitleImageSets();
-  };
+  tg.onclick=()=>{ o.mode = o.mode==="single" ? "variant" : "single"; paintTg(); rowEdited(); };
   tdMode.appendChild(tg);
 
-  tr.append(tdT,tdTitle,tdQ,tdP,tdS,tdMode);
+  // Entfernen
+  const tdX=document.createElement("td");
+  tdX.appendChild(mkBtn("✕","rmbtn",()=>{ exRows.splice(exRows.indexOf(o),1); rowsChanged(); }, "Aus dem Korb entfernen"));
+
+  tr.append(tdT,tdTitle,tdC,tdQ,tdP,tdS,tdMode,tdX);
   return tr;
 }
 
 /* =====================================================================
-   TITEL / BESCHREIBUNG / SKU
+   VARIANTEN-ANGEBOTE (Gruppen je Set + Sprache + Zustand)
    ===================================================================== */
-function draftTitle(o){
-  // Pokemon [Kartenname] [Nummer] [Set-Code] [Sprache] [+ Master Ball/Poke Ball]
-  let t=`Pokemon ${o.cardName} ${o.num3} ${o.setCode} ${o.lang}`;
-  if (o.ball) t+=` ${o.ball}`;
+let GTITLES = {};
+try{ GTITLES = JSON.parse(localStorage.getItem(EX_GTITLE_KEY)) || {}; }catch(e){ GTITLES = {}; }
+
+function variantGroups(){
+  const rows = exRows.filter(o=>o.mode==="variant" && o.price!=null);
+  const map = new Map();
+  rows.forEach(o=>{ const k=o.setCode+"|"+o.lang+"|"+o.cond; if(!map.has(k)) map.set(k,[]); map.get(k).push(o); });
+  const out=[];
+  map.forEach((all,k)=>{
+    const list = all.slice().sort((a,b)=>a.num-b.num);
+    const parts = Math.ceil(list.length/VAR_MAX);
+    for (let p=0;p<parts;p++){
+      const chunk=list.slice(p*VAR_MAX,(p+1)*VAR_MAX);
+      out.push({ key:k+(parts>1?"|"+(p+1):""), set:chunk[0].set, lang:chunk[0].lang, cond:chunk[0].cond,
+                 part: parts>1?p+1:0, list:chunk });
+    }
+  });
+  return out;
+}
+function groupTitleDefault(g){
+  const tail = (g.cond!=="NM" ? " "+condOf(g.cond).short : "") + (g.part ? " Teil "+g.part : "");
+  let t = `Pokemon ${g.set.name} ${g.lang} Einzelkarten zum Aussuchen` + tail;
+  if (t.length>80) t = `Pokemon ${g.set.name} ${g.lang} Karten Auswahl` + tail;
   return capTitle(t);
 }
-function parentTitle(set, lang){
-  return capTitle(`Pokemon ${set.name} ${set.code} ${lang} - Einzelkarten zum Aussuchen`);
-}
-function sku(o){ return `${o.setCode.toUpperCase()}-${o.num3}`; }
-/* Feste HTML-Beschreibung (kein Freitext, OHNE Zustandsangabe). */
-function description(headline, isVariant){
-  const stock = "Hinweis: Beim Produktbild handelt es sich um ein Beispielbild (Stockfoto). "+
-    "Sie erhalten die im Titel genannte Karte in der gewählten Variante. "+
-    "Gerne sende ich auf Anfrage Fotos der tatsächlichen Karte – schreiben Sie mich einfach an.";
-  const bundle = isVariant
-    ? "<p style='font-weight:bold'>Mehrere Karten kaufen und Versand sparen – nur 1x Versandkosten.</p>" : "";
-  return "<div style='font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#222'>"+
-         "<h2 style='font-size:18px;margin:0 0 10px'>"+esc(headline)+"</h2>"+
-         bundle+"<p>"+stock+"</p></div>";
-}
-
-/* =====================================================================
-   EXPORT A – Einzel-Entwürfe (Draft-CSV)
-   Zeilen ohne Preis werden ausgeschlossen (orange markiert).
-   ===================================================================== */
-function buildCsvA(){
-  const singles = exRows.filter(o=>o.mode==="single" && o.price!=null);
-  if (!singles.length) return null;
-  const lines=[HEADER_A];
-  singles.forEach(o=>{
-    const title = draftTitle(o);
-    const rec=[
-      "Draft", sku(o), CATEGORY_ID, title,
-      "",                      // UPC leer
-      priceDot(o.price),       // Punkt-Dezimaltrenner
-      String(o.qty),
-      exportUrl(o),
-      "",                      // Condition ID leer (bewusst, s. Beschreibung ohne Zustand)
-      description(title,false),
-      "FixedPrice"
-    ];
-    lines.push(rec.map(csvEsc).join(";"));
+function groupTitle(g){ return capTitle(GTITLES[g.key] || groupTitleDefault(g)); }
+/* Eindeutige Auswahl-Werte (max. 50 Zeichen, ohne Sonderzeichen der eBay-Syntax) */
+function varValues(g){
+  const used={}, m=new Map();
+  g.list.forEach(o=>{
+    const tail = " " + o.num3 + (o.ball ? " "+o.ball : "");
+    let name = o.cardName.replace(/[;|=,]/g," ").replace(/\s+/g," ").trim();
+    if ((name+tail).length>50) name = name.slice(0, 50-tail.length).trim();
+    let v = name + tail, i=2;
+    while (used[v.toLowerCase()]){ v = (name + tail).slice(0,46) + " #" + i; i++; }
+    used[v.toLowerCase()] = 1; m.set(o, v);
   });
-  return "﻿" + lines.join("\r\n");   // UTF-8 BOM + CRLF
+  return m;
 }
-
-/* =====================================================================
-   EXPORT B – Varianten-Angebote (Kategorie-CSV)
-   -------------------------------------------------------------------
-   eBay-File-Exchange-Variantensyntax (verifiziert gg. eBay-Doku):
-   • Elternzeile: Relationship leer,
-     RelationshipDetails = "Kartenname=Wert1;Wert2;…" (Merkmal + ALLE
-     Werte, ';'-getrennt; mehrere Merkmale würden mit '|' verkettet).
-     StartPrice/Quantity leer – bei Varianten definieren die KINDZEILEN
-     Preis und Menge (eBay-Vorgabe).
-   • Kindzeile: Relationship="Variation",
-     RelationshipDetails="Kartenname=Wert" (genau ein Wert),
-     eigener StartPrice/Quantity/PicURL/C:Kartennummer.
-   • ANNAHME (in der eBay-Doku nicht eindeutig): Action der Kindzeilen
-     = "Add" wie die Elternzeile, da *Action Pflichtfeld ist und die
-     Kindzeilen über Relationship=Variation zugeordnet werden. Sollte
-     die reale Vorlage leeres Action verlangen, hier auf "" ändern.
-   • ConditionID bleibt leer (Beschreibung macht bewusst KEINE
-     Zustandsangabe). Verlangt eBay einen Pflichtwert, ist 4000
-     (Gebraucht/Sehr gut) für Einzelkarten üblich.
-   ===================================================================== */
-function makeRowB(){ const o={}; COLS_B.forEach(c=>o[c]=""); return o; }
-function buildCsvB(){
-  const variants = exRows.filter(o=>o.mode==="variant" && o.price!=null);
-  if (!variants.length) return null;
-
-  const groups={};
-  variants.forEach(o=>{ (groups[o.setCode]=groups[o.setCode]||[]).push(o); });
-
-  const st = {
-    location:    byId("setLocation").value.trim(),
-    dispatch:    byId("setDispatch").value.trim(),
-    shipService: byId("setShipService").value.trim(),
-    shipCost:    parsePrice(byId("setShipCost").value),
-    returns:     byId("setReturns").value
-  };
-  const returnsOpt = st.returns==="yes" ? "ReturnsAccepted" : "ReturnsNotAccepted";
-  const lines=[HEADER_B];
-
-  Object.keys(groups).forEach(code=>{
-    const list = groups[code];
-    const set  = list[0].set;
-    const lang = list[0].lang;
-    const pTitle = parentTitle(set, lang);
-    const values = list.map(o=>`${o.cardName} ${o.num3}`);
-
-    /* ---- Elternzeile ---- */
-    const P = makeRowB();
-    P["*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)"] = "Add";
-    P["*Category"]   = CATEGORY_ID;
-    P["*Title"]      = pTitle;
-    P["Relationship"]= "";
-    P["RelationshipDetails"] = "Kartenname=" + values.join(";");
-    P["*C:Spiel"]    = "Pokémon TCG";
-    P["C:Sprache"]   = lang;
-    P["PicURL"]      = exportUrl(list[0]);
-    P["*Description"]= description(pTitle,true);
-    P["*Format"]     = "FixedPrice";
-    P["*Duration"]   = "GTC";
-    P["*StartPrice"] = "";
-    P["*Quantity"]   = "";
-    P["ImmediatePayRequired"] = "1";
-    P["*Location"]   = st.location;
-    P["ShippingType"]= "Flat";
-    P["ShippingService-1:Option"] = st.shipService;
-    P["ShippingService-1:Cost"]   = st.shipCost!=null ? priceDot(st.shipCost) : "";
-    P["*DispatchTimeMax"] = st.dispatch;
-    P["*ReturnsAcceptedOption"] = returnsOpt;
-    if (st.returns==="yes"){ P["ReturnsWithinOption"]="Days_30"; P["RefundOption"]="MoneyBack"; P["ShippingCostPaidByOption"]="Buyer"; }
-    lines.push(COLS_B.map(c=>csvEsc(P[c])).join(";"));
-
-    /* ---- Kindzeilen ---- */
-    list.forEach(o=>{
-      const C = makeRowB();
-      C["*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)"] = "Add";  // ANNAHME s. o.
-      C["CustomLabel"] = sku(o);
-      C["*Category"]   = CATEGORY_ID;
-      C["*Title"]      = pTitle;
-      C["Relationship"]= "Variation";
-      C["RelationshipDetails"] = "Kartenname=" + `${o.cardName} ${o.num3}`;
-      C["*C:Spiel"]    = "Pokémon TCG";
-      C["C:Kartenname"]= `${o.cardName} ${o.num3}`;
-      C["C:Kartennummer"] = o.num3;
-      C["C:Sprache"]   = lang;
-      C["PicURL"]      = exportUrl(o);
-      C["*Format"]     = "FixedPrice";
-      C["*Duration"]   = "GTC";
-      C["*StartPrice"] = priceDot(o.price);
-      C["*Quantity"]   = String(o.qty);
-      lines.push(COLS_B.map(c=>csvEsc(C[c])).join(";"));
+function renderGroups(){
+  const groups = variantGroups();
+  const card=byId("groupCard"), list=byId("groupList");
+  card.style.display = groups.length ? "block" : "none";
+  list.innerHTML="";
+  groups.forEach(g=>{
+    const prices=g.list.map(o=>o.price), qty=g.list.reduce((a,o)=>a+o.qty,0);
+    const box=document.createElement("div"); box.className="grpbox";
+    const lab=document.createElement("label"); lab.textContent="Titel des Angebots (max. 80 Zeichen)";
+    const inp=document.createElement("input"); inp.type="text"; inp.maxLength=80; inp.value=groupTitle(g);
+    inp.addEventListener("change", ()=>{
+      const v=capTitle(inp.value);
+      if (!v || v===groupTitleDefault(g)) delete GTITLES[g.key]; else GTITLES[g.key]=v;
+      try{ localStorage.setItem(EX_GTITLE_KEY, JSON.stringify(GTITLES)); }catch(e){}
+      inp.value=groupTitle(g);
     });
+    const gm=document.createElement("div"); gm.className="gm";
+    gm.innerHTML = `<b>${g.list.length}</b> Karten zur Auswahl · ${qty} Stück · ${priceComma(Math.min(...prices))} – ${priceComma(Math.max(...prices))} € · ` +
+      `${esc(g.set.code)} · ${esc(g.lang)} · Zustand ${esc(condOf(g.cond).short)}` +
+      (g.list.length===1 ? ` · <span style="color:var(--warn)">nur 1 Karte – besser als Einzelangebot</span>` : "");
+    box.append(lab, inp, gm);
+    list.appendChild(box);
   });
-  return "﻿" + lines.join("\r\n");
 }
 
-function doExportA(){
-  const csv=buildCsvA();
-  const skipped=exRows.filter(o=>o.mode==="single" && o.price==null).length;
-  if (!csv){ toastX("Keine exportierbaren Zeilen auf „Einzelangebot“ – keine Datei erzeugt.", true); return; }
-  downloadFile(FILE_A, csv, "text/csv;charset=utf-8");
-  toastX("Export A gespeichert" + (skipped?` (${skipped} Zeile(n) ohne Preis ausgeschlossen)`:""));
+/* =====================================================================
+   PRÜFUNG VOR DEM EXPORT
+   ===================================================================== */
+function liveIssues(){
+  const s=S(), out=[];
+  if (!s.location) out.push("Artikelstandort fehlt");
+  const pol=[s.shipProfile,s.returnProfile,s.payProfile].filter(Boolean).length;
+  if (pol>0 && pol<3) out.push("Rahmenbedingungen unvollständig – alle drei Namen eintragen oder alle leer lassen");
+  if (pol===0){
+    if (!s.shipService) out.push("Versandart fehlt");
+    if (s.shipCost==="" || parsePrice(s.shipCost)==null) out.push("Versandkosten fehlen (0 für kostenlos)");
+    if (s.dispatch==="") out.push("Bearbeitungszeit fehlt");
+  }
+  return out;
 }
-function doExportB(){
-  const csv=buildCsvB();
-  const skipped=exRows.filter(o=>o.mode==="variant" && o.price==null).length;
-  if (!csv){ toastX("Keine exportierbaren Zeilen auf „Variante“ – keine Datei erzeugt.", true); return; }
-  downloadFile(FILE_B, csv, "text/csv;charset=utf-8");
-  toastX("Export B gespeichert" + (skipped?` (${skipped} Zeile(n) ohne Preis ausgeschlossen)`:""));
+function openSettings(){
+  const d=byId("settingsCard"); d.open=true; d.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function renderChecks(){
+  const ul=byId("checkList"); ul.innerHTML="";
+  const add=(lvl, html)=>{ const li=document.createElement("li"); li.className=lvl; li.innerHTML=html; ul.appendChild(li); return li; };
+  const singles=exRows.filter(o=>o.mode==="single" && o.price!=null);
+  const groups=variantGroups();
+  const varCards=groups.reduce((a,g)=>a+g.list.length,0);
+  const noPrice=exRows.filter(o=>o.price==null).length;
+  const cheap=exRows.filter(o=>o.price!=null && o.price<1).length;
+  const noImg=exRows.filter(o=>!exportUrl(o)).length;
+  const mism=exRows.filter(o=>o.langMismatch).length;
+  const dups=exRows.filter(o=>o.dup).length;
+  const lonely=groups.filter(g=>g.list.length===1).length;
+  const live=liveIssues();
+
+  if (noPrice) add("warn", `⚠ ${noPrice} Karte(n) ohne Preis – sie werden nicht exportiert. Preis in der Tabelle eintragen.`);
+  if (cheap)   add("warn", `⚠ ${cheap} Karte(n) unter 1,00 € – eBay verlangt bei Festpreis-Angeboten mindestens 1,00 €.`);
+  if (noImg)   add("warn", `⚠ ${noImg} Karte(n) ohne Bild-Link – das Angebot entsteht dann ohne Foto.`);
+  if (mism)    add("warn", `⚠ ${mism} Karte(n) mit Bild aus einem anderssprachigen Set („Bildsprache?“).`);
+  if (dups)    add("warn", `⚠ ${dups} Zeile(n) sind doppelt im Korb – bei Varianten erhalten sie getrennte Auswahl-Einträge.`);
+  if (lonely)  add("warn", `⚠ ${lonely} Varianten-Angebot(e) mit nur einer Karte – besser auf „Einzel“ umstellen.`);
+  if (live.length){
+    const li=add("err", `✗ Für fertige Angebote und Varianten-Angebote fehlt noch: ${esc(live.join(" · "))}. <a href="#">Einstellungen öffnen</a>`);
+    li.querySelector("a").onclick=(e)=>{ e.preventDefault(); openSettings(); };
+  } else {
+    add("ok", "✓ Standort und Versand sind hinterlegt – fertige Angebote und Varianten-Angebote können erzeugt werden.");
+  }
+  if (!noPrice && !cheap && !noImg) add("ok", "✓ Alle Karten haben Preis und Bild.");
+  add("ok", `✓ Zustand wird je Karte als eBay-Zustands-ID 4000 mit Kartenzustand (NM/EX/GD/PL) übergeben.`);
+
+  byId("expDraftSub").textContent  = singles.length ? `${singles.length} Entwürfe · Versand & Zustand danach in eBay ergänzen` : "keine Karte auf „Einzel“";
+  byId("expSingleSub").textContent = singles.length ? `${singles.length} Angebote · gehen sofort online` : "keine Karte auf „Einzel“";
+  byId("expVariantSub").textContent= groups.length ? `${groups.length} Angebot(e) mit ${varCards} Karten · gehen sofort online` : "keine Karte auf „Variante“";
+  byId("expAllSub").textContent    = `${singles.length} Einzel + ${groups.length} Varianten-Angebot(e) · sofort online`;
+  byId("expDraft").classList.toggle("off", !singles.length);
+  byId("expSingle").classList.toggle("off", !singles.length || live.length>0);
+  byId("expVariant").classList.toggle("off", !groups.length || live.length>0);
+  byId("expAll").classList.toggle("off", (!singles.length && !groups.length) || live.length>0);
+  const eh=byId("exportHint"); eh.classList.toggle("show", noPrice>0);
+  eh.textContent = noPrice ? `⚠ ${noPrice} Zeile(n) ohne Preis sind orange markiert und werden ausgelassen.` : "";
 }
 
+/* =====================================================================
+   EBAY-DATEIEN ERZEUGEN
+   -------------------------------------------------------------------
+   Aufbau der Angebots-Datei (Verkäufer-Cockpit Pro → Berichte → Hochladen):
+   • Einzelangebot: eine Zeile, Action=Add.
+   • Varianten-Angebot: Elternzeile (Action=Add, RelationshipDetails =
+     "Merkmal=Wert1;Wert2;…", Preis/Menge LEER) + je Karte eine Kindzeile
+     (Action LEER, Relationship="Variation", RelationshipDetails=
+     "Merkmal=Wert", eigener Preis/Menge/SKU/Bild).
+   • Ungradete Einzelkarten brauchen ConditionID 4000 UND den Deskriptor
+     „Kartenzustand (ID 40001)“ – ohne ihn lehnt eBay das Angebot ab.
+   ===================================================================== */
+let TPLS = {};
+try{ TPLS = JSON.parse(localStorage.getItem(EX_TPL_KEY)) || {}; }catch(e){ TPLS = {}; }
+function tplFor(type){            // "draft" | "cat"
+  const c = TPLS[type];
+  if (c && Array.isArray(c.header) && c.header.length) return { info:(c.info||[]).map(r=>r.slice()), header:c.header.slice(), custom:true };
+  return { info:[], header:(type==="draft" ? HEADER_A.split(";") : COLS_B.slice()), custom:false };
+}
+/* Spaltenname → Schlüssel („*StartPrice“→startprice, „CD:Kartenzustand - (ID: 40001)“→cd40001) */
+function normCol(h){
+  h = String(h==null?"":h).trim();
+  if (/^\*?Action\s*\(/i.test(h) || /^\*?Action$/i.test(h)) return "action";
+  const m = h.match(/\(ID:\s*(\d+)\)/i);
+  if (/^CDA?:/i.test(h) && m) return "cd"+m[1];
+  return h.replace(/^\*/,"").toLowerCase().replace(/\s+/g,"");
+}
+function buildAoa(type, objs){
+  const tpl = tplFor(type);
+  const header = tpl.header.slice();
+  const idx = {};
+  header.forEach((h,i)=>{ const k=normCol(h); if (!(k in idx)) idx[k]=i; });
+  if (type==="draft" && !("categoryid" in idx) && header.length>=DRAFT_KEYS.length){
+    DRAFT_KEYS.forEach((k,i)=>{ idx[k]=i; });                 // fremdsprachige Entwurfs-Vorlage: nach Position füllen
+  }
+  objs.forEach(o=>Object.keys(o).forEach(k=>{
+    if (!(k in idx) && o[k]!==""){ idx[k]=header.length; header.push(EXTRA_COLS[k] || k); }
+  }));
+  const aoa = tpl.info.map(r=>r.slice());
+  aoa.push(header);
+  objs.forEach(o=>{
+    const r = new Array(header.length).fill("");
+    Object.keys(o).forEach(k=>{ if (k in idx) r[idx[k]] = o[k]==null ? "" : String(o[k]); });
+    aoa.push(r);
+  });
+  return aoa;
+}
+function saveAoa(basename, aoa){
+  const s=S();
+  if (s.fileFormat==="xlsx" && window.XLSX){
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Listings");
+    downloadFile(basename+".xlsx", XLSX.write(wb,{bookType:"xlsx",type:"array"}),
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    return basename+".xlsx";
+  }
+  const d = s.delim==="," ? "," : ";";
+  const csv = "﻿" + aoa.map(r=>r.map(c=>csvEsc(c,d)).join(d)).join("\r\n") + "\r\n";   // UTF-8 BOM + CRLF
+  downloadFile(basename+".csv", csv, "text/csv;charset=utf-8");
+  return basename+".csv";
+}
+
+/* ---- Zeilen-Objekte (Schlüssel = normalisierte Spaltennamen) ---- */
+function objDraft(o){
+  const title=buildTitle(o);
+  return { "action":"Draft", "customlabel(sku)":sku(o), "categoryid":CATEGORY_ID, "title":title, "upc":"",
+           "price":priceOut(o.price), "quantity":String(o.qty), "itemphotourl":exportUrl(o),
+           "conditionid":"", "description":description(title,o,false), "format":"FixedPrice" };
+}
+function commonAdd(cond){
+  const s=S();
+  const x = { "action":"Add", "category":CATEGORY_ID, "conditionid":"4000", "cd40001":condOf(cond).id,
+              "c:spiel":"Pokémon Sammelkartenspiel", "format":"FixedPrice", "duration":"GTC", "location":s.location };
+  if (s.shipProfile && s.returnProfile && s.payProfile){
+    x["shippingprofilename"]=s.shipProfile; x["returnprofilename"]=s.returnProfile; x["paymentprofilename"]=s.payProfile;
+  } else {
+    x["shippingtype"]="Flat";
+    x["shippingservice-1:option"]=s.shipService;
+    x["shippingservice-1:cost"]=priceOut(parsePrice(s.shipCost)||0);
+    x["dispatchtimemax"]=s.dispatch;
+    x["returnsacceptedoption"]= s.returns==="yes" ? "ReturnsAccepted" : "ReturnsNotAccepted";
+    if (s.returns==="yes"){ x["returnswithinoption"]="Days_30"; x["refundoption"]="MoneyBack"; x["shippingcostpaidbyoption"]="Buyer"; }
+  }
+  return x;
+}
+function objSingle(o){
+  const title=buildTitle(o);
+  const x=commonAdd(o.cond);
+  Object.assign(x, { "customlabel":sku(o), "title":title, "c:kartenname":o.cardName,
+    "c:kartennummer":nrVoll(o)||o.num3, "c:sprache":o.lang, "c:set":o.setName,
+    "picurl":exportUrl(o), "description":description(title,o,false),
+    "startprice":priceOut(o.price), "quantity":String(o.qty) });
+  if (RAR_SPEC[o.rarity]) x["c:seltenheit"]=RAR_SPEC[o.rarity];
+  return x;
+}
+function objsVariant(g){
+  const s=S();
+  const vName=(s.varName||"Karte").replace(/[;|=]/g," ").trim() || "Karte";
+  const vals=varValues(g), title=groupTitle(g);
+  const pics=g.list.slice().sort((a,b)=>(b.price||0)-(a.price||0)).map(exportUrl).filter(Boolean);
+  const parent=commonAdd(g.cond);
+  Object.assign(parent, { "title":title, "relationship":"", "relationshipdetails": vName+"="+g.list.map(o=>vals.get(o)).join(";"),
+    "c:sprache":g.lang, "c:set":g.set.name, "picurl":[...new Set(pics)].slice(0,PIC_MAX).join("|"),
+    "description":description(title,null,true), "startprice":"", "quantity":"" });
+  const out=[parent], skus={};
+  g.list.forEach(o=>{
+    let k=sku(o), i=2; while (skus[k]){ k=sku(o)+"-"+i; i++; } skus[k]=1;
+    const url=exportUrl(o), v=vals.get(o);
+    out.push({ "action":"", "customlabel":k, "relationship":"Variation", "relationshipdetails":vName+"="+v,
+      "startprice":priceOut(o.price), "quantity":String(o.qty),
+      "picurl": !url || s.varPic==="none" ? "" : (s.varPic==="url" ? url : v+"="+url) });
+  });
+  return out;
+}
+
+function doExport(kind){
+  const singles=exRows.filter(o=>o.mode==="single" && o.price!=null);
+  const groups=variantGroups();
+  const live=liveIssues();
+  if (kind!=="draft" && live.length){ toastX("Einstellungen unvollständig: "+live[0], true); openSettings(); return; }
+  let objs=[], used=[], type="cat", base="", nList=0;
+  if (kind==="draft"){
+    if (!singles.length){ toastX("Keine Karte mit Preis auf „Einzel“ – in der Tabelle umstellen.", true); return; }
+    objs=singles.map(objDraft); used=singles; type="draft"; base="ebay-entwuerfe"; nList=singles.length;
+  } else {
+    if (kind==="single" || kind==="all"){ singles.forEach(o=>{ objs.push(objSingle(o)); used.push(o); }); nList+=singles.length; }
+    if (kind==="variant" || kind==="all"){ groups.forEach(g=>{ objs.push(...objsVariant(g)); used.push(...g.list); }); nList+=groups.length; }
+    if (!objs.length){ toastX(kind==="variant" ? "Keine Karte mit Preis auf „Variante“." : "Keine Karte mit Preis im Korb.", true); return; }
+    base = kind==="single" ? "ebay-einzelangebote" : kind==="variant" ? "ebay-varianten" : "ebay-angebote";
+  }
+  const file = saveAoa(base+"-"+stamp(), buildAoa(type, objs));
+  used.forEach(o=>o.exported=true);
+  rowsChanged();
+  showNext(kind, file, nList, used.length);
+  toastX("Datei gespeichert: "+file);
+}
+function nextHtml(kind, file, nList, nCards){
+  const typ = kind==="draft" ? "Entwurfsvorlage erstellen" : "Neue Angebotsvorlage erstellen";
+  const ft  = /\.xlsx$/.test(file) ? ".xlsx" : ".csv";
+  return `<b>✓ ${esc(file)}</b> gespeichert – ${nList} ${kind==="draft"?"Entwurf/Entwürfe":"Angebot(e)"} mit ${nCards} Karte(n).`+
+    `<ol><li>Bei eBay öffnen: <i>Verkäufer-Cockpit Pro → Berichte → Hochladen</i>.</li>`+
+    `<li>„Vorlage hochladen“ wählen, Dateityp <b>${ft}</b>, Typ <b>„${typ}“</b>, die Datei auswählen und hochladen.</li>`+
+    (kind==="draft"
+      ? `<li>Danach unter <i>Angebote → Entwürfe</i> Zustand und Versand ergänzen und einstellen.</li>`
+      : `<li>eBay verarbeitet die Datei (meist unter 15 Minuten). Meldet der Ergebnisbericht Fehler, lade ihn unten bei „eBay-Ergebnisbericht prüfen“.</li>`)+
+    `</ol><a class="lnk" href="${EBAY_UPLOAD_URL}" target="_blank" rel="noopener">eBay-Upload öffnen ↗</a>`+
+    (kind==="draft" ? `<a class="lnk" href="${EBAY_DRAFTS_URL}" target="_blank" rel="noopener">eBay-Entwürfe öffnen ↗</a>` : "")+
+    `<div class="hintline" style="margin-top:10px">Tipp: Beim ersten Mal nur 1–2 Karten hochladen und das Ergebnis ansehen, bevor du den ganzen Korb einreichst.</div>`;
+}
+function showNext(kind, file, nList, nCards){
+  const nb=byId("nextBox"); nb.innerHTML=nextHtml(kind, file, nList, nCards); nb.classList.add("show");
+  nb.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+/* =====================================================================
+   SOFORT-DATEI FÜR EINE KARTE (Dialog aus der Kartensuche)
+   ===================================================================== */
+let QM = null;
+function qmKind(){ const r=document.querySelector('input[name="qmKind"]:checked'); return r ? r.value : "draft"; }
+function qmPaint(){
+  byId("qmLen").textContent = "· " + byId("qmTitle").value.length + "/80 Zeichen";
+  const live = qmKind()==="live";
+  byId("qmKindDraftL").classList.toggle("on", !live);
+  byId("qmKindLiveL").classList.toggle("on", live);
+  const note=byId("qmNote"), iss=liveIssues();
+  if (QM && QM.done){ note.className="qm-note"; note.innerHTML=QM.done; return; }
+  if (live && iss.length){
+    note.className="qm-note err";
+    note.innerHTML = "Für ein fertiges Angebot fehlt noch: " + esc(iss.join(" · ")) + ". Trage es im Tab „eBay-Export“ unter Angebots-Einstellungen ein – oder wähle „Entwurf“.";
+  } else {
+    note.className="qm-note";
+    note.textContent = live
+      ? "Das Angebot enthält Titel, Preis, Bild, Zustand, Standort und Versand und geht nach dem Hochladen online."
+      : "Der Entwurf enthält Titel, Preis, Stückzahl, Bild und Beschreibung.";
+  }
+}
+function openQuick(set, n){
+  const inKorb = korbFind(set, n);
+  const row = makeRow(set, n, inKorb
+    ? { qty:inKorb.qty, cond:inKorb.cond, titleManual:inKorb.titleManual, priceManual:inKorb.priceManual,
+        priceMode:inKorb.priceMode, salesAvg:inKorb.salesAvg, resolvedUrl:inKorb.resolvedUrl }
+    : { resolvedUrl:foundUrls.get(set.code+"-"+n)||null });
+  QM = { set, n, row, done:"" };
+  byId("qmImg").src = row.resolvedUrl || row.urls[0] || "";
+  byId("qmTitle").value = buildTitle(row);
+  byId("qmPrice").value = row.price!=null ? priceComma(row.price) : "";
+  byId("qmQty").value = row.qty;
+  byId("qmCond").value = row.cond;
+  byId("qmSold").href = ebaySoldLink(row);
+  byId("qmBack").classList.add("show");
+  qmPaint();
+  byId("qmPrice").focus(); byId("qmPrice").select();
+}
+function closeQuick(){ byId("qmBack").classList.remove("show"); QM=null; }
+/* Dialogwerte in die (temporäre) Zeile übernehmen; false = Eingabe unvollständig */
+function qmApply(){
+  const o=QM.row;
+  o.cond = byId("qmCond").value;
+  o.qty  = Math.max(1, parseInt(byId("qmQty").value,10)||1);
+  const t = capTitle(byId("qmTitle").value);
+  o.titleManual = (!t || t===autoTitle(o)) ? null : t;
+  const p = parsePrice(byId("qmPrice").value);
+  if (p==null || p<=0){ toastX("Bitte einen Preis eintragen.", true); byId("qmPrice").focus(); return false; }
+  if (o.price==null || Math.abs(p-o.price)>0.004){ o.priceManual=p; o.priceMode="manual"; }
+  computePrice(o);
+  return true;
+}
+function qmToKorb(silent){
+  if (!QM || !qmApply()) return null;
+  const o=QM.row;
+  let r=korbFind(QM.set, QM.n);
+  const isNew=!r;
+  if (isNew){ r=makeRow(QM.set, QM.n, {}); exRows.push(r); }
+  Object.assign(r, { qty:o.qty, cond:o.cond, titleManual:o.titleManual, priceManual:o.priceManual, priceMode:o.priceMode,
+                     salesAvg:o.salesAvg, resolvedUrl:o.resolvedUrl||r.resolvedUrl });
+  computePrice(r);
+  if (isNew) r.mode = defaultMode(r);       // Angebotsart nach dem tatsächlich eingegebenen Preis
+  rowsChanged();
+  if (!silent){ toastX(`${r.cardName} im eBay-Korb (${r.qty}×)`); closeQuick(); }
+  return r;
+}
+function qmDownload(){
+  if (!QM || !qmApply()) return;
+  const kind=qmKind(), o=QM.row;
+  if (kind==="live" && liveIssues().length){ qmPaint(); toastX("Für fertige Angebote fehlen Einstellungen – oder „Entwurf“ wählen.", true); return; }
+  const file = saveAoa("ebay-"+sku(o).toLowerCase()+"-"+stamp(),
+                       buildAoa(kind==="draft" ? "draft" : "cat", [kind==="draft" ? objDraft(o) : objSingle(o)]));
+  const r=korbFind(QM.set, QM.n);
+  if (r){                                   // Karte liegt schon im Korb: Dialogwerte übernehmen + als exportiert markieren
+    Object.assign(r, { qty:o.qty, cond:o.cond, titleManual:o.titleManual, priceManual:o.priceManual, priceMode:o.priceMode });
+    computePrice(r); r.exported=true; rowsChanged();
+  }
+  QM.done = nextHtml(kind==="draft" ? "draft" : "single", file, 1, 1);
+  qmPaint();
+  toastX("Datei gespeichert: "+file);
+}
+
+/* =====================================================================
+   EIGENE EBAY-VORLAGE + ERGEBNISBERICHT
+   ===================================================================== */
+async function fileText(file){
+  const buf=await file.arrayBuffer();
+  let t; try{ t=new TextDecoder("utf-8",{fatal:true}).decode(buf); }catch(e){ t=new TextDecoder("windows-1252").decode(buf); }
+  return t.replace(/^﻿/,"");
+}
+function guessDelim(text){
+  const lines=text.split(/\r?\n/).slice(0,25);
+  const c={";":0,",":0,"\t":0};
+  lines.forEach(line=>{ let q=false; for (const ch of line){ if (ch==='"') q=!q; else if (!q && ch in c) c[ch]++; } });
+  return Object.keys(c).sort((a,b)=>c[b]-c[a])[0];
+}
+function parseCsv(text, d){
+  const rows=[]; let row=[], cur="", q=false;
+  for (let i=0;i<text.length;i++){
+    const ch=text[i];
+    if (q){ if (ch==='"'){ if (text[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=ch; }
+    else if (ch==='"') q=true;
+    else if (ch===d){ row.push(cur); cur=""; }
+    else if (ch==="\n"){ row.push(cur); rows.push(row); row=[]; cur=""; }
+    else if (ch!=="\r") cur+=ch;
+  }
+  if (cur!=="" || row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+async function readTable(file){
+  if (/\.(csv|txt)$/i.test(file.name)){
+    const text=await fileText(file), d=guessDelim(text);
+    return { aoa:parseCsv(text,d), delim:d };
+  }
+  await ensureSheetJs();
+  const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()), {type:"array"});
+  const sheets=wb.SheetNames.map(n=>XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:""}));
+  const hit=sheets.find(a=>a.some(r=>(r||[]).some(c=>/^\*?Action\s*\(/i.test(String(c)))));
+  return { aoa: hit || sheets[0] || [], delim:null };
+}
+function trimRow(r){ r=(r||[]).map(c=>String(c==null?"":c)); while (r.length && r[r.length-1].trim()==="") r.pop(); return r; }
+
+async function handleTemplateFile(file){
+  let tab;
+  try{ tab=await readTable(file); }catch(e){ toastX("Vorlage konnte nicht gelesen werden: "+(e.message||e), true); return; }
+  const hi = tab.aoa.findIndex(r=>(r||[]).some(c=>/^\*?Action\s*\(/i.test(String(c).trim())));
+  if (hi<0){ toastX("In dieser Datei wurde keine eBay-Kopfzeile („Action(…)“) gefunden.", true); return; }
+  const header=trimRow(tab.aoa[hi]);
+  const keys=header.map(normCol);
+  const type = (keys.includes("relationship") || keys.includes("category") || keys.includes("startprice")) ? "cat" : "draft";
+  const info = tab.aoa.slice(0,hi).map(trimRow).filter(r=>r.length);
+  TPLS[type] = { info, header, name:file.name, delim:tab.delim };
+  try{ localStorage.setItem(EX_TPL_KEY, JSON.stringify(TPLS)); }catch(e){}
+  if (tab.delim===";" || tab.delim===","){ byId("fmtDelim").value=tab.delim; saveExSettings(); }
+  renderTplState();
+  toastX((type==="cat" ? "Angebots-Vorlage" : "Entwurfs-Vorlage") + " übernommen ("+header.length+" Spalten)");
+}
+function renderTplState(){
+  const el=byId("tplState"); let h="";
+  [["cat","Angebots-Vorlage"],["draft","Entwurfs-Vorlage"]].forEach(([k,lab])=>{
+    const t=TPLS[k];
+    if (t && t.header) h += `<div><b>✓ ${lab} aktiv:</b> ${esc(t.name||"")} · ${t.header.length} Spalten` +
+      (t.info&&t.info.length?` · ${t.info.length} Info-Zeile(n)`:"") + (t.delim?` · Trennzeichen „${esc(t.delim==="\t"?"Tab":t.delim)}“`:"") +
+      `<a href="#" data-k="${k}">entfernen</a></div>`;
+    else h += `<div>${lab}: eingebaute Standard-Kopfzeile (eBay Deutschland)</div>`;
+  });
+  el.innerHTML=h;
+  el.querySelectorAll("a[data-k]").forEach(a=>a.onclick=(e)=>{
+    e.preventDefault(); delete TPLS[a.dataset.k];
+    try{ localStorage.setItem(EX_TPL_KEY, JSON.stringify(TPLS)); }catch(err){}
+    renderTplState();
+  });
+}
+
+let repLines=[];
+async function handleReportFile(file){
+  const st=byId("repState"), wrap=byId("repWrap"), body=byId("repBody");
+  let tab;
+  try{ tab=await readTable(file); }catch(e){ st.textContent="Bericht konnte nicht gelesen werden: "+(e.message||e); return; }
+  const rows=tab.aoa.map(trimRow).filter(r=>r.length);
+  const hi=rows.findIndex(r=>r.filter(c=>c.trim()!=="").length>=3);
+  if (hi<0){ st.textContent="In dieser Datei wurden keine Tabellenzeilen gefunden."; wrap.style.display="none"; return; }
+  const head=rows[hi], data=rows.slice(hi+1);
+  const isMsg = h=>/error|fehler|message|meldung|status|result|ergebnis|warn|hinweis/i.test(h);
+  const isId  = h=>/^\*?action|title|titel|customlabel|sku|itemid|artikelnummer|line|zeile/i.test(h.replace(/\s+/g,""));
+  let cols=head.map((h,i)=>i).filter(i=>isMsg(head[i])||isId(head[i]));
+  if (!cols.some(i=>isMsg(head[i]))) cols=head.map((h,i)=>i).slice(0,14);
+  const bad=/error|fehler|failed|fehlgeschlagen|ungültig|invalid/i, good=/success|erfolg/i;
+  let nBad=0; repLines=[];
+  body.innerHTML="";
+  const trh=document.createElement("tr");
+  cols.forEach(i=>{ const th=document.createElement("th"); th.textContent=head[i]; trh.appendChild(th); });
+  body.appendChild(trh);
+  data.slice(0,400).forEach((r,ri)=>{
+    const tr=document.createElement("tr"); let rowBad=false;
+    cols.forEach(i=>{
+      const td=document.createElement("td"); const v=r[i]||""; td.textContent=v;
+      if (isMsg(head[i]) && bad.test(v)){ td.className="hit"; rowBad=true; }
+      else if (good.test(v)) td.className="good";
+      tr.appendChild(td);
+    });
+    if (rowBad){ nBad++; repLines.push(cols.map(i=>r[i]||"").filter(Boolean).join(" | ")); }
+    body.appendChild(tr);
+  });
+  wrap.style.display="block";
+  byId("repCopy").style.display = repLines.length ? "" : "none";
+  st.innerHTML = `<b style="color:${nBad?"var(--err)":"var(--ok)"}">${nBad ? nBad+" Zeile(n) mit Fehlermeldung" : "Keine Fehlermeldung erkannt"}</b> · ${data.length} Zeile(n) im Bericht` +
+    (data.length>400 ? " (erste 400 angezeigt)" : "") +
+    (nBad ? " · Häufigste Ursachen: Standort/Versand fehlt, Name einer Rahmenbedingung stimmt nicht, Preis unter 1 €, Titel doppelt/zu lang." : "");
+}
 /* =====================================================================
    TITELBILD-GENERATOR (Canvas 1600×1600)
    ===================================================================== */
@@ -1575,9 +2432,20 @@ function downloadTitleImage(){
    INIT EBAY-EXPORT
    ===================================================================== */
 function initEbayExport(){
+  // Zustands-Auswahlfelder füllen
+  [byId("setCond"), byId("qmCond")].forEach(sel=>{
+    CONDS.forEach(c=>{ const op=document.createElement("option"); op.value=c.k; op.textContent=c.short+" · "+c.de; sel.appendChild(op); });
+  });
+
+  // Einstellungen
   loadExSettings();
-  ["setLocation","setDispatch","setShipService","setShipCost","setReturns","priceThreshold"]
-    .forEach(id=>byId(id).addEventListener("change", saveExSettings));
+  Object.keys(SETTING_IDS).forEach(k=>{
+    const el=byId(SETTING_IDS[k]); if (!el) return;
+    el.addEventListener("change", ()=>{
+      saveExSettings();
+      if (k==="titlePattern") renderPreview(); else { renderGroups(); renderChecks(); }
+    });
+  });
 
   // Preisregeln
   renderRules();
@@ -1605,28 +2473,73 @@ function initEbayExport(){
     rulesChanged();
   });
 
-  // Import & Aktionen
+  // Korb füllen
   byId("xlsxFile").addEventListener("change", e=>{
     const f=e.target.files&&e.target.files[0];
     if (f) handleFile(f);
     e.target.value="";
   });
   byId("globalLang").addEventListener("change", ()=>{
-    if (lastDet) parseExcelRows(lastDet);   // Sprache gilt global → neu abgleichen
+    if (lastDet) parseExcelRows(lastDet);   // Sprache gilt für den Excel-Import → neu abgleichen
+  });
+  byId("invImport").addEventListener("click", importInventory);
+  byId("gotoSearch").addEventListener("click", ()=>switchMainTab("suche"));
+  byId("korbClear").addEventListener("click", ()=>{
+    if (!exRows.length){ toastX("Der Korb ist schon leer."); return; }
+    if (!confirm(`Wirklich alle ${exRows.length} Karte(n) aus dem eBay-Korb entfernen?`)) return;
+    exRows=[]; exErrs=[]; lastDet=null; renderErrors(); byId("importStatus").className="impstatus";
+    byId("nextBox").classList.remove("show");
+    rowsChanged(); toastX("Korb geleert");
   });
   byId("applyThreshold").addEventListener("click", ()=>{
-    applyThresholdPrefill(); renderPreview(); buildTitleImageSets();
-    toastX("Einzel/Variante nach Preisgrenze vorbelegt");
+    applyThresholdPrefill(); rowsChanged();
+    toastX("Einzel/Variante nach Preisgrenze gesetzt");
   });
-  byId("allSingle").addEventListener("click", ()=>{ exRows.forEach(o=>o.mode="single"); renderPreview(); buildTitleImageSets(); });
-  byId("allVariant").addEventListener("click", ()=>{ exRows.forEach(o=>o.mode="variant"); renderPreview(); buildTitleImageSets(); });
-  byId("exportA").addEventListener("click", doExportA);
-  byId("exportB").addEventListener("click", doExportB);
+  byId("allSingle").addEventListener("click", ()=>{ exRows.forEach(o=>o.mode="single"); rowsChanged(); });
+  byId("allVariant").addEventListener("click", ()=>{ exRows.forEach(o=>o.mode="variant"); rowsChanged(); });
+  byId("dropDone").addEventListener("click", ()=>{
+    const n=exRows.filter(o=>o.exported).length;
+    if (!n || !confirm(`${n} bereits exportierte Karte(n) aus dem Korb entfernen?`)) return;
+    exRows=exRows.filter(o=>!o.exported); rowsChanged();
+  });
+
+  // Export
+  byId("expDraft").addEventListener("click", ()=>doExport("draft"));
+  byId("expSingle").addEventListener("click", ()=>doExport("single"));
+  byId("expVariant").addEventListener("click", ()=>doExport("variant"));
+  byId("expAll").addEventListener("click", ()=>doExport("all"));
   byId("tbDownload").addEventListener("click", downloadTitleImage);
+
+  // Eigene Vorlage + Ergebnisbericht
+  byId("tplFile").addEventListener("change", e=>{ const f=e.target.files&&e.target.files[0]; if (f) handleTemplateFile(f); e.target.value=""; });
+  byId("repFile").addEventListener("change", e=>{ const f=e.target.files&&e.target.files[0]; if (f) handleReportFile(f); e.target.value=""; });
+  byId("repCopy").addEventListener("click", ()=>{
+    const t=repLines.join("\n");
+    navigator.clipboard.writeText(t).then(()=>toastX("Fehlermeldungen kopiert")).catch(()=>prompt("Manuell kopieren:", t));
+  });
+  renderTplState();
+
+  // Sofort-Datei-Dialog
+  byId("qmClose").addEventListener("click", closeQuick);
+  byId("qmBack").addEventListener("click", e=>{ if (e.target===byId("qmBack")) closeQuick(); });
+  byId("qmGo").addEventListener("click", qmDownload);
+  byId("qmKorb").addEventListener("click", ()=>qmToKorb(false));
+  byId("qmTitle").addEventListener("input", ()=>{ if (QM) QM.done=""; qmPaint(); });
+  ["qmPrice","qmQty","qmCond"].forEach(id=>byId(id).addEventListener("change", ()=>{ if (QM){ QM.done=""; qmPaint(); } }));
+  document.querySelectorAll('input[name="qmKind"]').forEach(r=>r.addEventListener("change", ()=>{ if (QM) QM.done=""; qmPaint(); }));
+  byId("qmPrice").addEventListener("keydown", e=>{ if (e.key==="Enter") qmDownload(); });
+  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && QM) closeQuick(); });
+
+  // gespeicherten Korb laden
+  loadRows();
+  markDups();
+  renderPreview();
+  buildTitleImageSets();
 
   // Direkteinstieg per Hash (Hub-Link zeigt auf #ebay)
   if (location.hash==="#ebay" || location.hash==="#export") switchMainTab("export");
 }
+init();
 initEbayExport();
 </script>
 </body>
