@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etikett-Drucker</title>
+<!--
+  Etikett-Drucker für Brother QL-820NWB (62 mm Rolle)
+  eBay-/Internetmarke-PDF (A4, Label oben links) hineinziehen
+  -> Label wird an den Schnittmarken ausgeschnitten, gedreht und
+     in Originalgröße auf ein 62 x 100 mm Etikett gesetzt
+  -> Druckdialog öffnet sich automatisch.
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#ffffff; --line:#d5dbe2; --ink:#16202b; --muted:#5d6b7a;
+    --accent:#d4a106; --accent-ink:#1b1400; --ok:#1f8a4c; --warn:#b4560d;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#11161c; --panel:#1a2129; --line:#2c3642; --ink:#e7ecf1; --muted:#93a1b1;
+           --accent:#ffcc00; --accent-ink:#1b1400; --ok:#4cc584; --warn:#f0a35e; color-scheme:dark; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;
+       padding:32px 16px}
+  .wrap{max-width:820px;margin:0 auto;display:grid;gap:20px}
+  h1{font-size:24px;margin:0}
+  .sub{color:var(--muted);margin:4px 0 0}
+  .drop{border:2px dashed var(--line);border-radius:14px;background:var(--panel);
+        padding:40px 20px;text-align:center;cursor:pointer;transition:border-color .15s}
+  .drop.over{border-color:var(--accent)}
+  .drop strong{font-size:18px;display:block;margin-bottom:6px}
+  .drop span{color:var(--muted)}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .preview{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;
+           display:grid;gap:10px;justify-items:center;flex:1 1 260px;min-width:0}
+  .preview img{width:186px;height:auto;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.25)}
+  .side{flex:1 1 300px;min-width:0;display:grid;gap:12px}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:14px 20px;cursor:pointer;
+         background:var(--accent);color:var(--accent-ink)}
+  button:disabled{opacity:.4;cursor:default}
+  button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .status{font-size:14px;color:var(--muted)}
+  .status.ok{color:var(--ok)} .status.warn{color:var(--warn)}
+  label.opt{display:flex;gap:8px;align-items:center;font-size:14px}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+  details summary{cursor:pointer;font-weight:700}
+  details li{margin:4px 0}
+  #printArea{display:none}
+
+  /* ---------- Druck: genau ein 62 x 100 mm Etikett ---------- */
+  @page{size:62mm 100mm;margin:0}
+  @media print{
+    html,body{margin:0;padding:0;background:#fff}
+    .wrap{display:none}
+    #printArea{display:block;width:62mm;height:100mm;overflow:hidden;
+               position:relative;page-break-after:avoid;break-after:avoid}
+    #printArea img{position:absolute;left:0;top:0;width:62mm;height:100mm}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Etikett-Drucker</h1>
+    <p class="sub">eBay-Etikett (PDF) hier reinziehen. Das Label wird ausgeschnitten und für den Brother QL-820NWB (62 × 100 mm) vorbereitet.</p>
+  </header>
+
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="PDF auswählen">
+    <strong>PDF hier reinziehen</strong>
+    <span>oder klicken zum Auswählen · auch Bilder (PNG/JPG) gehen</span>
+    <input type="file" id="file" accept="application/pdf,image/*" hidden>
+  </div>
+
+  <div class="row" id="result" hidden>
+    <div class="preview">
+      <img id="previewImg" alt="Vorschau des Etiketts">
+      <div class="status">Vorschau 62 × 100 mm</div>
+    </div>
+    <div class="side">
+      <button id="printBtn" disabled>Drucken</button>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <label class="opt"><input type="checkbox" id="autoPrint" checked> Druckdialog nach dem Reinziehen automatisch öffnen</label>
+
+  <details>
+    <summary>Einmalige Einrichtung im Chrome-Druckdialog</summary>
+    <ol>
+      <li>Ziel: <b>Brother QL-820NWB</b></li>
+      <li>Weitere Einstellungen → Papierformat: <b>62mm x 100mm</b> (bei Endlosrolle DK-22205 ebenfalls diese Größe wählen)</li>
+      <li>Ränder: <b>Keine</b> · Skalierung: <b>Standard / 100 %</b></li>
+    </ol>
+    <p class="status">Chrome merkt sich diese Einstellungen. Danach reicht jedes Mal: PDF reinziehen → Enter.</p>
+  </details>
+</div>
+
+<div id="printArea"><img id="printImg" alt=""></div>
+
+<script>
+(function(){
+  const DPI = 300, PX_PER_MM = DPI / 25.4;
+  const OUT_W_MM = 62, OUT_H_MM = 100, PAD_MM = 2;     // Etikett + Sicherheitsrand
+  const $ = id => document.getElementById(id);
+  const drop = $('drop'), fileIn = $('file'), statusEl = $('status');
+
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  try { $('autoPrint').checked = localStorage.getItem('etikett-autoprint') !== '0'; } catch(e){}
+  $('autoPrint').addEventListener('change', e => {
+    try { localStorage.setItem('etikett-autoprint', e.target.checked ? '1' : '0'); } catch(_){}
+  });
+
+  drop.addEventListener('click', () => fileIn.click());
+  drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); }});
+  fileIn.addEventListener('change', () => fileIn.files[0] && handle(fileIn.files[0]));
+  ['dragenter','dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  document.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
+  document.addEventListener('paste', e => {
+    const item = [...e.clipboardData.items].find(i => i.type.startsWith('image/') || i.type === 'application/pdf');
+    if (item) handle(item.getAsFile());
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+
+  function setStatus(msg, cls){ statusEl.textContent = msg; statusEl.className = 'status ' + (cls||''); }
+
+  async function handle(file){
+    $('result').hidden = false;
+    $('printBtn').disabled = true;
+    setStatus('Wird gelesen …');
+    try {
+      const page = await renderFile(file);           // Canvas der ganzen Seite, 300 dpi
+      const pxPerMm = page.pxPerMm;
+      const box = findLabel(page.canvas, pxPerMm);
+      const out = composeLabel(page.canvas, box, pxPerMm);
+      const url = out.canvas.toDataURL('image/png');
+      $('previewImg').src = url;
+      $('printImg').src = url;
+      await new Promise(r => { $('printImg').complete ? r() : $('printImg').onload = r; });
+      $('printBtn').disabled = false;
+      const size = `${Math.round(box.w/pxPerMm)} × ${Math.round(box.h/pxPerMm)} mm`;
+      if (out.scale < 0.999) setStatus(`Label ${size} – zu groß für 62 mm, auf ${Math.round(out.scale*100)} % verkleinert. Barcode nach dem Druck kurz prüfen.`, 'warn');
+      else setStatus(`Label ${size} erkannt${box.marks ? ' (Schnittmarken)' : ''} – Originalgröße.`, 'ok');
+      if ($('autoPrint').checked) setTimeout(() => window.print(), 150);
+    } catch(err){
+      console.error(err);
+      setStatus('Das hat nicht geklappt: ' + (err.message || err) + '. Bitte die PDF von „Etikett herunterladen“ nehmen.', 'warn');
+    }
+  }
+
+  async function renderFile(file){
+    if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '')) {
+      if (!window.pdfjsLib) throw new Error('PDF-Modul nicht geladen (Internet nötig)');
+      const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+      const p = await pdf.getPage(1);
+      const vp = p.getViewport({scale: DPI/72});
+      const c = document.createElement('canvas');
+      c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height);
+      await p.render({canvasContext: ctx, viewport: vp}).promise;
+      return {canvas: c, pxPerMm: PX_PER_MM};
+    }
+    // Bild: Annahme A4-Seite (Breite = 210 mm)
+    const img = await new Promise((res, rej) => {
+      const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Bild nicht lesbar'));
+      i.src = URL.createObjectURL(file);
+    });
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height);
+    ctx.drawImage(img, 0, 0);
+    return {canvas: c, pxPerMm: c.width / 210};
+  }
+
+  // Findet das Label: Umriss aller dunklen Pixel, dann Schnittmarken (Kreuze) in den Ecken.
+  function findLabel(canvas, pxPerMm){
+    const W = canvas.width, H = canvas.height;
+    const d = canvas.getContext('2d').getImageData(0,0,W,H).data;
+    const dark = new Uint8Array(W*H);
+    let x0=W, y0=H, x1=-1, y1=-1;
+    for (let y=0, i=0; y<H; y++) for (let x=0; x<W; x++, i+=4) {
+      if (d[i]+d[i+1]+d[i+2] < 600) {           // grau/schwarz
+        dark[y*W+x] = 1;
+        if (x<x0) x0=x; if (x>x1) x1=x; if (y<y0) y0=y; if (y>y1) y1=y;
+      }
+    }
+    if (x1 < 0) throw new Error('Seite ist leer');
+
+    // Schnittmarke = Kreuz: in einem kleinen Eckfenster die Spalte/Zeile mit den meisten dunklen Pixeln.
+    const win = Math.round(8*pxPerMm);
+    function peakCol(xa, xb, ya, yb){ let best=-1, bx=-1;
+      for (let x=Math.max(0,xa); x<=Math.min(W-1,xb); x++){ let s=0;
+        for (let y=Math.max(0,ya); y<=Math.min(H-1,yb); y++) s+=dark[y*W+x];
+        if (s>best){best=s;bx=x;} } return {pos:bx, n:best}; }
+    function peakRow(xa, xb, ya, yb){ let best=-1, by=-1;
+      for (let y=Math.max(0,ya); y<=Math.min(H-1,yb); y++){ let s=0;
+        for (let x=Math.max(0,xa); x<=Math.min(W-1,xb); x++) s+=dark[y*W+x];
+        if (s>best){best=s;by=y;} } return {pos:by, n:best}; }
+
+    const L = peakCol(x0, x0+win, y0, y0+win), T = peakRow(x0, x0+win, y0, y0+win);
+    const R = peakCol(x1-win, x1, y1-win, y1), B = peakRow(x1-win, x1, y1-win, y1);
+    const minLine = 2*pxPerMm;                   // Markenarm mind. ~2 mm
+    const ok = [L,T,R,B].every(p => p.n >= minLine) &&
+               (R.pos-L.pos) > 30*pxPerMm && (B.pos-T.pos) > 20*pxPerMm;
+    if (ok) return {x:L.pos, y:T.pos, w:R.pos-L.pos, h:B.pos-T.pos, marks:true};
+
+    const pad = Math.round(PAD_MM*pxPerMm);
+    return {x:Math.max(0,x0-pad), y:Math.max(0,y0-pad),
+            w:Math.min(W,x1+pad)-Math.max(0,x0-pad), h:Math.min(H,y1+pad)-Math.max(0,y0-pad), marks:false};
+  }
+
+  // Setzt das Label (bei Bedarf gedreht) zentriert auf ein 62 x 100 mm Etikett.
+  function composeLabel(src, box, pxPerMm){
+    const outW = Math.round(OUT_W_MM*PX_PER_MM), outH = Math.round(OUT_H_MM*PX_PER_MM);
+    const c = document.createElement('canvas'); c.width = outW; c.height = outH;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,outW,outH);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+
+    const wMm = box.w/pxPerMm, hMm = box.h/pxPerMm;
+    const rotate = wMm > hMm;                      // Querformat-Label längs auf die Rolle legen
+    const fitW = OUT_W_MM - 2*PAD_MM, fitH = OUT_H_MM - 2*PAD_MM;
+    const lw = rotate ? hMm : wMm, lh = rotate ? wMm : hMm;   // Maße auf dem Etikett
+    const scale = Math.min(1, fitW/lw, fitH/lh);
+    const k = PX_PER_MM/pxPerMm*scale;
+
+    ctx.save();
+    ctx.translate(outW/2, outH/2);
+    if (rotate) ctx.rotate(Math.PI/2);
+    ctx.drawImage(src, box.x, box.y, box.w, box.h, -box.w*k/2, -box.h*k/2, box.w*k, box.h*k);
+    ctx.restore();
+    return {canvas: c, scale};
+  }
+
+  window.__etikett = {findLabel, composeLabel};   // für Tests
+})();
+</script>
+</body>
+</html>
